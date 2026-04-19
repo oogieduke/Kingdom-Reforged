@@ -164,6 +164,11 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .vt-btn{border:none;background:var(--paper);padding:6px 14px;cursor:pointer;font-family:'Kalam';font-weight:700;font-size:13px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:4px}
 .vt-btn.on{background:var(--ink);color:var(--paper)}
 .vt-btn:not(.on):hover{background:var(--paper-2)}
+.zoom-ctrl{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:8px;background:var(--paper);padding:3px 6px;box-shadow:var(--shadow-sm);font-family:'Kalam';font-weight:700;color:var(--ink)}
+.zoom-ctrl button{width:26px;height:26px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);font-family:'Kalam';font-weight:700;cursor:pointer;color:var(--ink);display:grid;place-items:center}
+.zoom-ctrl button:hover:not(:disabled){background:var(--paper-2)}
+.zoom-ctrl button:disabled{opacity:.4;cursor:not-allowed}
+.zoom-ctrl span{min-width:44px;text-align:center;font-size:12px}
 
 /* ── MAIN ── */
 main{min-height:50vh}
@@ -196,7 +201,6 @@ main{min-height:50vh}
 .btn-mini:disabled{opacity:.35;cursor:not-allowed}
 .inline-imgzone{flex:1;min-height:32px;border:1.5px dashed var(--line);border-radius:6px;padding:3px 6px;position:relative;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:'Caveat';color:var(--ink-ghost);font-size:12px;transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease);overflow:hidden}
 .inline-imgzone:hover{background:var(--focus-bg);border-color:var(--line)}
-.inline-imgzone.dragover{background:var(--focus-bg);border-color:var(--accent);border-style:solid}
 .inline-imgzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .inline-img-thumb{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1.5px solid var(--line);flex-shrink:0}
 .inline-img-label{flex:1;color:var(--ink-soft);font-size:11px}
@@ -465,6 +469,7 @@ main{min-height:50vh}
 @media print{
   @page{size:A4;margin:1cm}
   html,body{background:#fff !important;overflow:visible !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important}
+  body{zoom:1 !important}
   body > *:not(#print-area){display:none !important}
   #print-area,#print-area *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important}
   #print-area{display:grid !important;grid-template-columns:repeat(3,1fr);gap:.4cm;padding:0}
@@ -524,14 +529,11 @@ main{min-height:50vh}
     <span class="chip" data-res="water" tabindex="0" role="button"><span class="res water sm" aria-hidden="true">E</span> Eau</span>
   </div>
   <div class="tb-sep" aria-hidden="true"></div>
-  <label class="sort-ctrl" aria-label="Trier les cartes"><span class="sort-ico" aria-hidden="true">⇅</span>
-    <select id="sort-select">
-      <option value="custom">Ordre d'ajout</option>
-      <option value="name">Nom (A→Z)</option>
-      <option value="name-desc">Nom (Z→A)</option>
-      <option value="type">Type</option>
-    </select>
-  </label>
+  <div class="zoom-ctrl" role="group" aria-label="Zoom de l'interface">
+    <button type="button" id="zoom-minus" aria-label="Réduire le zoom">−</button>
+    <span id="zoom-value">100%</span>
+    <button type="button" id="zoom-plus" aria-label="Augmenter le zoom">+</button>
+  </div>
   <div class="view-toggle" role="group" aria-label="Mode d'affichage">
     <button class="vt-btn on" data-mode="list" aria-pressed="true"><span aria-hidden="true">☰</span> Liste</button>
     <button class="vt-btn" data-mode="grid" aria-pressed="false"><span aria-hidden="true">⊞</span> Grille</button>
@@ -756,10 +758,10 @@ const state = {
   typeFilter: 'all',
   resFilter: null,
   searchQ: '',
-  sortBy: 'custom',
   viewMode: 'list',
   editing: null,
   imageLibraryTarget: null,
+  uiZoom: 100,
 };
 
 // ═══════════════════════════════════
@@ -794,6 +796,8 @@ function load(){
   }
   const mode = localStorage.getItem('kr-view-mode');
   if(mode==='grid'||mode==='list') state.viewMode = mode;
+  const zoom = Number(localStorage.getItem('kr-ui-zoom'));
+  if([100,110,120,130,150].includes(zoom)) state.uiZoom = zoom;
 }
 function getCard(id){ return state.cards.find(c=>c.id===id)||null; }
 function getStage(cardId){ return state.stageByCard[cardId]||0; }
@@ -974,20 +978,12 @@ function filteredCards(){
     const q = state.searchQ.toLowerCase();
     cards = cards.filter(c=>c.name.toLowerCase().includes(q));
   }
-  if(state.sortBy && state.sortBy !== 'custom'){
-    const coll = new Intl.Collator('fr', {sensitivity:'base', numeric:true});
-    cards = cards.slice();
-    if(state.sortBy === 'name') cards.sort((a,b)=>coll.compare(a.name, b.name));
-    else if(state.sortBy === 'name-desc') cards.sort((a,b)=>coll.compare(b.name, a.name));
-    else if(state.sortBy === 'type'){
-      const order = ['building','exploration','treasure','action'];
-      cards.sort((a,b)=>{
-        const d = order.indexOf(a.type) - order.indexOf(b.type);
-        return d !== 0 ? d : coll.compare(a.name, b.name);
-      });
-    }
-  }
-  return cards;
+  const coll = new Intl.Collator('fr', {sensitivity:'base', numeric:true});
+  const order = ['building','exploration','treasure','action'];
+  return cards.slice().sort((a,b)=>{
+    const d = order.indexOf(a.type) - order.indexOf(b.type);
+    return d !== 0 ? d : coll.compare(a.name, b.name);
+  });
 }
 
 function updateCounts(){
@@ -1014,8 +1010,8 @@ function renderCardRow(card){
   const copies = card.copies != null ? card.copies : 1;
   const typeOptions = Object.entries(TYPE_META).map(([k,v])=>`<option value="${k}"${card.type===k?' selected':''}>${v.icon} ${v.label}</option>`).join('');
   const imgZoneInner = card.image
-    ? `<img src="${card.image}" class="inline-img-thumb" alt=""/><span class="inline-img-label">Remplacer</span><button type="button" class="btn-mini img-clear" data-card="${card.id}" data-action="image-clear" aria-label="Supprimer l'image">✕</button>`
-    : `<span class="inline-img-ghost">Glisser / cliquer</span>`;
+    ? `<img src="${card.image}" class="inline-img-thumb" alt=""/><span class="inline-img-label">Choisir dans la bibliothèque</span>`
+    : `<span class="inline-img-ghost">Choisir dans la bibliothèque</span>`;
 
   const stageCols = [];
   for(let i=0;i<4;i++){
@@ -1064,9 +1060,8 @@ function renderCardRow(card){
         </label>
         <label class="info-inline">
           <span class="label">Image</span>
-          <div class="inline-imgzone" data-card="${card.id}" data-field="image-drop">
+          <div class="inline-imgzone" data-card="${card.id}" data-action="image-library" role="button" tabindex="0" aria-label="Choisir une image pour ${escapeHtml(card.name)}">
             ${imgZoneInner}
-            <input type="file" accept="image/*" data-card="${card.id}" data-field="image-file" aria-label="Téléverser illustration"/>
           </div>
         </label>
         <div class="info-inline">
@@ -1198,18 +1193,16 @@ function editorImage(card){
     ? `<div class="cell-field">
         <img src="${card.image}" class="img-preview" alt=""/>
         <div style="text-align:center;display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
-          <label class="btn">📁 Remplacer <input type="file" id="ed-img-input" accept="image/*" style="display:none"/></label>
-          <button class="btn ghost" id="ed-img-library">Bibliothèque</button>
+          <button class="btn primary" id="ed-img-library">Choisir dans la bibliothèque</button>
           <button class="btn ghost" id="ed-img-clear" style="color:var(--danger)">✕ Supprimer</button>
         </div>
       </div>`
     : `<div class="cell-field">
-        <div class="img-upload">
-          Déposer une image ici<br/>
-          <span style="font-family:'Caveat';font-size:14px">PNG, JPG, WebP</span>
-          <input type="file" id="ed-img-input" accept="image/*"/>
+        <div class="img-upload" style="cursor:default">
+          Aucune image choisie<br/>
+          <span style="font-family:'Caveat';font-size:14px">Ajoute tes images via le bouton Images, puis sélectionne-les ici.</span>
         </div>
-        <div style="text-align:center;margin-top:10px"><button class="btn ghost" id="ed-img-library">Choisir dans la bibliothèque</button></div>
+        <div style="text-align:center;margin-top:10px"><button class="btn primary" id="ed-img-library">Choisir dans la bibliothèque</button></div>
       </div>`;
 }
 function editorCost(card, stage){
@@ -1288,13 +1281,6 @@ function bindEditorEvents(card, field, stage){
     };
   }
   if(field==='image'){
-    const input = document.getElementById('ed-img-input');
-    if(input) input.onchange = e=>{
-      const f = e.target.files[0]; if(!f) return;
-      const r = new FileReader();
-      r.onload = ev=>{ card.image = ev.target.result; save(); renderCards(); openCellEditor(card.id,'image'); };
-      r.readAsDataURL(f);
-    };
     const library = document.getElementById('ed-img-library');
     if(library) library.onclick = ()=>{ closeCellModal(); openImageLibrary(card.id); };
     const clear = document.getElementById('ed-img-clear');
@@ -1416,7 +1402,7 @@ async function renderDeckLibrary(){
         </div>
         <div class="actions">
           <button class="btn primary" data-action="deck-load" data-deck="${d.id}">Charger</button>
-          <button class="btn ghost" data-action="deck-rename" data-deck="${d.id}">Nom → champ</button>
+          <button class="btn ghost" data-action="deck-replace" data-deck="${d.id}">Remplacer</button>
           <button class="btn ghost" style="color:var(--danger)" data-action="deck-delete" data-deck="${d.id}">Supprimer</button>
         </div>
       </div>`).join('');
@@ -1463,9 +1449,18 @@ async function deleteDeckFromLibrary(id){
   showStatus('Deck supprimé');
   await renderDeckLibrary();
 }
-async function setDeckNameFromLibrary(id){
+async function replaceDeckInLibrary(id){
   const deck = await getLibraryItem('decks', id);
-  if(deck) document.getElementById('deck-name-input').value = deck.name;
+  if(!deck) return;
+  if(!confirm(`Remplacer « ${deck.name} » par le deck actuel ?`)) return;
+  deck.cards = cloneCards(state.cards);
+  deck.cardCount = state.cards.length;
+  deck.updatedAt = Date.now();
+  await putLibraryItem('decks', deck);
+  localStorage.setItem('kr-current-deck-name', deck.name);
+  document.getElementById('deck-name-input').value = deck.name;
+  showStatus('Deck remplacé');
+  await renderDeckLibrary();
 }
 async function openImageLibrary(cardId=null){
   state.imageLibraryTarget = cardId;
@@ -1647,6 +1642,25 @@ function setViewMode(mode){
   });
   renderCards();
 }
+const UI_ZOOMS = [100,110,120,130,150];
+function applyUiZoom(){
+  const value = UI_ZOOMS.includes(state.uiZoom) ? state.uiZoom : 100;
+  document.body.style.zoom = value === 100 ? '' : `${value}%`;
+  const label = document.getElementById('zoom-value');
+  if(label) label.textContent = `${value}%`;
+  const i = UI_ZOOMS.indexOf(value);
+  const minus = document.getElementById('zoom-minus');
+  const plus = document.getElementById('zoom-plus');
+  if(minus) minus.disabled = i <= 0;
+  if(plus) plus.disabled = i >= UI_ZOOMS.length-1;
+}
+function changeUiZoom(delta){
+  const current = UI_ZOOMS.includes(state.uiZoom) ? UI_ZOOMS.indexOf(state.uiZoom) : 0;
+  const next = Math.max(0, Math.min(UI_ZOOMS.length-1, current + delta));
+  state.uiZoom = UI_ZOOMS[next];
+  localStorage.setItem('kr-ui-zoom', String(state.uiZoom));
+  applyUiZoom();
+}
 
 // ═══════════════════════════════════
 // EVENT BINDINGS
@@ -1659,6 +1673,8 @@ function bindEvents(){
   document.getElementById('btn-import').addEventListener('click', openImport);
   document.getElementById('btn-export').addEventListener('click', openExport);
   document.getElementById('btn-pdf').addEventListener('click', exportToPDF);
+  document.getElementById('zoom-minus').addEventListener('click', ()=>changeUiZoom(-1));
+  document.getElementById('zoom-plus').addEventListener('click', ()=>changeUiZoom(1));
   document.getElementById('io-close').addEventListener('click', ()=>document.getElementById('io-modal').classList.remove('open'));
   document.getElementById('io-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
   document.getElementById('deck-close').addEventListener('click', closeDeckLibrary);
@@ -1670,7 +1686,7 @@ function bindEvents(){
     const id = action.dataset.deck;
     if(action.dataset.action==='deck-load') loadDeckFromLibrary(id);
     if(action.dataset.action==='deck-delete') deleteDeckFromLibrary(id);
-    if(action.dataset.action==='deck-rename') setDeckNameFromLibrary(id);
+    if(action.dataset.action==='deck-replace') replaceDeckInLibrary(id);
   });
   document.getElementById('image-close').addEventListener('click', closeImageLibrary);
   document.getElementById('image-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeImageLibrary(); });
@@ -1691,11 +1707,6 @@ function bindEvents(){
 
   // Search
   document.getElementById('search-input').addEventListener('input', e=>{ state.searchQ=e.target.value; renderCards(); });
-  const sortSel = document.getElementById('sort-select');
-  if(sortSel){
-    sortSel.value = state.sortBy;
-    sortSel.addEventListener('change', e=>{ state.sortBy = e.target.value; renderCards(); });
-  }
 
   // Type filter
   document.getElementById('type-filter').addEventListener('click', e=>{
@@ -1783,12 +1794,10 @@ function bindEvents(){
     if(!cell) return;
     const field = cell.dataset.field;
     // Inline fields handled via input/change — ignore clicks
-    if(field==='name-direct'||field==='type-direct'||field==='image-file') return;
+    if(field==='name-direct'||field==='type-direct') return;
     const cardId = cell.dataset.card || cell.closest('[data-id]')?.dataset.id;
     const stage = cell.dataset.stage != null ? +cell.dataset.stage : undefined;
     if(!cardId) return;
-    // Image drop zone: ignore clicks not on the file input (native label handles)
-    if(field==='image-drop') return;
     // Shield toggle (grid corner + list stage-num)
     if(field==='shield'||field==='shield-num'){
       const card = getCard(cardId);
@@ -1826,39 +1835,6 @@ function bindEvents(){
       save(); renderCards();
       return;
     }
-    if(t.matches('input[type=file][data-field="image-file"]')){
-      const card = getCard(t.dataset.card);
-      if(!card) return;
-      const f = t.files && t.files[0]; if(!f) return;
-      const r = new FileReader();
-      r.onload = ev=>{ card.image = ev.target.result; save(); renderCards(); };
-      r.readAsDataURL(f);
-      return;
-    }
-  });
-  // Drop handlers for image zones
-  container.addEventListener('dragover', e=>{
-    const zone = e.target.closest('.inline-imgzone');
-    if(!zone) return;
-    e.preventDefault();
-    zone.classList.add('dragover');
-  });
-  container.addEventListener('dragleave', e=>{
-    const zone = e.target.closest('.inline-imgzone');
-    if(zone) zone.classList.remove('dragover');
-  });
-  container.addEventListener('drop', e=>{
-    const zone = e.target.closest('.inline-imgzone');
-    if(!zone) return;
-    e.preventDefault();
-    zone.classList.remove('dragover');
-    const f = e.dataTransfer.files && e.dataTransfer.files[0];
-    if(!f || !f.type.startsWith('image/')) return;
-    const card = getCard(zone.dataset.card);
-    if(!card) return;
-    const r = new FileReader();
-    r.onload = ev=>{ card.image = ev.target.result; save(); renderCards(); };
-    r.readAsDataURL(f);
   });
   container.addEventListener('keydown', e=>{
     if(e.key!=='Enter'&&e.key!==' ') return;
@@ -1896,6 +1872,7 @@ initTheme();
 load();
 bindEvents();
 trackHeaderHeight();
+applyUiZoom();
 setViewMode(state.viewMode);
 </script>
 </body>
