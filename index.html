@@ -179,6 +179,11 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .danger-center b{font-size:calc(var(--sz,220px) * .18);line-height:.9}
 .treasure-center{inset:24%;border-radius:18%;background:linear-gradient(135deg,#f6e8c3 0%,#e8c66f 100%);font-size:calc(var(--sz,220px) * .075);padding:calc(var(--sz,220px) * .04)}
 .treasure-center .bonus{position:static;transform:none;max-width:none;font-size:calc(var(--sz,220px) * .08);padding:calc(var(--sz,220px) * .025) calc(var(--sz,220px) * .04)}
+.treasure-center .custom-icon-stack{gap:calc(var(--sz,220px) * .022)}
+.treasure-center .custom-card-icon,.treasure-center .custom-card-icon.bonus-custom{width:calc(var(--sz,220px) * .25);height:calc(var(--sz,220px) * .25)}
+.treasure-center .bonus-icon-img{width:calc(var(--sz,220px) * .25);height:calc(var(--sz,220px) * .25)}
+.treasure-center .res,.treasure-center .res.sm{width:calc(var(--sz,220px) * .18);height:calc(var(--sz,220px) * .18)}
+.treasure-center .bpv,.treasure-center .bworker,.treasure-center .baction,.treasure-center .bdraw,.treasure-center .bexplorers{font-size:calc(var(--sz,220px) * .14)}
 
 /* ── TOOLBAR ── */
 .toolbar{display:flex;gap:10px;padding:8px 0 0;border-bottom:none;flex-wrap:nowrap;align-items:center;background:var(--paper);overflow-x:auto;scrollbar-width:none}
@@ -326,6 +331,7 @@ main{min-height:50vh}
 .grid-item:hover .grid-card-actions,.grid-item:focus-within .grid-card-actions{opacity:1;pointer-events:auto}
 .grid-card-actions .btn{width:30px;height:30px;padding:0;display:grid;place-items:center;box-shadow:var(--shadow-sm);background:var(--paper);font-size:13px}
 .grid-card-actions .stage-action{font-size:18px}
+.grid-card-actions .stage-action.loop-stage{background:#d9f0ff;border-color:#4da7d8;color:#114967}
 .grid-card-actions .stage-action:disabled{opacity:.35;cursor:not-allowed;transform:none}
 
 /* ── MODALS ── */
@@ -558,7 +564,7 @@ main{min-height:50vh}
       <button class="btn ghost" id="btn-decks" aria-label="Ouvrir les decks sauvegardés">Decks</button>
       <button class="btn ghost" id="btn-images" aria-label="Ouvrir la bibliothèque d'images">Images</button>
       <button class="btn ghost" id="btn-resources" aria-label="Ouvrir les icônes de ressources">Ressources</button>
-      <button class="btn ghost" id="btn-icons" aria-label="Ouvrir les icônes de bonus">Icônes</button>
+      <button class="btn ghost" id="btn-icons" aria-label="Ouvrir la bibliothèque de bonus">Bonus</button>
       <button class="btn ghost" id="btn-import" aria-label="Importer JSON">↓ Import</button>
       <button class="btn ghost" id="btn-export" aria-label="Exporter JSON">↑ Export</button>
       <button class="btn" id="btn-pdf" aria-label="Exporter PDF (A4)">🖨 PDF</button>
@@ -1192,18 +1198,17 @@ function renderCardHtml(card, sizeClass='', interactive=false){
     const shieldCls = step.shield ? ' shielded' : '';
     const editCls = interactive ? ' editable' : '';
     corners += `<div class="corner${shieldCls} ${STAGE_POSITIONS[i]}${editCls}" data-field="shield" data-stage="${i}"${interactive?' role="button" tabindex="0"':''} aria-label="Étape ${STAGE_NUMS[i]}${step.shield?' protégée':''}">${STAGE_NUMS[i]}</div>`;
-    const isWrapCost = i === n - 1;
-    const isLoopCost = isWrapCost && n === 4;
-    const showWrapCost = isWrapCost ? (n < 4 || !!card.loopCost) : true;
-    const nextIdx = (i + 1) % n;
-    const nextStep = showWrapCost ? card.steps[nextIdx] : null;
-    const loopCls = isLoopCost ? ' loop-ribbon' : '';
-    if(nextStep && hasStepCost(nextStep)){
-      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${loopCls}${editCls}" data-stage="${nextIdx}" data-field="cost"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">${stepCostHtml(nextStep,'sm')}</div>`;
-    } else if(interactive && nextStep){
-      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${loopCls} editable empty-ribbon" data-stage="${nextIdx}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">＋</div>`;
-    } else if(interactive && isLoopCost && !card.loopCost){
-      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]} loop-ribbon loop-add-ribbon editable" data-card="${card.id}" data-action="loop-add" role="button" tabindex="0" aria-label="Ajouter la transition IV vers I">＋</div>`;
+    const isNormalTransition = i < n - 1;
+    const isLoopTransition = i === 3 && n === 4 && !!card.loopCost;
+    if(isNormalTransition || isLoopTransition){
+      const nextIdx = isLoopTransition ? 0 : i + 1;
+      const nextStep = card.steps[nextIdx];
+      const loopCls = isLoopTransition ? ' loop-ribbon' : '';
+      if(nextStep && hasStepCost(nextStep)){
+        ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${loopCls}${editCls}" data-stage="${nextIdx}" data-field="cost"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">${stepCostHtml(nextStep,'sm')}</div>`;
+      } else if(interactive && nextStep){
+        ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${loopCls} editable empty-ribbon" data-stage="${nextIdx}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">＋</div>`;
+      }
     }
     const bHtml = renderBonusHtml(step.bonus);
     if(bHtml)
@@ -1343,13 +1348,14 @@ function renderCardRow(card){
 function renderCardGridItem(card){
   const canEditStages = !['exploration','treasure'].includes(card.type);
   const canAddStageOrLoop = canEditStages && (card.steps.length < 4 || !card.loopCost);
+  const addLoop = canEditStages && card.steps.length >= 4 && !card.loopCost;
   const addStageTitle = card.steps.length >= 4 ? 'Ajouter la transition IV vers I' : 'Ajouter une étape';
   return `
     <div class="grid-item" data-id="${card.id}">
       ${renderCardHtml(card,'md',true)}
       <input class="gi-name-input" data-card="${card.id}" data-field="name-grid" value="${escapeHtml(card.name)}" aria-label="Nom de la carte"/>
       <div class="grid-card-actions">
-        ${canEditStages ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="stage-add" ${canAddStageOrLoop?'':'disabled'} aria-label="${addStageTitle}" title="${addStageTitle}">+</button>` : ''}
+        ${canEditStages ? `<button class="btn ghost stage-action${addLoop?' loop-stage':''}" data-card="${card.id}" data-action="stage-add" ${canAddStageOrLoop?'':'disabled'} aria-label="${addStageTitle}" title="${addStageTitle}">+</button>` : ''}
         ${canEditStages ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="stage-remove" ${card.steps.length<=1?'disabled':''} aria-label="Enlever une étape" title="Enlever une étape">−</button>` : ''}
         <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer ${escapeHtml(card.name)}" title="Dupliquer">⎘</button>
         <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer ${escapeHtml(card.name)}" title="Supprimer">🗑</button>
@@ -1938,7 +1944,7 @@ function assignedSlotForIcon(icon){
 async function openIconLibrary(category='bonus'){
   state.iconLibraryCategory = category;
   const title = document.getElementById('icon-modal-title');
-  if(title) title.firstChild.nodeValue = category === 'resource' ? 'Bibliothèque de ressources' : "Bibliothèque d'icônes";
+  if(title) title.firstChild.nodeValue = category === 'resource' ? 'Bibliothèque de ressources' : "Bibliothèque de bonus";
   const inputCategory = document.getElementById('icon-import-category');
   if(inputCategory) inputCategory.value = category;
   const hint = document.getElementById('icon-library-hint');
