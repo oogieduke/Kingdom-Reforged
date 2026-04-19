@@ -115,7 +115,7 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .ribbon.bl{bottom:10.5%;left:-14%;transform:rotate(45deg)}
 .ribbon.tl{top:10.5%;left:-14%;transform:rotate(-45deg)}
 .ribbon.editable{cursor:pointer}.ribbon.editable:hover{background:repeating-linear-gradient(90deg,#fff5d6 0 6px,#f5e5ab 6px 12px)}
-.ribbon.add-ribbon{opacity:.45;border-style:dashed;background:rgba(244,239,228,.72)}
+.ribbon.add-ribbon,.ribbon.empty-ribbon{opacity:.45;border-style:dashed;background:rgba(244,239,228,.72)}
 /* bonus slot — anchored via center so content width doesn't shift placement.
    Centers sit 20% from each edge, aligned with the stage marker on that edge. */
 .bonus{position:absolute;background:var(--paper);border:calc(var(--sz,220px) * .007) solid var(--line);border-radius:calc(var(--sz,220px) * .032);padding:calc(var(--sz,220px) * .014) calc(var(--sz,220px) * .032);font-family:'Kalam';font-size:calc(var(--sz,220px) * .05);font-weight:700;display:flex;align-items:center;gap:calc(var(--sz,220px) * .014);z-index:4;white-space:nowrap;color:var(--ink);box-shadow:1px 1px 0 rgba(0,0,0,.08)}
@@ -126,6 +126,11 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .bonus.editable{cursor:pointer}.bonus.editable:hover{background:var(--focus-bg)}
 /* bonus icons */
 .bpv{display:inline-flex;align-items:center;gap:1px;font-family:'Kalam';font-weight:700}
+.bexplorers{display:inline-flex;align-items:center;gap:1px}
+.bexplorers::before{content:'E';font-size:.9em}
+.bpv.has-custom::before,.bworker.has-custom::before,.baction.has-custom::before,.bdraw.has-custom::before,.bexplorers.has-custom::before{content:none}
+.icon-img{width:78%;height:78%;object-fit:contain;display:block;pointer-events:none}
+.bonus-icon-img{width:1em;height:1em;object-fit:contain;display:inline-block;vertical-align:-.16em}
 .bpv::before{content:'★';color:#c2410c}
 .bworker::before{content:'👷';font-size:.9em}
 .baction::before{content:'⚡';font-size:.9em}
@@ -153,15 +158,21 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .kcenter.editable{cursor:pointer}.kcenter.editable:hover{box-shadow:0 0 0 3px var(--accent)}
 .kcard .res{width:calc(var(--sz,220px) * .1);height:calc(var(--sz,220px) * .1);border-width:calc(var(--sz,220px) * .007);font-size:calc(var(--sz,220px) * .045)}
 .kcard .res.sm{width:calc(var(--sz,220px) * .082);height:calc(var(--sz,220px) * .082);font-size:calc(var(--sz,220px) * .041)}
+.danger-center,.treasure-center{position:absolute;inset:28%;border:calc(var(--sz,220px) * .014) solid var(--line);border-radius:50%;background:var(--paper);display:grid;place-items:center;text-align:center;font-family:'Kalam';font-weight:700;color:var(--ink);z-index:5;cursor:pointer}
+.danger-center{background:radial-gradient(circle,#f5e8c8,#d6aa58);font-size:calc(var(--sz,220px) * .052)}
+.danger-center b{font-size:calc(var(--sz,220px) * .18);line-height:.9}
+.treasure-center{inset:24%;border-radius:18%;background:linear-gradient(135deg,#f6e8c3 0%,#e8c66f 100%);font-size:calc(var(--sz,220px) * .075);padding:calc(var(--sz,220px) * .04)}
+.treasure-center .bonus{position:static;transform:none;max-width:none;font-size:calc(var(--sz,220px) * .08);padding:calc(var(--sz,220px) * .025) calc(var(--sz,220px) * .04)}
 
 /* ── TOOLBAR ── */
 .toolbar{display:flex;gap:10px;padding:8px 0 0;border-bottom:none;flex-wrap:nowrap;align-items:center;background:var(--paper);overflow-x:auto;scrollbar-width:none}
 .toolbar::-webkit-scrollbar{display:none}
 .tb-group{display:flex;gap:8px;align-items:center;flex-wrap:nowrap;flex-shrink:0}
-.new-card-wrap{position:relative;display:inline-flex}
-.new-card-menu{position:fixed;z-index:150;display:none;min-width:180px;background:var(--paper);border:2px solid var(--line);border-radius:8px;box-shadow:var(--shadow-lg);padding:6px}
-.new-card-menu.open{display:flex;flex-direction:column;gap:4px}
-.new-card-menu button{width:100%;justify-content:flex-start;box-shadow:none}
+.new-card-wrap{position:relative;display:inline-flex;padding:0 4px 4px 0}
+.new-card-menu{position:fixed;z-index:150;display:flex;flex-direction:column;gap:4px;min-width:180px;background:var(--paper);border:2px solid var(--line);border-radius:8px;box-shadow:var(--shadow-lg);padding:6px;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-6px) scale(.98);transition:opacity var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),visibility 0s linear var(--t-fast)}
+.new-card-menu.open{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0) scale(1);transition-delay:0s}
+.new-card-menu button{width:100%;justify-content:flex-start;box-shadow:none;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
+.new-card-menu button:hover,.new-card-menu button:focus-visible{background:var(--focus-bg);transform:translateX(2px)}
 .tb-sep{width:1.5px;align-self:stretch;background:var(--line);opacity:.35;margin:2px 4px}
 .search{display:flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:20px;padding:4px 12px;background:var(--paper-2);min-width:180px;max-width:260px}
 .search input{border:none;outline:none;background:transparent;flex:1;font-family:'Patrick Hand';font-size:15px;color:var(--ink);min-width:80px}
@@ -325,6 +336,9 @@ main{min-height:50vh}
 .image-name-input:hover,.image-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
 .image-delete-btn{position:absolute;top:8px;right:8px;width:24px;height:24px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);color:var(--danger);font-family:'Kalam';font-weight:700;display:grid;place-items:center;opacity:0;pointer-events:none;cursor:pointer;box-shadow:var(--shadow-sm)}
 .image-tile:hover .image-delete-btn,.image-tile:focus-within .image-delete-btn{opacity:1;pointer-events:auto}
+.icon-grid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}
+.icon-tile img{object-fit:contain}
+.icon-slot-select,.icon-category-select{width:100%;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);font-family:'Patrick Hand';font-size:12px;color:var(--ink);padding:2px 4px}
 .library-empty{font-family:'Caveat';font-size:17px;color:var(--ink-ghost);text-align:center;padding:24px 12px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper-2)}
 
 .cell-field{margin:10px 0}
@@ -416,7 +430,7 @@ main{min-height:50vh}
 :root[data-theme="dark"] .kcard.treasure .kcenter{background:radial-gradient(circle,#f4d871,#b8892a)}
 :root[data-theme="dark"] .kcard.action .kcenter{background:radial-gradient(circle,#c4a7e0,#7b5db0)}
 :root[data-theme="dark"] .ribbon{background:repeating-linear-gradient(90deg,#f0e7d4 0 6px,#e4d7ba 6px 12px);border-top-color:#2a2722;border-bottom-color:#2a2722;color:#1b1a17}
-:root[data-theme="dark"] .ribbon.add-ribbon{background:rgba(244,239,228,.72)}
+:root[data-theme="dark"] .ribbon.add-ribbon,:root[data-theme="dark"] .ribbon.empty-ribbon{background:rgba(244,239,228,.72)}
 :root[data-theme="dark"] .bonus,:root[data-theme="dark"] .corner{background:#f4efe4;border-color:#2a2722;color:#1b1a17}
 :root[data-theme="dark"] .corner.shielded{background:linear-gradient(155deg,#f3d77b 0%,#dca83d 45%,#9e6e17 100%);color:#3a1e04}
 :root[data-theme="dark"] .kcard .res.wood{background:#e2c391;color:#5a3a12}
@@ -424,6 +438,8 @@ main{min-height:50vh}
 :root[data-theme="dark"] .kcard .res.wheat{background:#f1d983;color:#6b4a0a}
 :root[data-theme="dark"] .kcard .res.iron{background:#e7c547;color:#5a4108}
 :root[data-theme="dark"] .kcard .res.water{background:#9ec9e6;color:#0a3856}
+:root[data-theme="dark"] .danger-center{background:radial-gradient(circle,#f5e8c8,#d6aa58);border-color:#2a2722;color:#1b1a17}
+:root[data-theme="dark"] .treasure-center{background:linear-gradient(135deg,#f6e8c3 0%,#e8c66f 100%);border-color:#2a2722;color:#1b1a17}
 
 /* ── RESPONSIVE ── */
 @media (max-width:1250px){
@@ -518,6 +534,7 @@ main{min-height:50vh}
       <button class="theme-toggle" id="theme-toggle" aria-label="Basculer thème sombre" title="Thème sombre"><span aria-hidden="true">🌙</span></button>
       <button class="btn ghost" id="btn-decks" aria-label="Ouvrir les decks sauvegardés">Decks</button>
       <button class="btn ghost" id="btn-images" aria-label="Ouvrir la bibliothèque d'images">Images</button>
+      <button class="btn ghost" id="btn-icons" aria-label="Ouvrir la bibliothèque d'icônes">Icônes</button>
       <button class="btn ghost" id="btn-import" aria-label="Importer JSON">↓ Import</button>
       <button class="btn ghost" id="btn-export" aria-label="Exporter JSON">↑ Export</button>
       <button class="btn" id="btn-pdf" aria-label="Exporter PDF (A4)">🖨 PDF</button>
@@ -570,6 +587,7 @@ main{min-height:50vh}
     <div id="cell-modal-body"></div>
     <div class="modal-actions">
       <button class="btn ghost" id="cell-modal-clear" type="button" style="color:var(--danger);display:none">Reset</button>
+      <button class="btn ghost" id="cell-modal-delete-step" type="button" style="color:var(--danger);display:none">Supprimer étape</button>
       <button class="btn primary" id="cell-modal-done">Fermer</button>
     </div>
   </div>
@@ -611,6 +629,22 @@ main{min-height:50vh}
   </div>
 </div>
 
+<!-- Icon library modal -->
+<div class="modal-overlay" id="icon-modal" role="dialog" aria-modal="true" aria-labelledby="icon-modal-title">
+  <div class="modal">
+    <h3 id="icon-modal-title">Bibliothèque d'icônes<button class="modal-close" id="icon-close" aria-label="Fermer">✕</button></h3>
+    <div class="library-tools">
+      <input type="file" id="icon-library-input" accept="image/*" multiple aria-label="Ajouter des icônes"/>
+      <select id="icon-import-category" class="icon-category-select" aria-label="Catégorie des nouvelles icônes">
+        <option value="resource">Ressources</option>
+        <option value="bonus">Bonus</option>
+      </select>
+      <span class="hint">Importe une image, puis assigne-la à un symbole.</span>
+    </div>
+    <div id="icon-library-grid" class="image-grid icon-grid"></div>
+  </div>
+</div>
+
 <!-- Confirm delete -->
 <div class="confirm-overlay" id="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-msg">
   <div class="confirm-box">
@@ -630,6 +664,8 @@ main{min-height:50vh}
 const RES_TYPES = ['wood','stone','wheat','iron','water'];
 const RES_LABELS = {wood:'B',stone:'P',wheat:'Bl',iron:'F',water:'E'};
 const RES_NAMES  = {wood:'Bois',stone:'Pierre',wheat:'Blé',iron:'Fer',water:'Eau'};
+const BONUS_ICON_LABELS = {pv:'PV',workers:'Ouvriers',actions:'Actions',draw:'Pioche',explorers:'Explorateurs'};
+const ICON_ASSIGN_STORAGE = 'kr-icon-assignments';
 const STAGE_NUMS = ['I','II','III','IV'];
 const STAGE_POSITIONS = ['top','right','bottom','left'];
 const RIBBON_POSITIONS = ['tr','br','bl','tl'];
@@ -779,6 +815,7 @@ const state = {
   searchQ: '',
   editing: null,
   imageLibraryTarget: null,
+  iconAssignments: {resource:{}, bonus:{}},
   uiZoom: 130,
 };
 
@@ -811,11 +848,23 @@ function saveDebounced(delay=400){
   clearTimeout(_saveDebounceT);
   _saveDebounceT = setTimeout(save, delay);
 }
+function loadIconAssignments(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(ICON_ASSIGN_STORAGE) || '{}');
+    state.iconAssignments = {resource:{...(raw.resource||{})}, bonus:{...(raw.bonus||{})}};
+  }catch{
+    state.iconAssignments = {resource:{}, bonus:{}};
+  }
+}
+function saveIconAssignments(){
+  localStorage.setItem(ICON_ASSIGN_STORAGE, JSON.stringify(state.iconAssignments));
+}
 function migrateBonus(b){
   if(!b || typeof b==='object') return {...emptyBonus(),...(b||{})};
   return {...emptyBonus(), note: b==='—'?'':b};
 }
 function load(){
+  loadIconAssignments();
   const raw = localStorage.getItem('kr-cards');
   if(raw){
     try{
@@ -834,7 +883,7 @@ function getStage(cardId){ return state.stageByCard[cardId]||0; }
 // LOCAL LIBRARY (INDEXEDDB)
 // ═══════════════════════════════════
 const LIB_DB_NAME = 'kingdom-reforged-library';
-const LIB_DB_VERSION = 1;
+const LIB_DB_VERSION = 2;
 let libDbPromise = null;
 function openLibraryDb(){
   if(libDbPromise) return libDbPromise;
@@ -852,6 +901,12 @@ function openLibraryDb(){
         const images = db.createObjectStore('images',{keyPath:'id'});
         images.createIndex('createdAt','createdAt');
         images.createIndex('name','name',{unique:false});
+      }
+      if(!db.objectStoreNames.contains('icons')){
+        const icons = db.createObjectStore('icons',{keyPath:'id'});
+        icons.createIndex('createdAt','createdAt');
+        icons.createIndex('name','name',{unique:false});
+        icons.createIndex('category','category',{unique:false});
       }
     };
     req.onsuccess = ()=>resolve(req.result);
@@ -973,14 +1028,28 @@ function fileToDataUrl(file){
     r.readAsDataURL(file);
   });
 }
+function getOrCreateStep(card, stage=0){
+  const index = Math.max(0, Math.min(3, Number(stage)||0));
+  while(card.steps.length <= index) card.steps.push(makeStep(emptyBonus(),makeCost()));
+  return card.steps[index];
+}
 
 // ═══════════════════════════════════
 // RENDER HELPERS
 // ═══════════════════════════════════
+function assignedIcon(kind, key){
+  return state.iconAssignments?.[kind]?.[key] || '';
+}
+function iconImg(kind, key, label, className=''){
+  const src = assignedIcon(kind, key);
+  return src ? `<img class="${className || 'icon-img'}" src="${src}" alt="${escapeHtml(label)}"/>` : '';
+}
 function resHtml(type, qty=1, size='sm'){
   if(!qty) return '';
   const label = `${RES_NAMES[type]}${qty>1?' x'+qty:''}`;
-  return Array(qty).fill(`<span class="res ${type} ${size}" role="img" aria-label="${label}"><span aria-hidden="true">${RES_LABELS[type]}</span></span>`).join('');
+  const icon = iconImg('resource', type, RES_NAMES[type]);
+  const content = icon || `<span aria-hidden="true">${RES_LABELS[type]}</span>`;
+  return Array(qty).fill(`<span class="res ${type} ${size}" role="img" aria-label="${label}">${content}</span>`).join('');
 }
 function costHtml(cost, size='sm'){
   if(!cost) return '—';
@@ -997,13 +1066,19 @@ function renderBonusHtml(b){
   ['wood','stone','wheat','iron'].forEach(r=>{
     if(b['prod_'+r]>0) parts.push(`<span class="bprod bprod-badge">${b['prod_'+r]}${resHtml(r,1,'sm')}</span>`);
   });
-  if(b.pv>0) parts.push(`<span class="bpv">${b.pv}</span>`);
-  if(b.workers>0) parts.push(`<span class="bworker">${b.workers>1?b.workers:''}</span>`);
-  if(b.actions>0) parts.push(`<span class="baction">${b.actions>1?b.actions:''}</span>`);
-  if(b.draw>0) parts.push(`<span class="bdraw">${b.draw>1?b.draw:''}</span>`);
-  if(b.explorers>0) parts.push(`<span>+${b.explorers}🏔</span>`);
+  if(b.pv>0) parts.push(renderBonusIcon('pv', b.pv));
+  if(b.workers>0) parts.push(renderBonusIcon('workers', b.workers));
+  if(b.actions>0) parts.push(renderBonusIcon('actions', b.actions));
+  if(b.draw>0) parts.push(renderBonusIcon('draw', b.draw));
+  if(b.explorers>0) parts.push(renderBonusIcon('explorers', b.explorers));
   if(b.note) parts.push(`<span class="bnote">${escapeHtml(b.note)}</span>`);
   return parts.join('');
+}
+function renderBonusIcon(key, value){
+  const cls = {pv:'bpv',workers:'bworker',actions:'baction',draw:'bdraw',explorers:'bexplorers'}[key] || '';
+  const icon = iconImg('bonus', key, BONUS_ICON_LABELS[key] || key, 'bonus-icon-img');
+  const count = key === 'pv' || key === 'explorers' || value > 1 ? value : '';
+  return `<span class="${cls}${icon?' has-custom':''}">${icon}${count}</span>`;
 }
 
 function renderBonusDetail(b){
@@ -1014,7 +1089,43 @@ function renderBonusDetail(b){
 
 function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+function inferDanger(card){
+  if(Number.isFinite(Number(card.danger))) return Math.max(0, Math.min(9, Number(card.danger)));
+  const text = (card.steps||[]).map(s=>s.bonus?.note||'').join(' ');
+  const m = text.match(/danger\s*(\d+)/i);
+  return m ? Math.max(0, Math.min(9, Number(m[1]))) : 0;
+}
+function renderExplorationCardHtml(card, sizeClass='', interactive=false){
+  const bg = typeColor(card.type);
+  let bonuses = '';
+  for(let i=0;i<4;i++){
+    const step = card.steps[i] || makeStep(emptyBonus(),makeCost());
+    const editCls = interactive ? ' editable' : '';
+    const bHtml = renderBonusHtml(step.bonus);
+    if(bHtml){
+      bonuses += `<div class="bonus ${STAGE_POSITIONS[i]}${editCls}" data-stage="${i}" data-field="bonus"${interactive?' role="button" tabindex="0"':''} aria-label="Bonus exploration ${STAGE_NUMS[i]}">${bHtml}</div>`;
+    } else if(interactive){
+      bonuses += `<div class="bonus ${STAGE_POSITIONS[i]}${editCls}" data-stage="${i}" data-field="bonus" role="button" tabindex="0" aria-label="Bonus exploration ${STAGE_NUMS[i]}" style="opacity:.45">＋</div>`;
+    }
+  }
+  const attrs = interactive ? `data-field="danger" data-card="${card.id}" role="button" tabindex="0" aria-label="Niveau de danger"` : '';
+  return `<div class="kcard ${sizeClass} ${bg}" data-id="${card.id}">
+    ${bonuses}
+    <div class="danger-center${interactive?' editable':''}" ${attrs}>Danger<br><b>${inferDanger(card)}</b></div>
+  </div>`;
+}
+function renderTreasureCardHtml(card, sizeClass='', interactive=false){
+  const bg = typeColor(card.type);
+  const step = card.steps[0] || makeStep(emptyBonus(),makeCost());
+  const bHtml = renderBonusHtml(step.bonus) || (interactive ? '＋' : '');
+  const attrs = interactive ? `data-field="bonus" data-stage="0" data-card="${card.id}" role="button" tabindex="0" aria-label="Bonus trésor"` : '';
+  return `<div class="kcard ${sizeClass} ${bg}" data-id="${card.id}">
+    <div class="treasure-center${interactive?' editable':''}" ${attrs}>${bHtml}</div>
+  </div>`;
+}
 function renderCardHtml(card, sizeClass='', interactive=false){
+  if(card.type === 'exploration') return renderExplorationCardHtml(card, sizeClass, interactive);
+  if(card.type === 'treasure') return renderTreasureCardHtml(card, sizeClass, interactive);
   const stage = getStage(card.id);
   const n = card.steps.length;
   const bg = typeColor(card.type);
@@ -1034,7 +1145,7 @@ function renderCardHtml(card, sizeClass='', interactive=false){
     if(nextStep && hasCost(nextStep.cost))
       ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${editCls}" data-stage="${nextIdx}" data-field="cost"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">${costHtml(nextStep.cost,'sm')}</div>`;
     else if(interactive && nextStep)
-      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]} editable" data-stage="${nextIdx}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[nextIdx]}" style="opacity:.45">＋</div>`;
+      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]} editable empty-ribbon" data-stage="${nextIdx}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">＋</div>`;
     const bHtml = renderBonusHtml(step.bonus);
     if(bHtml)
       bonuses += `<div class="bonus ${STAGE_POSITIONS[i]}${editCls}" data-stage="${i}" data-field="bonus"${interactive?' role="button" tabindex="0"':''} aria-label="Bonus étape ${STAGE_NUMS[i]}">${bHtml}</div>`;
@@ -1232,6 +1343,7 @@ function openCellEditor(cardId, field, stage, clickEvent){
     case 'cost':   title=`Coût — étape ${STAGE_NUMS[stage]}`; html=editorCost(card,stage); break;
     case 'bonus':  title=`Bonus — étape ${STAGE_NUMS[stage]}`; html=editorBonus(card,stage); break;
     case 'shield': title=`Bouclier — étape ${STAGE_NUMS[stage]}`; html=editorShield(card,stage); break;
+    case 'danger': title='Danger'; html=editorDanger(card); break;
   }
   titleEl.textContent = title;
   body.innerHTML = html;
@@ -1241,6 +1353,12 @@ function openCellEditor(cardId, field, stage, clickEvent){
     clearBtn.style.display = canClear ? 'inline-flex' : 'none';
     clearBtn.textContent = field === 'cost' ? 'Vider le coût' : 'Vider le bonus';
     clearBtn.onclick = canClear ? ()=>clearCurrentEditor(card, field, stage) : null;
+  }
+  const deleteStepBtn = document.getElementById('cell-modal-delete-step');
+  if(deleteStepBtn){
+    const canDeleteStep = (field === 'cost' || field === 'bonus') && !['exploration','treasure'].includes(card.type) && stage > 0 && card.steps.length > 1;
+    deleteStepBtn.style.display = canDeleteStep ? 'inline-flex' : 'none';
+    deleteStepBtn.onclick = canDeleteStep ? ()=>deleteCurrentEditorStep(card, stage) : null;
   }
   modal.classList.add('open');
   placeAnchoredModal(modal, clickEvent);
@@ -1267,20 +1385,33 @@ function removeStep(card, stage){
   state.stageByCard[card.id] = Math.min(getStage(card.id), card.steps.length - 1);
   return true;
 }
+function refreshCurrentEditor(card, field, stage){
+  const body = document.getElementById('cell-modal-body');
+  if(!body) return;
+  if(field === 'cost') body.innerHTML = editorCost(card, stage);
+  if(field === 'bonus') body.innerHTML = editorBonus(card, stage);
+  if(field === 'danger') body.innerHTML = editorDanger(card);
+  bindEditorEvents(card, field, stage);
+}
+function deleteCurrentEditorStep(card, stage){
+  if(removeStep(card, stage)){
+    closeCellModal();
+    save(); renderCards();
+    showStatus('Étape supprimée');
+  }
+}
 function clearCurrentEditor(card, field, stage){
-  if(!card || !card.steps[stage]) return;
+  if(!card) return;
+  const step = getOrCreateStep(card, stage);
   if(field === 'cost'){
-    card.steps[stage].cost = makeCost();
-    if(removeStep(card, stage)){
-      closeCellModal();
-      save(); renderCards();
-      return;
-    }
-    save(); renderCards(); openCellEditor(card.id, 'cost', stage);
+    step.cost = makeCost();
+    save(); renderCards(); refreshCurrentEditor(card, field, stage);
+    showStatus('Coût vidé');
   }
   if(field === 'bonus'){
-    card.steps[stage].bonus = emptyBonus();
-    save(); renderCards(); openCellEditor(card.id, 'bonus', stage);
+    step.bonus = emptyBonus();
+    save(); renderCards(); refreshCurrentEditor(card, field, stage);
+    showStatus('Bonus vidé');
   }
 }
 
@@ -1328,10 +1459,10 @@ function editorImage(card){
       </div>`;
 }
 function editorCost(card, stage){
-  const step = card.steps[stage];
+  const step = getOrCreateStep(card, stage);
   const rows = RES_TYPES.map(r=>`
     <div class="cost-row">
-      <span class="res ${r} lg" role="img" aria-label="${RES_NAMES[r]}"><span aria-hidden="true">${RES_LABELS[r]}</span></span>
+      ${resHtml(r,1,'lg')}
       <span class="res-name">${RES_NAMES[r]}</span>
       <div class="cost-stepper">
         <button data-cost="${r}" data-delta="-1" aria-label="Diminuer ${RES_NAMES[r]}">−</button>
@@ -1342,17 +1473,17 @@ function editorCost(card, stage){
   return `<div class="cell-field"><div class="cost-editor">${rows}</div></div>`;
 }
 function editorBonus(card, stage){
-  const step = card.steps[stage];
+  const step = getOrCreateStep(card, stage);
   const b = step.bonus;
   return `<div class="cell-field">
     <div class="bonus-editor">
       <div class="be-row">
         <span class="be-label">Ressources</span>
-        ${RES_TYPES.map(r=>`<div class="be-stepper"><span class="res ${r} sm" aria-hidden="true">${RES_LABELS[r]}</span><button data-bfield="${r}" data-bdelta="-1" aria-label="Diminuer ${RES_NAMES[r]}">−</button><span id="ed-b-${r}">${b[r]||0}</span><button data-bfield="${r}" data-bdelta="1" aria-label="Augmenter ${RES_NAMES[r]}">+</button></div>`).join('')}
+        ${RES_TYPES.map(r=>`<div class="be-stepper">${resHtml(r,1,'sm')}<button data-bfield="${r}" data-bdelta="-1" aria-label="Diminuer ${RES_NAMES[r]}">−</button><span id="ed-b-${r}">${b[r]||0}</span><button data-bfield="${r}" data-bdelta="1" aria-label="Augmenter ${RES_NAMES[r]}">+</button></div>`).join('')}
       </div>
       <div class="be-row">
         <span class="be-label">Prod./cycle</span>
-        ${['wood','stone','wheat','iron'].map(r=>`<div class="be-stepper"><span class="res ${r} sm" aria-hidden="true">${RES_LABELS[r]}</span><button data-bfield="prod_${r}" data-bdelta="-1" aria-label="Diminuer prod. ${RES_NAMES[r]}">−</button><span id="ed-b-prod_${r}">${b['prod_'+r]||0}</span><button data-bfield="prod_${r}" data-bdelta="1" aria-label="Augmenter prod. ${RES_NAMES[r]}">+</button></div>`).join('')}
+        ${['wood','stone','wheat','iron'].map(r=>`<div class="be-stepper">${resHtml(r,1,'sm')}<button data-bfield="prod_${r}" data-bdelta="-1" aria-label="Diminuer prod. ${RES_NAMES[r]}">−</button><span id="ed-b-prod_${r}">${b['prod_'+r]||0}</span><button data-bfield="prod_${r}" data-bdelta="1" aria-label="Augmenter prod. ${RES_NAMES[r]}">+</button></div>`).join('')}
       </div>
       <div class="be-row">
         <span class="be-label">Autres</span>
@@ -1366,6 +1497,17 @@ function editorBonus(card, stage){
         <span class="be-label">Note</span>
         <input class="be-note" id="ed-b-note" type="text" value="${escapeHtml(b.note||'')}" placeholder="effet spécial…"/>
       </div>
+    </div>
+  </div>`;
+}
+function editorDanger(card){
+  return `<div class="cell-field">
+    <label>Niveau de danger</label>
+    <div class="stage-stepper">
+      <button class="btn" id="ed-danger-minus" aria-label="Diminuer le danger">−</button>
+      <b id="ed-danger-value">${inferDanger(card)}</b>
+      <button class="btn" id="ed-danger-plus" aria-label="Augmenter le danger">+</button>
+      <span class="hint">(0 à 9)</span>
     </div>
   </div>`;
 }
@@ -1402,22 +1544,16 @@ function bindEditorEvents(card, field, stage){
     if(clear) clear.onclick = ()=>{ clearCardImage(card); save(); renderCards(); openCellEditor(card.id,'image'); };
   }
   if(field==='cost'){
-    const step = card.steps[stage];
+    const step = getOrCreateStep(card, stage);
     document.querySelectorAll('#cell-modal [data-cost]').forEach(btn=>btn.addEventListener('click',()=>{
       const r = btn.dataset.cost, d = +btn.dataset.delta;
       step.cost[r] = Math.max(0,Math.min(9,(step.cost[r]||0)+d));
       document.getElementById('ed-cost-'+r).textContent = step.cost[r];
-      if(!hasCost(step.cost) && stage > 0 && card.steps.length > 1){
-        removeStep(card, stage);
-        closeCellModal();
-        save(); renderCards();
-        return;
-      }
       save(); renderCards();
     }));
   }
   if(field==='bonus'){
-    const step = card.steps[stage];
+    const step = getOrCreateStep(card, stage);
     document.querySelectorAll('#cell-modal [data-bfield]').forEach(btn=>btn.addEventListener('click',()=>{
       const f = btn.dataset.bfield, d = +btn.dataset.bdelta;
       step.bonus[f] = Math.max(0,Math.min(9,(step.bonus[f]||0)+d));
@@ -1431,6 +1567,16 @@ function bindEditorEvents(card, field, stage){
       card.steps[stage].shield = e.target.checked; save(); renderCards();
     };
   }
+  if(field==='danger'){
+    const update = delta=>{
+      card.danger = Math.max(0, Math.min(9, inferDanger(card) + delta));
+      const el = document.getElementById('ed-danger-value');
+      if(el) el.textContent = card.danger;
+      save(); renderCards();
+    };
+    document.getElementById('ed-danger-minus').onclick = ()=>update(-1);
+    document.getElementById('ed-danger-plus').onclick = ()=>update(1);
+  }
 }
 
 // ═══════════════════════════════════
@@ -1438,10 +1584,12 @@ function bindEditorEvents(card, field, stage){
 // ═══════════════════════════════════
 function makeNewCard(type='building'){
   const names = {building:'Nouveau bâtiment', exploration:'Nouvelle exploration', treasure:'Nouveau trésor'};
-  const steps = type === 'treasure'
-    ? [makeStep(emptyBonus(),makeCost())]
-    : [makeStep(emptyBonus(),makeCost()),makeStep(emptyBonus(),makeCost())];
-  return {id:newId(),name:names[type] || 'Nouvelle carte',type,image:null,copies:1,steps};
+  const steps = type === 'exploration'
+    ? [makeStep(emptyBonus(),makeCost()),makeStep(emptyBonus(),makeCost()),makeStep(emptyBonus(),makeCost()),makeStep(emptyBonus(),makeCost())]
+    : [makeStep(emptyBonus(),makeCost())];
+  const card = {id:newId(),name:names[type] || 'Nouvelle carte',type,image:null,copies:1,steps};
+  if(type === 'exploration') card.danger = 0;
+  return card;
 }
 function addNewCard(type='building'){
   const card = makeNewCard(type);
@@ -1720,6 +1868,112 @@ function clearImageFromLibraryTarget(){
   save();
   showStatus(`Image effacée pour ${card.name}`);
 }
+function closeIconLibrary(){ document.getElementById('icon-modal').classList.remove('open'); }
+function iconSlotOptions(category, selected=''){
+  const source = category === 'bonus' ? BONUS_ICON_LABELS : RES_NAMES;
+  return `<option value="">Assigner...</option>` + Object.entries(source).map(([key,label])=>`<option value="${key}"${selected===key?' selected':''}>${escapeHtml(label)}</option>`).join('');
+}
+function assignedSlotForIcon(icon){
+  const category = icon.category || 'resource';
+  const src = icon.dataUrl;
+  return Object.entries(state.iconAssignments[category] || {}).find(([,value])=>value === src)?.[0] || '';
+}
+async function openIconLibrary(){
+  const modal = document.getElementById('icon-modal');
+  modal.classList.add('open');
+  await renderIconLibrary();
+}
+async function renderIconLibrary(){
+  const grid = document.getElementById('icon-library-grid');
+  grid.innerHTML = `<div class="library-empty">Chargement des icônes...</div>`;
+  try{
+    const icons = (await getAllLibraryItems('icons')).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    if(!icons.length){
+      grid.innerHTML = `<div class="library-empty">Aucune icône pour l'instant. Ajoute des PNG, SVG ou WebP.</div>`;
+      return;
+    }
+    grid.innerHTML = icons.map(icon=>{
+      const category = icon.category || 'resource';
+      const slot = assignedSlotForIcon(icon);
+      return `<div class="image-tile icon-tile" data-icon-id="${icon.id}">
+        <img src="${icon.dataUrl}" alt="${escapeHtml(icon.name)}"/>
+        <input class="image-name-input" data-icon-name="${icon.id}" value="${escapeHtml(icon.name)}" title="${escapeHtml(icon.name)}" aria-label="Nom de l'icône"/>
+        <select class="icon-category-select" data-icon-category="${icon.id}" aria-label="Type d'icône">
+          <option value="resource"${category==='resource'?' selected':''}>Ressource</option>
+          <option value="bonus"${category==='bonus'?' selected':''}>Bonus</option>
+        </select>
+        <select class="icon-slot-select" data-icon-slot="${icon.id}" data-category="${category}" aria-label="Symbole associé">
+          ${iconSlotOptions(category, slot)}
+        </select>
+        <button class="image-delete-btn" data-action="icon-delete" data-icon="${icon.id}" aria-label="Supprimer ${escapeHtml(icon.name)}">×</button>
+      </div>`;
+    }).join('');
+  }catch(e){
+    grid.innerHTML = `<div class="library-empty">Impossible de lire les icônes: ${escapeHtml(e.message)}</div>`;
+  }
+}
+async function addIconsToLibrary(files){
+  const icons = Array.from(files||[]).filter(f=>f.type.startsWith('image/'));
+  if(!icons.length) return;
+  const category = document.getElementById('icon-import-category')?.value || 'resource';
+  try{
+    for(const file of icons){
+      await putLibraryItem('icons',{
+        id: libraryId('ico-'),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        category,
+        createdAt: Date.now(),
+        dataUrl: await fileToDataUrl(file),
+      });
+    }
+    showStatus(`${icons.length} icône${icons.length>1?'s':''} ajoutée${icons.length>1?'s':''}`);
+    await renderIconLibrary();
+  }catch(e){ alert('Import icône impossible : '+e.message); }
+}
+async function renameIconInLibrary(id, name){
+  const icon = await getLibraryItem('icons', id);
+  if(!icon) return;
+  icon.name = name.trim() || icon.name;
+  await putLibraryItem('icons', icon);
+  showStatus('Icône renommée');
+}
+async function setIconCategory(id, category){
+  const icon = await getLibraryItem('icons', id);
+  if(!icon) return;
+  icon.category = category;
+  await putLibraryItem('icons', icon);
+  await renderIconLibrary();
+}
+async function assignIconToSlot(id, category, slot){
+  const icon = await getLibraryItem('icons', id);
+  if(!icon) return;
+  category = category || icon.category || 'resource';
+  if(!state.iconAssignments[category]) state.iconAssignments[category] = {};
+  Object.keys(state.iconAssignments[category]).forEach(key=>{
+    if(state.iconAssignments[category][key] === icon.dataUrl) delete state.iconAssignments[category][key];
+  });
+  if(slot) state.iconAssignments[category][slot] = icon.dataUrl;
+  saveIconAssignments();
+  renderCards();
+  showStatus(slot ? 'Icône assignée' : 'Icône dissociée');
+}
+async function deleteIconFromLibrary(id){
+  const icon = await getLibraryItem('icons', id);
+  if(!icon) return;
+  if(!confirm(`Supprimer l'icône « ${icon.name} » ?`)) return;
+  await deleteLibraryItem('icons', id);
+  ['resource','bonus'].forEach(category=>{
+    Object.keys(state.iconAssignments[category]).forEach(key=>{
+      if(state.iconAssignments[category][key] === icon.dataUrl) delete state.iconAssignments[category][key];
+    });
+  });
+  saveIconAssignments();
+  renderCards();
+  showStatus('Icône supprimée');
+  await renderIconLibrary();
+}
 
 function exportToPDF(){
   const cards = filteredCards();
@@ -1862,6 +2116,7 @@ function bindEvents(){
   });
   document.getElementById('btn-decks').addEventListener('click', openDeckLibrary);
   document.getElementById('btn-images').addEventListener('click', ()=>openImageLibrary());
+  document.getElementById('btn-icons').addEventListener('click', openIconLibrary);
   document.getElementById('btn-import').addEventListener('click', openImport);
   document.getElementById('btn-export').addEventListener('click', openExport);
   document.getElementById('btn-pdf').addEventListener('click', exportToPDF);
@@ -1899,6 +2154,22 @@ function bindEvents(){
     const input = e.target.closest('.image-name-input');
     if(!input) return;
     renameImageInLibrary(input.dataset.image, input.value);
+  });
+  document.getElementById('icon-close').addEventListener('click', closeIconLibrary);
+  document.getElementById('icon-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeIconLibrary(); });
+  document.getElementById('icon-library-input').addEventListener('change', e=>addIconsToLibrary(e.target.files).then(()=>{ e.target.value=''; }));
+  document.getElementById('icon-library-grid').addEventListener('click', e=>{
+    const action = e.target.closest('[data-action]');
+    if(!action) return;
+    if(action.dataset.action==='icon-delete') deleteIconFromLibrary(action.dataset.icon);
+  });
+  document.getElementById('icon-library-grid').addEventListener('change', e=>{
+    const name = e.target.closest('[data-icon-name]');
+    if(name){ renameIconInLibrary(name.dataset.iconName, name.value); return; }
+    const category = e.target.closest('[data-icon-category]');
+    if(category){ setIconCategory(category.dataset.iconCategory, category.value); return; }
+    const slot = e.target.closest('[data-icon-slot]');
+    if(slot){ assignIconToSlot(slot.dataset.iconSlot, slot.dataset.category, slot.value); return; }
   });
   document.getElementById('confirm-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
 
@@ -1955,8 +2226,11 @@ function bindEvents(){
       if(a==='image-library'){ openImageLibrary(cardId, e); return; }
       if(a==='stage-add'){
         if(card && card.steps.length<4){
+          const anchor = {clientX:e.clientX, clientY:e.clientY};
+          const newStage = card.steps.length;
           card.steps.push(makeStep(emptyBonus(),makeCost()));
           save(); renderCards();
+          requestAnimationFrame(()=>openCellEditor(cardId, 'cost', newStage, anchor));
         }
         return;
       }
@@ -2064,6 +2338,8 @@ function bindEvents(){
       if(deck.classList.contains('open')){ closeDeckLibrary(); e.preventDefault(); return; }
       const image = document.getElementById('image-modal');
       if(image.classList.contains('open')){ closeImageLibrary(); e.preventDefault(); return; }
+      const icon = document.getElementById('icon-modal');
+      if(icon.classList.contains('open')){ closeIconLibrary(); e.preventDefault(); return; }
       const cm = document.getElementById('confirm-modal');
       if(cm.classList.contains('open')){ cm.classList.remove('open'); e.preventDefault(); return; }
     }
