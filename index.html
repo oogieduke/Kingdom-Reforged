@@ -296,6 +296,7 @@ main{min-height:50vh}
 .modal-overlay.anchored{background:rgba(27,26,23,.25);align-items:stretch;justify-content:stretch;padding:0;pointer-events:none}
 .modal-overlay.anchored .modal{position:fixed;margin:0;max-width:min(420px,92vw);pointer-events:auto}
 .modal-overlay.anchored.open{display:block}
+#image-modal.anchored .modal{max-width:min(640px,94vw)}
 .modal{background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:20px;box-shadow:6px 6px 0 var(--line);max-width:520px;width:100%;max-height:85vh;overflow-y:auto}
 .modal h3{font-size:20px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .modal textarea{width:100%;height:200px;border:2px solid var(--line);border-radius:8px;padding:8px;font-family:'Architects Daughter';font-size:12px;background:var(--paper-2);outline:none;resize:vertical;color:var(--ink)}
@@ -313,6 +314,8 @@ main{min-height:50vh}
 .library-row .actions .btn{box-shadow:none;padding:3px 8px;font-size:12px}
 .image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;max-height:50vh;overflow:auto;padding-right:4px}
 .image-tile{border:1.5px solid var(--line);border-radius:8px;background:var(--paper-2);padding:8px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.image-tile[data-usable="true"]{cursor:pointer}
+.image-tile[data-usable="true"]:hover{background:var(--paper);box-shadow:var(--shadow-sm)}
 .image-tile img{width:100%;aspect-ratio:1;border:1.5px solid var(--line);border-radius:8px;object-fit:cover;background:var(--paper)}
 .image-tile strong{font-family:'Kalam';font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .image-tile .meta{font-family:'Caveat';font-size:13px;color:var(--ink-soft)}
@@ -529,14 +532,14 @@ main{min-height:50vh}
     <span class="chip" data-res="water" tabindex="0" role="button"><span class="res water sm" aria-hidden="true">E</span> Eau</span>
   </div>
   <div class="tb-sep" aria-hidden="true"></div>
+  <div class="view-toggle" role="group" aria-label="Mode d'affichage">
+    <button class="vt-btn on" data-mode="list" aria-pressed="true"><span aria-hidden="true">☰</span> Liste</button>
+    <button class="vt-btn" data-mode="grid" aria-pressed="false"><span aria-hidden="true">⊞</span> Grille</button>
+  </div>
   <div class="zoom-ctrl" role="group" aria-label="Zoom de l'interface">
     <button type="button" id="zoom-minus" aria-label="Réduire le zoom">−</button>
     <span id="zoom-value">100%</span>
     <button type="button" id="zoom-plus" aria-label="Augmenter le zoom">+</button>
-  </div>
-  <div class="view-toggle" role="group" aria-label="Mode d'affichage">
-    <button class="vt-btn on" data-mode="list" aria-pressed="true"><span aria-hidden="true">☰</span> Liste</button>
-    <button class="vt-btn" data-mode="grid" aria-pressed="false"><span aria-hidden="true">⊞</span> Grille</button>
   </div>
 </div>
 
@@ -881,6 +884,62 @@ function normalizeImportedCards(cards){
   cards.forEach(c=>c.steps?.forEach(s=>{ s.bonus=migrateBonus(s.bonus); s.cost={...makeCost(),...(s.cost||{})}; }));
   return cards;
 }
+function isEmbeddedImage(value){
+  return typeof value === 'string' && value.startsWith('data:image/');
+}
+function incrementDeckName(name){
+  const fallback = 'Deck Kingdom Reforged';
+  const current = String(name || fallback).trim() || fallback;
+  const match = current.match(/^(.*?)(?:\s+(\d+))?$/);
+  const root = (match?.[1] || current).trim() || fallback;
+  const next = match?.[2] ? Number(match[2]) + 1 : 2;
+  return `${root} ${next}`;
+}
+async function suggestedDeckName(){
+  const savedName = localStorage.getItem('kr-current-deck-name') || 'Deck Kingdom Reforged';
+  const names = new Set((await getAllLibraryItems('decks')).map(d=>String(d.name||'').toLowerCase()));
+  let candidate = incrementDeckName(savedName);
+  while(names.has(candidate.toLowerCase())) candidate = incrementDeckName(candidate);
+  return candidate;
+}
+function exportableCards(){
+  return cloneCards(state.cards).map(card=>{
+    const imageName = card.imageName || (!isEmbeddedImage(card.image) ? card.image : '');
+    if(imageName){
+      card.image = imageName;
+      card.imageName = imageName;
+    } else if(isEmbeddedImage(card.image)){
+      card.image = null;
+      delete card.imageName;
+    }
+    delete card.imageLibraryId;
+    return card;
+  });
+}
+async function hydrateImportedImages(cards){
+  const images = await getAllLibraryItems('images').catch(()=>[]);
+  const byName = new Map(images.map(img=>[String(img.name||'').toLowerCase(), img]));
+  cards.forEach(card=>{
+    const ref = card.imageName || (!isEmbeddedImage(card.image) ? card.image : '');
+    if(!ref) return;
+    card.imageName = ref;
+    if(isEmbeddedImage(card.image)) return;
+    const image = byName.get(String(ref).toLowerCase());
+    if(image){
+      card.image = image.dataUrl;
+      card.imageLibraryId = image.id;
+    } else {
+      card.image = null;
+      delete card.imageLibraryId;
+    }
+  });
+  return cards;
+}
+function clearCardImage(card){
+  card.image = null;
+  delete card.imageName;
+  delete card.imageLibraryId;
+}
 function fileToDataUrl(file){
   return new Promise((resolve,reject)=>{
     const r = new FileReader();
@@ -958,9 +1017,12 @@ function renderCardHtml(card, sizeClass='', interactive=false){
       bonuses += `<div class="bonus ${STAGE_POSITIONS[i]} editable" data-stage="${i}" data-field="bonus" role="button" tabindex="0" aria-label="Bonus étape ${STAGE_NUMS[i]}" style="opacity:.45">＋</div>`;
   }
 
+  const centerAttrs = interactive
+    ? `data-action="image-library" data-card="${card.id}" role="button" tabindex="0" aria-label="Choisir une image pour ${escapeHtml(card.name)}"`
+    : `data-field="name" aria-label="Nom: ${escapeHtml(card.name)}"`;
   const center = card.image
-    ? `<div class="kcenter${interactive?' editable':''}" data-field="name"${interactive?' role="button" tabindex="0"':''} aria-label="Nom: ${escapeHtml(card.name)}"><img src="${card.image}" alt="${escapeHtml(card.name)}"/></div>`
-    : `<div class="kcenter${interactive?' editable':''}" data-field="name"${interactive?' role="button" tabindex="0"':''} aria-label="Nom: ${escapeHtml(card.name)}">${escapeHtml(card.name)}</div>`;
+    ? `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}><img src="${card.image}" alt="${escapeHtml(card.name)}"/></div>`
+    : `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}>${escapeHtml(card.name)}</div>`;
 
   return `<div class="kcard ${sizeClass} ${bg}" data-id="${card.id}" style="transform:rotate(${rot}deg)">
     ${corners}${ribbons}${bonuses}${center}
@@ -1073,7 +1135,6 @@ function renderCardRow(card){
           </div>
         </div>
         <div class="row-actions">
-          <button type="button" class="btn-row-act" data-card="${card.id}" data-action="image-library" aria-label="Choisir une image pour ${escapeHtml(card.name)}">Images</button>
           <button type="button" class="btn-row-act" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer ${escapeHtml(card.name)}">⎘ Dupliquer</button>
           <button type="button" class="btn-row-act danger" data-card="${card.id}" data-action="delete" aria-label="Supprimer ${escapeHtml(card.name)}">🗑 Supprimer</button>
         </div>
@@ -1092,8 +1153,6 @@ function renderCardGridItem(card){
       <div class="gi-meta" data-card="${card.id}" data-field="type" role="button" tabindex="0" aria-label="Éditer le type">${meta.icon} ${meta.label} · ${card.steps.length} étape${card.steps.length>1?'s':''}</div>
       <div class="gi-actions">
         <button class="btn ghost" data-card="${card.id}" data-action="steps" aria-label="Nombre d'étapes">#</button>
-        <button class="btn ghost" data-card="${card.id}" data-action="image" aria-label="Illustration">🖼</button>
-        <button class="btn ghost" data-card="${card.id}" data-action="image-library" aria-label="Bibliothèque d'images">Img</button>
         <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer">⎘</button>
         <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer">🗑</button>
       </div>
@@ -1282,9 +1341,9 @@ function bindEditorEvents(card, field, stage){
   }
   if(field==='image'){
     const library = document.getElementById('ed-img-library');
-    if(library) library.onclick = ()=>{ closeCellModal(); openImageLibrary(card.id); };
+    if(library) library.onclick = e=>{ closeCellModal(); openImageLibrary(card.id, e); };
     const clear = document.getElementById('ed-img-clear');
-    if(clear) clear.onclick = ()=>{ card.image=null; save(); renderCards(); openCellEditor(card.id,'image'); };
+    if(clear) clear.onclick = ()=>{ clearCardImage(card); save(); renderCards(); openCellEditor(card.id,'image'); };
   }
   if(field==='cost'){
     const step = card.steps[stage];
@@ -1375,14 +1434,18 @@ function updateCopiesDisplay(card){
 // ═══════════════════════════════════
 function closeDeckLibrary(){ document.getElementById('deck-modal').classList.remove('open'); }
 function closeImageLibrary(){
-  document.getElementById('image-modal').classList.remove('open');
+  const modal = document.getElementById('image-modal');
+  modal.classList.remove('open');
+  modal.classList.remove('anchored');
+  const panel = modal.querySelector('.modal');
+  if(panel){ panel.style.left=''; panel.style.top=''; }
   state.imageLibraryTarget = null;
 }
 async function openDeckLibrary(){
   const modal = document.getElementById('deck-modal');
-  document.getElementById('deck-name-input').value = localStorage.getItem('kr-current-deck-name') || 'Deck Kingdom Reforged';
   modal.classList.add('open');
   await renderDeckLibrary();
+  document.getElementById('deck-name-input').value = await suggestedDeckName().catch(()=>incrementDeckName(localStorage.getItem('kr-current-deck-name')));
   document.getElementById('deck-name-input').focus();
 }
 async function renderDeckLibrary(){
@@ -1429,6 +1492,7 @@ async function saveDeckToLibrary(){
     localStorage.setItem('kr-current-deck-name', name);
     showStatus(existing ? 'Deck mis à jour' : 'Deck sauvegardé');
     await renderDeckLibrary();
+    input.value = await suggestedDeckName().catch(()=>incrementDeckName(name));
   }catch(e){ alert('Sauvegarde impossible : '+e.message); }
 }
 async function loadDeckFromLibrary(id){
@@ -1462,13 +1526,37 @@ async function replaceDeckInLibrary(id){
   showStatus('Deck remplacé');
   await renderDeckLibrary();
 }
-async function openImageLibrary(cardId=null){
+async function openImageLibrary(cardId=null, clickEvent=null){
   state.imageLibraryTarget = cardId;
   const card = cardId ? getCard(cardId) : null;
   const hint = document.getElementById('image-target-hint');
   hint.textContent = card ? `Sélection pour: ${card.name}` : 'Ajoute des images ou gère la bibliothèque.';
-  document.getElementById('image-modal').classList.add('open');
+  const modal = document.getElementById('image-modal');
+  const panel = modal.querySelector('.modal');
+  const placeNearClick = ()=>{
+    const rect = panel.getBoundingClientRect();
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let x = clickEvent.clientX + 10;
+    let y = clickEvent.clientY + 10;
+    if(x + rect.width + 8 > vw) x = Math.max(8, clickEvent.clientX - rect.width - 10);
+    if(y + rect.height + 8 > vh) y = Math.max(8, vh - rect.height - 8);
+    if(x < 8) x = 8; if(y < 8) y = 8;
+    panel.style.left = x + 'px';
+    panel.style.top = y + 'px';
+  };
+  modal.classList.add('open');
+  if(clickEvent && clickEvent.clientX != null){
+    modal.classList.add('anchored');
+    panel.style.left = '0px';
+    panel.style.top = '0px';
+    panel.style.transform = '';
+    requestAnimationFrame(placeNearClick);
+  } else {
+    modal.classList.remove('anchored');
+    panel.style.left=''; panel.style.top='';
+  }
   await renderImageLibrary();
+  if(clickEvent && clickEvent.clientX != null) requestAnimationFrame(placeNearClick);
 }
 async function renderImageLibrary(){
   const grid = document.getElementById('image-library-grid');
@@ -1481,7 +1569,7 @@ async function renderImageLibrary(){
     }
     const canUse = !!state.imageLibraryTarget;
     grid.innerHTML = images.map(img=>`
-      <div class="image-tile" data-image-id="${img.id}">
+      <div class="image-tile" data-image-id="${img.id}" data-usable="${canUse?'true':'false'}">
         <img src="${img.dataUrl}" alt="${escapeHtml(img.name)}"/>
         <strong title="${escapeHtml(img.name)}">${escapeHtml(img.name)}</strong>
         <div class="meta">${formatBytes(img.size)} · ${formatDate(img.createdAt)}</div>
@@ -1513,13 +1601,23 @@ async function addImagesToLibrary(files){
   }catch(e){ alert('Import image impossible : '+e.message); }
 }
 async function useImageFromLibrary(id){
-  const card = getCard(state.imageLibraryTarget);
+  const cardId = state.imageLibraryTarget;
+  const card = getCard(cardId);
   if(!card) return;
   const image = await getLibraryItem('images', id);
   if(!image) return;
   card.image = image.dataUrl;
-  save(); renderCards(); closeImageLibrary();
-  showStatus(`Image appliquée à ${card.name}`);
+  card.imageName = image.name;
+  card.imageLibraryId = image.id;
+  closeImageLibrary();
+  renderCards();
+  try{
+    save();
+    showStatus(`Image appliquée à ${card.name}`);
+  }catch(e){
+    console.warn(e);
+    showStatus('Image appliquée, sauvegarde locale trop lourde');
+  }
 }
 async function deleteImageFromLibrary(id){
   const image = await getLibraryItem('images', id);
@@ -1554,7 +1652,7 @@ function exportToPDF(){
 function openExport(){
   const modal=document.getElementById('io-modal');
   document.getElementById('io-modal-title').firstChild.nodeValue='Export JSON';
-  document.getElementById('io-textarea').value=JSON.stringify(state.cards,null,2);
+  document.getElementById('io-textarea').value=JSON.stringify(exportableCards(),null,2);
   document.getElementById('io-action').textContent='Copier';
   document.getElementById('io-action').onclick=()=>{ navigator.clipboard.writeText(document.getElementById('io-textarea').value).then(()=>showStatus('Copié !')); };
   modal.classList.add('open');
@@ -1564,9 +1662,10 @@ function openImport(){
   document.getElementById('io-modal-title').firstChild.nodeValue='Import JSON';
   document.getElementById('io-textarea').value='';
   document.getElementById('io-action').textContent='Importer';
-  document.getElementById('io-action').onclick=()=>{
+  document.getElementById('io-action').onclick=async ()=>{
     try{
       const cards=normalizeImportedCards(JSON.parse(document.getElementById('io-textarea').value));
+      await hydrateImportedImages(cards);
       state.cards=cards;
       save(); renderCards();
       modal.classList.remove('open');
@@ -1693,10 +1792,14 @@ function bindEvents(){
   document.getElementById('image-library-input').addEventListener('change', e=>addImagesToLibrary(e.target.files).then(()=>{ e.target.value=''; }));
   document.getElementById('image-library-grid').addEventListener('click', e=>{
     const action = e.target.closest('[data-action]');
-    if(!action) return;
-    const id = action.dataset.image;
-    if(action.dataset.action==='image-use') useImageFromLibrary(id);
-    if(action.dataset.action==='image-delete') deleteImageFromLibrary(id);
+    if(action){
+      const id = action.dataset.image;
+      if(action.dataset.action==='image-use') useImageFromLibrary(id);
+      if(action.dataset.action==='image-delete') deleteImageFromLibrary(id);
+      return;
+    }
+    const tile = e.target.closest('[data-image-id]');
+    if(tile && state.imageLibraryTarget) useImageFromLibrary(tile.dataset.imageId);
   });
   document.getElementById('confirm-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
 
@@ -1753,7 +1856,7 @@ function bindEvents(){
       if(a==='delete'){ confirmDelete(cardId); return; }
       if(a==='steps'){ openCellEditor(cardId,'steps',undefined,e); return; }
       if(a==='image'){ openCellEditor(cardId,'image',undefined,e); return; }
-      if(a==='image-library'){ openImageLibrary(cardId); return; }
+      if(a==='image-library'){ openImageLibrary(cardId, e); return; }
       if(a==='stage-add'){
         if(card && card.steps.length<4){
           card.steps.push(makeStep(emptyBonus(),makeCost()));
@@ -1785,7 +1888,7 @@ function bindEvents(){
         return;
       }
       if(a==='image-clear'){
-        if(card){ card.image=null; save(); renderCards(); }
+        if(card){ clearCardImage(card); save(); renderCards(); }
         return;
       }
     }
