@@ -152,12 +152,12 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .be-select{font-family:'Kalam';font-size:12px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);padding:3px 6px;cursor:pointer;color:var(--ink)}
 .be-note{font-family:'Patrick Hand';font-size:14px;border:1.5px dashed var(--line);border-radius:6px;background:var(--paper);padding:4px 8px;width:100%;outline:none;color:var(--ink)}
 .be-note:focus{border-style:solid;background:var(--focus-bg)}
-.icon-editor-list{display:flex;flex-direction:column;gap:8px}
-.icon-editor-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;padding:6px 8px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper)}
+.icon-editor-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px}
+.icon-editor-row{display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper);min-width:0}
 .editor-icon-img{width:34px;height:34px;object-fit:contain;display:block}
-.icon-editor-row .icon-label{font-family:'Kalam';font-size:14px;color:var(--ink)}
 .icon-editor-row .qty{min-width:24px;text-align:center;font-family:'Kalam';font-weight:700;color:var(--ink)}
-.icon-editor-row .cost-stepper{gap:4px}
+.icon-editor-row .cost-stepper{gap:3px}
+.icon-editor-row .cost-stepper button{width:22px;height:22px}
 .icon-empty{font-family:'Caveat';font-size:16px;color:var(--ink-ghost);text-align:center;padding:16px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper-2)}
 /* center illustration — shrunk so side bonus labels sit clearly outside */
 .kcenter{position:absolute;inset:28%;border:calc(var(--sz,220px) * .011) solid var(--line);border-radius:50%;background:radial-gradient(circle,#a8c35a,#6b8b2e);display:grid;place-items:center;color:#fff;font-family:'Kalam';font-weight:700;font-size:calc(var(--sz,220px) * .055);text-align:center;z-index:2;overflow:hidden}
@@ -199,6 +199,7 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .chrome-actions #btn-resources{background:#e5f4d3;border-color:#719c35;color:#2d4f12}
 .chrome-actions #btn-icons{background:#f0def8;border-color:#8d5aa8;color:#44215b}
 .chrome-actions #btn-decks:hover,.chrome-actions #btn-images:hover,.chrome-actions #btn-resources:hover,.chrome-actions #btn-icons:hover{filter:brightness(1.04);transform:translateY(-1px)}
+.chrome-actions #btn-sidebar{background:#ece7df;border-color:#7b6e5d;color:#2e261b}
 .tb-sep{width:1.5px;align-self:stretch;background:var(--line);opacity:.35;margin:2px 4px}
 .search{display:flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:20px;padding:4px 12px;background:var(--paper-2);min-width:180px;max-width:260px}
 .search input{border:none;outline:none;background:transparent;flex:1;font-family:'Patrick Hand';font-size:15px;color:var(--ink);min-width:80px}
@@ -214,6 +215,23 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 
 /* ── MAIN ── */
 main{min-height:50vh}
+body.sidebar-open main{margin-left:260px}
+.card-sidebar{position:fixed;top:var(--header-h,116px);left:0;bottom:0;width:252px;background:var(--paper);border-right:2px solid var(--line);box-shadow:4px 0 0 rgba(0,0,0,.08);z-index:110;transform:translateX(-260px);transition:transform var(--t-med) var(--ease);display:flex;flex-direction:column;min-height:0}
+.card-sidebar.open{transform:translateX(0)}
+.sidebar-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1.5px dashed var(--line)}
+.sidebar-head strong{font-family:'Kalam';font-size:17px;color:var(--ink)}
+.sidebar-close{width:28px;height:28px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);font-family:'Kalam';font-weight:700;color:var(--ink);cursor:pointer}
+.sidebar-list{overflow:auto;padding:10px;display:flex;flex-direction:column;gap:10px}
+.sidebar-section{border:1.5px solid var(--line);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:5px}
+.sidebar-section h4{font-size:14px;margin:0 0 2px;display:flex;align-items:center;justify-content:space-between;color:#1b1a17}
+.sidebar-section h4 span{font-family:'Patrick Hand';font-size:12px;opacity:.7}
+.sidebar-section.building{background:#f1d4a3}
+.sidebar-section.exploration{background:#d8e5bd}
+.sidebar-section.treasure{background:#ead083}
+.sidebar-section.action{background:#d6c4ef}
+.sidebar-card{border:1.5px solid rgba(42,39,34,.65);border-radius:6px;background:rgba(255,255,255,.48);padding:4px 6px;text-align:left;font-family:'Patrick Hand';font-size:14px;color:#1b1a17;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-card:hover,.sidebar-card:focus-visible{background:rgba(255,255,255,.78);transform:translateX(2px)}
+.grid-item.flash .kcard{box-shadow:0 0 0 4px var(--accent),4px 4px 0 rgba(0,0,0,.14)}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:60px 20px;color:var(--ink-ghost);font-family:'Caveat';font-size:18px;text-align:center}
 .empty-state .icon{font-size:48px}
 
@@ -328,8 +346,10 @@ main{min-height:50vh}
 .grid-item .gi-name-input{width:min(var(--grid-card-size),100%);border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:center;padding:2px 6px;outline:none}
 .grid-item .gi-name-input:hover,.grid-item .gi-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
 .grid-card-actions{position:absolute;top:4px;left:calc(50% + (var(--grid-card-size) / 2) + 8px);display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20}
-.grid-item:hover .grid-card-actions,.grid-item:focus-within .grid-card-actions{opacity:1;pointer-events:auto}
-.grid-card-actions .btn{width:30px;height:30px;padding:0;display:grid;place-items:center;box-shadow:var(--shadow-sm);background:var(--paper);font-size:13px}
+.grid-card-copy-actions{position:absolute;top:calc(var(--grid-card-size) - 106px);left:calc(50% + (var(--grid-card-size) / 2) + 8px);display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20;align-items:center}
+.grid-item:hover .grid-card-actions,.grid-item:focus-within .grid-card-actions,.grid-item:hover .grid-card-copy-actions,.grid-item:focus-within .grid-card-copy-actions{opacity:1;pointer-events:auto}
+.grid-card-actions .btn,.grid-card-copy-actions .btn{width:30px;height:30px;padding:0;display:grid;place-items:center;box-shadow:var(--shadow-sm);background:var(--paper);font-size:13px}
+.grid-copy-count{width:30px;min-height:24px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper-2);display:grid;place-items:center;font-family:'Kalam';font-weight:700;font-size:13px;color:var(--ink);box-shadow:var(--shadow-sm)}
 .grid-card-actions .stage-action{font-size:18px}
 .grid-card-actions .stage-action.loop-stage{background:#d9f0ff;border-color:#4da7d8;color:#114967}
 .grid-card-actions .stage-action:disabled{opacity:.35;cursor:not-allowed;transform:none}
@@ -338,7 +358,7 @@ main{min-height:50vh}
 .modal-overlay{position:fixed;inset:0;background:var(--overlay);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
 .modal-overlay.open{display:flex}
 .modal-overlay.anchored{background:rgba(27,26,23,.25);align-items:stretch;justify-content:stretch;padding:0;pointer-events:none}
-.modal-overlay.anchored .modal{position:fixed;margin:0;max-width:min(420px,92vw);pointer-events:auto}
+.modal-overlay.anchored .modal{position:fixed;margin:0;max-width:min(350px,92vw);pointer-events:auto}
 .modal-overlay.anchored.open{display:block}
 #image-modal.anchored .modal{max-width:min(640px,94vw)}
 .modal{background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:20px;box-shadow:6px 6px 0 var(--line);max-width:520px;width:100%;max-height:85vh;overflow-y:auto}
@@ -460,6 +480,8 @@ main{min-height:50vh}
 :root[data-theme="dark"] .kcard.action .kcenter{background:radial-gradient(circle,#c4a7e0,#7b5db0)}
 :root[data-theme="dark"] .ribbon{background:repeating-linear-gradient(90deg,#f0e7d4 0 6px,#e4d7ba 6px 12px);border-top-color:#2a2722;border-bottom-color:#2a2722;color:#1b1a17}
 :root[data-theme="dark"] .ribbon.add-ribbon,:root[data-theme="dark"] .ribbon.empty-ribbon{background:rgba(244,239,228,.72)}
+:root[data-theme="dark"] .ribbon.loop-ribbon{background:repeating-linear-gradient(90deg,#d9f0ff 0 6px,#b8e2fb 6px 12px);border-color:#4da7d8;color:#114967}
+:root[data-theme="dark"] .ribbon.loop-ribbon.empty-ribbon,:root[data-theme="dark"] .ribbon.loop-ribbon.loop-add-ribbon{background:rgba(198,235,255,.86)}
 :root[data-theme="dark"] .bonus,:root[data-theme="dark"] .corner{background:#f4efe4;border-color:#2a2722;color:#1b1a17}
 :root[data-theme="dark"] .corner.shielded{background:linear-gradient(155deg,#f3d77b 0%,#dca83d 45%,#9e6e17 100%);color:#3a1e04}
 :root[data-theme="dark"] .kcard .res.wood{background:#e2c391;color:#5a3a12}
@@ -561,6 +583,7 @@ main{min-height:50vh}
     <div class="chrome-actions">
       <span class="autosave" id="autosave-status" role="status" aria-live="polite"></span>
       <button class="theme-toggle" id="theme-toggle" aria-label="Basculer thème sombre" title="Thème sombre"><span aria-hidden="true">🌙</span></button>
+      <button class="btn ghost" id="btn-sidebar" aria-label="Ouvrir ou fermer la liste des cartes">Liste</button>
       <button class="btn ghost" id="btn-decks" aria-label="Ouvrir les decks sauvegardés">Decks</button>
       <button class="btn ghost" id="btn-images" aria-label="Ouvrir la bibliothèque d'images">Images</button>
       <button class="btn ghost" id="btn-resources" aria-label="Ouvrir les icônes de ressources">Ressources</button>
@@ -598,6 +621,14 @@ main{min-height:50vh}
   </div>
 </div>
 </header>
+
+<aside class="card-sidebar" id="card-sidebar" aria-label="Liste des cartes">
+  <div class="sidebar-head">
+    <strong>Cartes</strong>
+    <button class="sidebar-close" id="sidebar-close" aria-label="Fermer la liste">×</button>
+  </div>
+  <div class="sidebar-list" id="sidebar-list"></div>
+</aside>
 
 <main id="cards-container" class="cards-grid" aria-label="Cartes"></main>
 <div id="print-area" aria-hidden="true"></div>
@@ -836,6 +867,7 @@ const state = {
   iconAssignments: {resource:{}, bonus:{}},
   iconLibraryCategory: 'bonus',
   iconCache: {resource:[], bonus:[], byId:{}},
+  sidebarOpen: true,
   uiZoom: 130,
 };
 
@@ -895,6 +927,7 @@ function load(){
   }
   const zoom = Number(localStorage.getItem('kr-grid-zoom'));
   if(UI_ZOOMS.includes(zoom)) state.uiZoom = zoom;
+  state.sidebarOpen = localStorage.getItem('kr-sidebar-open') !== 'false';
 }
 function getCard(id){ return state.cards.find(c=>c.id===id)||null; }
 function getStage(cardId){ return state.stageByCard[cardId]||0; }
@@ -1257,6 +1290,7 @@ function updateCounts(){
 
 function renderCards(){
   updateCounts();
+  renderCardSidebar();
   const container = document.getElementById('cards-container');
   container.className = 'cards-grid';
   const cards = filteredCards();
@@ -1265,6 +1299,43 @@ function renderCards(){
     return;
   }
   container.innerHTML = cards.map(renderCardGridItem).join('');
+}
+
+function renderCardSidebar(){
+  const list = document.getElementById('sidebar-list');
+  if(!list) return;
+  const coll = new Intl.Collator('fr', {sensitivity:'base', numeric:true});
+  const order = ['building','exploration','treasure','action'];
+  const sections = order.map(type=>{
+    const cards = state.cards.filter(c=>c.type===type).sort((a,b)=>coll.compare(a.name,b.name));
+    if(!cards.length) return '';
+    const meta = TYPE_META[type];
+    return `<section class="sidebar-section ${type}">
+      <h4>${meta.icon} ${meta.label}<span>${cards.length}</span></h4>
+      ${cards.map(card=>`<button class="sidebar-card" data-sidebar-card="${card.id}" title="${escapeHtml(card.name)}">${escapeHtml(card.name)}</button>`).join('')}
+    </section>`;
+  }).join('');
+  list.innerHTML = sections || `<div class="library-empty">Aucune carte.</div>`;
+}
+
+function setSidebarOpen(open){
+  state.sidebarOpen = !!open;
+  document.body.classList.toggle('sidebar-open', state.sidebarOpen);
+  const panel = document.getElementById('card-sidebar');
+  if(panel) panel.classList.toggle('open', state.sidebarOpen);
+  const btn = document.getElementById('btn-sidebar');
+  if(btn) btn.setAttribute('aria-pressed', state.sidebarOpen ? 'true' : 'false');
+  localStorage.setItem('kr-sidebar-open', state.sidebarOpen ? 'true' : 'false');
+}
+
+function focusCardFromSidebar(cardId){
+  const item = document.querySelector(`.grid-item[data-id="${cardId}"]`);
+  if(!item) return;
+  item.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
+  item.classList.add('flash');
+  const input = item.querySelector('.gi-name-input');
+  setTimeout(()=>item.classList.remove('flash'), 1200);
+  if(input) setTimeout(()=>input.focus(), 220);
 }
 
 function renderCardRow(card){
@@ -1350,6 +1421,7 @@ function renderCardGridItem(card){
   const canAddStageOrLoop = canEditStages && (card.steps.length < 4 || !card.loopCost);
   const addLoop = canEditStages && card.steps.length >= 4 && !card.loopCost;
   const addStageTitle = card.steps.length >= 4 ? 'Ajouter la transition IV vers I' : 'Ajouter une étape';
+  const copies = Math.max(1, card.copies != null ? card.copies : 1);
   return `
     <div class="grid-item" data-id="${card.id}">
       ${renderCardHtml(card,'md',true)}
@@ -1359,6 +1431,11 @@ function renderCardGridItem(card){
         ${canEditStages ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="stage-remove" ${card.steps.length<=1?'disabled':''} aria-label="Enlever une étape" title="Enlever une étape">−</button>` : ''}
         <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer ${escapeHtml(card.name)}" title="Dupliquer">⎘</button>
         <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer ${escapeHtml(card.name)}" title="Supprimer">🗑</button>
+      </div>
+      <div class="grid-card-copy-actions" role="group" aria-label="Copies PDF">
+        <button class="btn ghost" data-card="${card.id}" data-action="copies-plus" aria-label="Ajouter une copie PDF" title="Ajouter une copie PDF">+</button>
+        <b class="grid-copy-count" data-copies-value="${card.id}">${copies}</b>
+        <button class="btn ghost" data-card="${card.id}" data-action="copies-minus" aria-label="Enlever une copie PDF" title="Enlever une copie PDF"${copies<=1?' disabled':''}>−</button>
       </div>
     </div>
   `;
@@ -1523,10 +1600,6 @@ function editorCost(card, stage){
   const rows = editorIconRows(state.iconCache.resource, icon=>step.costIcons?.[icon.id]||0, icon=>'data-cost-icon="'+icon.id+'"');
   return `<div class="cell-field">
     ${rows || `<div class="icon-empty">Ajoute d'abord des icônes dans le menu Ressources.</div>`}
-    <label class="shield-cell" style="margin-top:10px;padding:8px;border:1.5px dashed var(--line);border-radius:8px;justify-content:flex-start">
-      <input type="checkbox" id="ed-cost-shield"${step.shield?' checked':''}/>
-      <span style="font-family:'Patrick Hand';font-size:15px">Étape protégée</span>
-    </label>
   </div>`;
 }
 function editorBonus(card, stage){
@@ -1560,7 +1633,6 @@ function editorIconRows(icons, valueFor, attrFor){
     const deltaAttr = attr.includes('data-bicon') ? 'data-bdelta' : 'data-delta';
     return `<div class="icon-editor-row">
       <img class="editor-icon-img" src="${icon.dataUrl}" alt="${escapeHtml(icon.name)}"/>
-      <span class="icon-label">${escapeHtml(icon.name)}</span>
       <div class="cost-stepper">
         <button ${attr} ${deltaAttr}="-1" aria-label="Diminuer ${escapeHtml(icon.name)}">−</button>
         <span class="qty">${valueFor(icon)}</span>
@@ -1611,8 +1683,6 @@ function bindEditorEvents(card, field, stage){
       btn.parentElement.querySelector('.qty').textContent = step.costIcons[id];
       save(); renderCards();
     }));
-    const shield = document.getElementById('ed-cost-shield');
-    if(shield) shield.onchange = e=>{ step.shield = e.target.checked; save(); renderCards(); };
   }
   if(field==='bonus'){
     const step = getOrCreateStep(card, stage);
@@ -1722,13 +1792,9 @@ function toggleNewCardMenu(){
 // IMPORT / EXPORT
 // ═══════════════════════════════════
 function updateCopiesDisplay(card){
-  const el = document.querySelector(`[data-copies-value="${card.id}"]`);
-  if(el) el.textContent = card.copies != null ? card.copies : 1;
-  const row = document.querySelector(`.card-row[data-id="${card.id}"]`);
-  if(row){
-    const minus = row.querySelector('[data-action="copies-minus"]');
-    if(minus) minus.disabled = (card.copies||1) <= 1;
-  }
+  const value = card.copies != null ? card.copies : 1;
+  document.querySelectorAll(`[data-copies-value="${card.id}"]`).forEach(el=>{ el.textContent = value; });
+  document.querySelectorAll(`[data-card="${card.id}"][data-action="copies-minus"]`).forEach(btn=>{ btn.disabled = value <= 1; });
 }
 
 // ═══════════════════════════════════
@@ -2177,6 +2243,13 @@ function changeUiZoom(delta){
 // ═══════════════════════════════════
 function bindEvents(){
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+  document.getElementById('btn-sidebar').addEventListener('click', ()=>setSidebarOpen(!state.sidebarOpen));
+  document.getElementById('sidebar-close').addEventListener('click', ()=>setSidebarOpen(false));
+  document.getElementById('sidebar-list').addEventListener('click', e=>{
+    const item = e.target.closest('[data-sidebar-card]');
+    if(!item) return;
+    focusCardFromSidebar(item.dataset.sidebarCard);
+  });
   document.getElementById('btn-new-card').addEventListener('click', e=>{ e.stopPropagation(); toggleNewCardMenu(); });
   document.getElementById('new-card-menu').addEventListener('click', e=>{
     const btn = e.target.closest('[data-new-type]');
@@ -2455,6 +2528,7 @@ load();
 bindEvents();
 trackHeaderHeight();
 applyUiZoom();
+setSidebarOpen(state.sidebarOpen);
 renderCards();
 refreshIconCache().then(()=>renderCards()).catch(()=>{});
 hydrateImportedImages(state.cards).then(()=>{
