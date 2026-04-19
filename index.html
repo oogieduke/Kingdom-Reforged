@@ -116,6 +116,9 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .ribbon.tl{top:10.5%;left:-14%;transform:rotate(-45deg)}
 .ribbon.editable{cursor:pointer}.ribbon.editable:hover{background:repeating-linear-gradient(90deg,#fff5d6 0 6px,#f5e5ab 6px 12px)}
 .ribbon.add-ribbon,.ribbon.empty-ribbon{opacity:.45;border-style:dashed;background:rgba(244,239,228,.72)}
+.ribbon.loop-ribbon{background:repeating-linear-gradient(90deg,#d9f0ff 0 6px,#b8e2fb 6px 12px);border-color:#4da7d8;color:#114967}
+.ribbon.loop-ribbon.empty-ribbon,.ribbon.loop-ribbon.loop-add-ribbon{opacity:.72;border-style:dashed;background:rgba(198,235,255,.86)}
+.ribbon.loop-ribbon.editable:hover{background:repeating-linear-gradient(90deg,#e9f8ff 0 6px,#cceeff 6px 12px)}
 /* bonus slot — anchored via center so content width doesn't shift placement.
    Centers sit 20% from each edge, aligned with the stage marker on that edge. */
 .bonus{position:absolute;background:var(--paper);border:calc(var(--sz,220px) * .007) solid var(--line);border-radius:calc(var(--sz,220px) * .032);padding:calc(var(--sz,220px) * .014) calc(var(--sz,220px) * .032);font-family:'Kalam';font-size:calc(var(--sz,220px) * .05);font-weight:700;display:flex;align-items:center;gap:calc(var(--sz,220px) * .014);z-index:4;white-space:nowrap;color:var(--ink);box-shadow:1px 1px 0 rgba(0,0,0,.08)}
@@ -157,7 +160,7 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .icon-editor-row .cost-stepper{gap:4px}
 .icon-empty{font-family:'Caveat';font-size:16px;color:var(--ink-ghost);text-align:center;padding:16px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper-2)}
 /* center illustration — shrunk so side bonus labels sit clearly outside */
-.kcenter{position:absolute;inset:32%;border:calc(var(--sz,220px) * .011) solid var(--line);border-radius:50%;background:radial-gradient(circle,#a8c35a,#6b8b2e);display:grid;place-items:center;color:#fff;font-family:'Kalam';font-weight:700;font-size:calc(var(--sz,220px) * .055);text-align:center;z-index:2;overflow:hidden}
+.kcenter{position:absolute;inset:28%;border:calc(var(--sz,220px) * .011) solid var(--line);border-radius:50%;background:radial-gradient(circle,#a8c35a,#6b8b2e);display:grid;place-items:center;color:#fff;font-family:'Kalam';font-weight:700;font-size:calc(var(--sz,220px) * .055);text-align:center;z-index:2;overflow:hidden}
 .kcard.exploration .kcenter{background:radial-gradient(circle,#e9c57a,#b88437)}
 .kcard.treasure .kcenter{background:radial-gradient(circle,#f4d871,#b8892a)}
 .kcard.action .kcenter{background:radial-gradient(circle,#c4a7e0,#7b5db0)}
@@ -186,6 +189,11 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .new-card-menu.open{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0) scale(1);transition-delay:0s}
 .new-card-menu button{width:100%;justify-content:flex-start;box-shadow:none;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
 .new-card-menu button:hover,.new-card-menu button:focus-visible{background:var(--focus-bg);transform:translateX(2px)}
+.chrome-actions #btn-decks{background:#f5e8c3;border-color:#8b6a2f;color:#3a2608}
+.chrome-actions #btn-images{background:#d9edf8;border-color:#4a7ba0;color:#123d5a}
+.chrome-actions #btn-resources{background:#e5f4d3;border-color:#719c35;color:#2d4f12}
+.chrome-actions #btn-icons{background:#f0def8;border-color:#8d5aa8;color:#44215b}
+.chrome-actions #btn-decks:hover,.chrome-actions #btn-images:hover,.chrome-actions #btn-resources:hover,.chrome-actions #btn-icons:hover{filter:brightness(1.04);transform:translateY(-1px)}
 .tb-sep{width:1.5px;align-self:stretch;background:var(--line);opacity:.35;margin:2px 4px}
 .search{display:flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:20px;padding:4px 12px;background:var(--paper-2);min-width:180px;max-width:260px}
 .search input{border:none;outline:none;background:transparent;flex:1;font-family:'Patrick Hand';font-size:15px;color:var(--ink);min-width:80px}
@@ -314,7 +322,7 @@ main{min-height:50vh}
 .grid-item{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-width:0}
 .grid-item .gi-name-input{width:min(var(--grid-card-size),100%);border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:center;padding:2px 6px;outline:none}
 .grid-item .gi-name-input:hover,.grid-item .gi-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
-.grid-card-actions{position:absolute;top:4px;right:4px;display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20}
+.grid-card-actions{position:absolute;top:4px;left:calc(50% + (var(--grid-card-size) / 2) + 8px);display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20}
 .grid-item:hover .grid-card-actions,.grid-item:focus-within .grid-card-actions{opacity:1;pointer-events:auto}
 .grid-card-actions .btn{width:30px;height:30px;padding:0;display:grid;place-items:center;box-shadow:var(--shadow-sm);background:var(--paper);font-size:13px}
 .grid-card-actions .stage-action{font-size:18px}
@@ -577,14 +585,6 @@ main{min-height:50vh}
     <span class="chip" data-type="action" tabindex="0" role="button"><span class="chip-icon" aria-hidden="true">🃏</span><span class="chip-text">Actions</span> <span class="c" id="cnt-action">0</span></span>
   </div>
   <div class="tb-sep" aria-hidden="true"></div>
-  <div class="chip-group" id="res-filter" role="group" aria-label="Filtrer par ressource">
-    <span class="chip" data-res="wood" tabindex="0" role="button"><span class="res wood sm" aria-hidden="true">B</span><span class="chip-text">Bois</span></span>
-    <span class="chip" data-res="stone" tabindex="0" role="button"><span class="res stone sm" aria-hidden="true">P</span><span class="chip-text">Pierre</span></span>
-    <span class="chip" data-res="wheat" tabindex="0" role="button"><span class="res wheat sm" aria-hidden="true">Bl</span><span class="chip-text">Blé</span></span>
-    <span class="chip" data-res="iron" tabindex="0" role="button"><span class="res iron sm" aria-hidden="true">F</span><span class="chip-text">Fer</span></span>
-    <span class="chip" data-res="water" tabindex="0" role="button"><span class="res water sm" aria-hidden="true">E</span><span class="chip-text">Eau</span></span>
-  </div>
-  <div class="tb-sep" aria-hidden="true"></div>
   <div class="zoom-ctrl" role="group" aria-label="Zoom de l'interface">
     <button type="button" id="zoom-minus" aria-label="Réduire le zoom">−</button>
     <span id="zoom-value">100%</span>
@@ -603,7 +603,6 @@ main{min-height:50vh}
     <div id="cell-modal-body"></div>
     <div class="modal-actions">
       <button class="btn ghost" id="cell-modal-clear" type="button" style="color:var(--danger);display:none">Reset</button>
-      <button class="btn ghost" id="cell-modal-delete-step" type="button" style="color:var(--danger);display:none">Supprimer étape</button>
       <button class="btn primary" id="cell-modal-done">Fermer</button>
     </div>
   </div>
@@ -1192,14 +1191,19 @@ function renderCardHtml(card, sizeClass='', interactive=false){
     const step = card.steps[i];
     const shieldCls = step.shield ? ' shielded' : '';
     const editCls = interactive ? ' editable' : '';
-    corners += `<div class="corner${shieldCls} ${STAGE_POSITIONS[i]}${editCls}" data-field="cost" data-stage="${i}"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[i]}">${STAGE_NUMS[i]}</div>`;
-    const isWrapCost = i === n - 1 && n < 4;
+    corners += `<div class="corner${shieldCls} ${STAGE_POSITIONS[i]}${editCls}" data-field="shield" data-stage="${i}"${interactive?' role="button" tabindex="0"':''} aria-label="Étape ${STAGE_NUMS[i]}${step.shield?' protégée':''}">${STAGE_NUMS[i]}</div>`;
+    const isWrapCost = i === n - 1;
+    const isLoopCost = isWrapCost && n === 4;
+    const showWrapCost = isWrapCost ? (n < 4 || !!card.loopCost) : true;
     const nextIdx = (i + 1) % n;
-    const nextStep = isWrapCost ? null : card.steps[nextIdx];
+    const nextStep = showWrapCost ? card.steps[nextIdx] : null;
+    const loopCls = isLoopCost ? ' loop-ribbon' : '';
     if(nextStep && hasStepCost(nextStep)){
-      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${editCls}" data-stage="${nextIdx}" data-field="cost"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">${stepCostHtml(nextStep,'sm')}</div>`;
+      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${loopCls}${editCls}" data-stage="${nextIdx}" data-field="cost"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">${stepCostHtml(nextStep,'sm')}</div>`;
     } else if(interactive && nextStep){
-      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]} editable empty-ribbon" data-stage="${nextIdx}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">＋</div>`;
+      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${loopCls} editable empty-ribbon" data-stage="${nextIdx}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">＋</div>`;
+    } else if(interactive && isLoopCost && !card.loopCost){
+      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]} loop-ribbon loop-add-ribbon editable" data-card="${card.id}" data-action="loop-add" role="button" tabindex="0" aria-label="Ajouter la transition IV vers I">＋</div>`;
     }
     const bHtml = renderBonusHtml(step.bonus);
     if(bHtml)
@@ -1338,12 +1342,14 @@ function renderCardRow(card){
 
 function renderCardGridItem(card){
   const canEditStages = !['exploration','treasure'].includes(card.type);
+  const canAddStageOrLoop = canEditStages && (card.steps.length < 4 || !card.loopCost);
+  const addStageTitle = card.steps.length >= 4 ? 'Ajouter la transition IV vers I' : 'Ajouter une étape';
   return `
     <div class="grid-item" data-id="${card.id}">
       ${renderCardHtml(card,'md',true)}
       <input class="gi-name-input" data-card="${card.id}" data-field="name-grid" value="${escapeHtml(card.name)}" aria-label="Nom de la carte"/>
       <div class="grid-card-actions">
-        ${canEditStages ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="stage-add" ${card.steps.length>=4?'disabled':''} aria-label="Ajouter une étape" title="Ajouter une étape">+</button>` : ''}
+        ${canEditStages ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="stage-add" ${canAddStageOrLoop?'':'disabled'} aria-label="${addStageTitle}" title="${addStageTitle}">+</button>` : ''}
         ${canEditStages ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="stage-remove" ${card.steps.length<=1?'disabled':''} aria-label="Enlever une étape" title="Enlever une étape">−</button>` : ''}
         <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer ${escapeHtml(card.name)}" title="Dupliquer">⎘</button>
         <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer ${escapeHtml(card.name)}" title="Supprimer">🗑</button>
@@ -1406,12 +1412,6 @@ function openCellEditor(cardId, field, stage, clickEvent){
     clearBtn.style.display = canClear ? 'inline-flex' : 'none';
     clearBtn.textContent = field === 'cost' ? 'Vider le coût' : 'Vider le bonus';
     clearBtn.onclick = canClear ? ()=>clearCurrentEditor(card, field, stage) : null;
-  }
-  const deleteStepBtn = document.getElementById('cell-modal-delete-step');
-  if(deleteStepBtn){
-    const canDeleteStep = (field === 'cost' || field === 'bonus') && !['exploration','treasure'].includes(card.type) && stage > 0 && card.steps.length > 1;
-    deleteStepBtn.style.display = canDeleteStep ? 'inline-flex' : 'none';
-    deleteStepBtn.onclick = canDeleteStep ? ()=>deleteCurrentEditorStep(card, stage) : null;
   }
   modal.classList.add('open');
   placeAnchoredModal(modal, clickEvent);
@@ -2240,6 +2240,21 @@ function bindEvents(){
   document.getElementById('cell-modal-close').addEventListener('click', closeCellModal);
   document.getElementById('cell-modal-done').addEventListener('click', closeCellModal);
   document.getElementById('cell-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeCellModal(); });
+  document.addEventListener('mousedown', e=>{
+    const closeIfOutside = (id, closeFn)=>{
+      const overlay = document.getElementById(id);
+      if(!overlay?.classList.contains('open')) return false;
+      const panel = overlay.querySelector('.modal,.confirm-box');
+      if(panel && panel.contains(e.target)) return false;
+      closeFn();
+      return true;
+    };
+    if(closeIfOutside('cell-modal', closeCellModal)) return;
+    if(closeIfOutside('io-modal', ()=>document.getElementById('io-modal').classList.remove('open'))) return;
+    if(closeIfOutside('deck-modal', closeDeckLibrary)) return;
+    if(closeIfOutside('image-modal', closeImageLibrary)) return;
+    if(closeIfOutside('icon-modal', closeIconLibrary)) return;
+  });
 
   // Search
   document.getElementById('search-input').addEventListener('input', e=>{ state.searchQ=e.target.value; renderCards(); });
@@ -2254,19 +2269,6 @@ function bindEvents(){
   document.getElementById('type-filter').addEventListener('keydown', e=>{
     if(e.key!=='Enter'&&e.key!==' ') return;
     const c = e.target.closest('[data-type]'); if(!c) return;
-    e.preventDefault(); c.click();
-  });
-
-  // Resource filter (toggle)
-  document.getElementById('res-filter').addEventListener('click', e=>{
-    const c = e.target.closest('[data-res]'); if(!c) return;
-    state.resFilter = state.resFilter===c.dataset.res ? null : c.dataset.res;
-    document.querySelectorAll('#res-filter [data-res]').forEach(x=>x.classList.toggle('on', x.dataset.res===state.resFilter));
-    renderCards();
-  });
-  document.getElementById('res-filter').addEventListener('keydown', e=>{
-    if(e.key!=='Enter'&&e.key!==' ') return;
-    const c = e.target.closest('[data-res]'); if(!c) return;
     e.preventDefault(); c.click();
   });
 
@@ -2288,19 +2290,40 @@ function bindEvents(){
       if(a==='image'){ openCellEditor(cardId,'image',undefined,e); return; }
       if(a==='image-library'){ openImageLibrary(cardId, e); return; }
       if(a==='stage-add'){
-        if(card && !['exploration','treasure'].includes(card.type) && card.steps.length<4){
-          card.steps.push(makeStep(emptyBonus(),makeCost()));
+        if(card && !['exploration','treasure'].includes(card.type)){
+          if(card.steps.length < 4){
+            card.steps.push(makeStep(emptyBonus(),makeCost()));
+            if(card.steps.length < 4) card.loopCost = false;
+            save(); renderCards();
+            showStatus('Étape ajoutée');
+          } else if(!card.loopCost){
+            card.loopCost = true;
+            save(); renderCards();
+            showStatus('Transition IV → I ajoutée');
+          }
+        }
+        return;
+      }
+      if(a==='loop-add'){
+        if(card && card.steps.length === 4 && !card.loopCost){
+          card.loopCost = true;
           save(); renderCards();
-          showStatus('Étape ajoutée');
+          showStatus('Transition IV → I ajoutée');
         }
         return;
       }
       if(a==='stage-remove'){
-        if(card && !['exploration','treasure'].includes(card.type) && card.steps.length>1){
-          card.steps.pop();
-          state.stageByCard[card.id] = Math.min(getStage(card.id), card.steps.length - 1);
-          save(); renderCards();
-          showStatus('Étape retirée');
+        if(card && !['exploration','treasure'].includes(card.type)){
+          if(card.loopCost){
+            card.loopCost = false;
+            save(); renderCards();
+            showStatus('Transition retirée');
+          } else if(card.steps.length>1){
+            card.steps.pop();
+            state.stageByCard[card.id] = Math.min(getStage(card.id), card.steps.length - 1);
+            save(); renderCards();
+            showStatus('Étape retirée');
+          }
         }
         return;
       }
