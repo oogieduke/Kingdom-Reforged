@@ -298,6 +298,23 @@ main{min-height:50vh}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
 .modal-close{background:none;border:none;font-family:'Kalam';font-size:22px;line-height:1;cursor:pointer;color:var(--ink-soft);padding:0 4px}
 .modal-close:hover{color:var(--ink)}
+.library-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1.5px dashed var(--line)}
+.library-tools input[type=text]{flex:1;min-width:170px;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);padding:6px 10px;font-family:'Patrick Hand';font-size:15px;color:var(--ink)}
+.library-tools input[type=file]{font-family:'Patrick Hand';font-size:14px;color:var(--ink-soft);max-width:260px}
+.library-list{display:flex;flex-direction:column;gap:8px;max-height:48vh;overflow:auto;padding-right:4px}
+.library-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1.5px solid var(--line);border-radius:8px;background:var(--paper-2);padding:8px}
+.library-row strong{font-family:'Kalam';font-size:15px;color:var(--ink)}
+.library-row .meta{font-family:'Caveat';font-size:14px;color:var(--ink-soft)}
+.library-row .actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.library-row .actions .btn{box-shadow:none;padding:3px 8px;font-size:12px}
+.image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;max-height:50vh;overflow:auto;padding-right:4px}
+.image-tile{border:1.5px solid var(--line);border-radius:8px;background:var(--paper-2);padding:8px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.image-tile img{width:100%;aspect-ratio:1;border:1.5px solid var(--line);border-radius:8px;object-fit:cover;background:var(--paper)}
+.image-tile strong{font-family:'Kalam';font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.image-tile .meta{font-family:'Caveat';font-size:13px;color:var(--ink-soft)}
+.image-tile .actions{display:flex;gap:4px;flex-wrap:wrap}
+.image-tile .actions .btn{box-shadow:none;padding:3px 7px;font-size:11px}
+.library-empty{font-family:'Caveat';font-size:17px;color:var(--ink-ghost);text-align:center;padding:24px 12px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper-2)}
 
 .cell-field{margin:10px 0}
 .cell-field label{display:block;font-family:'Kalam';font-weight:700;font-size:11px;color:var(--ink-soft);margin-bottom:4px;letter-spacing:.3px;text-transform:uppercase}
@@ -476,6 +493,8 @@ main{min-height:50vh}
     <div class="chrome-actions">
       <span class="autosave" id="autosave-status" role="status" aria-live="polite"></span>
       <button class="theme-toggle" id="theme-toggle" aria-label="Basculer thème sombre" title="Thème sombre"><span aria-hidden="true">🌙</span></button>
+      <button class="btn ghost" id="btn-decks" aria-label="Ouvrir les decks sauvegardés">Decks</button>
+      <button class="btn ghost" id="btn-images" aria-label="Ouvrir la bibliothèque d'images">Images</button>
       <button class="btn ghost" id="btn-import" aria-label="Importer JSON">↓ Import</button>
       <button class="btn ghost" id="btn-export" aria-label="Exporter JSON">↑ Export</button>
       <button class="btn" id="btn-pdf" aria-label="Exporter PDF (A4)">🖨 PDF</button>
@@ -541,6 +560,30 @@ main{min-height:50vh}
     <div class="modal-actions">
       <button class="btn primary" id="io-action">Copier</button>
     </div>
+  </div>
+</div>
+
+<!-- Deck library modal -->
+<div class="modal-overlay" id="deck-modal" role="dialog" aria-modal="true" aria-labelledby="deck-modal-title">
+  <div class="modal">
+    <h3 id="deck-modal-title">Decks sauvegardés<button class="modal-close" id="deck-close" aria-label="Fermer">✕</button></h3>
+    <div class="library-tools">
+      <input type="text" id="deck-name-input" placeholder="Nom du deck…" aria-label="Nom du deck à sauvegarder"/>
+      <button class="btn primary" id="deck-save">Sauvegarder le deck</button>
+    </div>
+    <div id="deck-list" class="library-list"></div>
+  </div>
+</div>
+
+<!-- Image library modal -->
+<div class="modal-overlay" id="image-modal" role="dialog" aria-modal="true" aria-labelledby="image-modal-title">
+  <div class="modal">
+    <h3 id="image-modal-title">Bibliothèque d'images<button class="modal-close" id="image-close" aria-label="Fermer">✕</button></h3>
+    <div class="library-tools">
+      <input type="file" id="image-library-input" accept="image/*" multiple aria-label="Ajouter des images à la bibliothèque"/>
+      <span class="hint" id="image-target-hint"></span>
+    </div>
+    <div id="image-library-grid" class="image-grid"></div>
   </div>
 </div>
 
@@ -716,6 +759,7 @@ const state = {
   sortBy: 'custom',
   viewMode: 'list',
   editing: null,
+  imageLibraryTarget: null,
 };
 
 // ═══════════════════════════════════
@@ -753,6 +797,94 @@ function load(){
 }
 function getCard(id){ return state.cards.find(c=>c.id===id)||null; }
 function getStage(cardId){ return state.stageByCard[cardId]||0; }
+
+// ═══════════════════════════════════
+// LOCAL LIBRARY (INDEXEDDB)
+// ═══════════════════════════════════
+const LIB_DB_NAME = 'kingdom-reforged-library';
+const LIB_DB_VERSION = 1;
+let libDbPromise = null;
+function openLibraryDb(){
+  if(libDbPromise) return libDbPromise;
+  libDbPromise = new Promise((resolve,reject)=>{
+    if(!window.indexedDB){ reject(new Error('IndexedDB indisponible dans ce navigateur')); return; }
+    const req = indexedDB.open(LIB_DB_NAME, LIB_DB_VERSION);
+    req.onupgradeneeded = ()=>{
+      const db = req.result;
+      if(!db.objectStoreNames.contains('decks')){
+        const decks = db.createObjectStore('decks',{keyPath:'id'});
+        decks.createIndex('updatedAt','updatedAt');
+        decks.createIndex('name','name',{unique:false});
+      }
+      if(!db.objectStoreNames.contains('images')){
+        const images = db.createObjectStore('images',{keyPath:'id'});
+        images.createIndex('createdAt','createdAt');
+        images.createIndex('name','name',{unique:false});
+      }
+    };
+    req.onsuccess = ()=>resolve(req.result);
+    req.onerror = ()=>reject(req.error);
+  });
+  return libDbPromise;
+}
+async function libraryStore(name, mode='readonly'){
+  const db = await openLibraryDb();
+  return db.transaction(name,mode).objectStore(name);
+}
+async function getAllLibraryItems(storeName){
+  const store = await libraryStore(storeName);
+  return new Promise((resolve,reject)=>{
+    const req = store.getAll();
+    req.onsuccess = ()=>resolve(req.result||[]);
+    req.onerror = ()=>reject(req.error);
+  });
+}
+async function getLibraryItem(storeName, id){
+  const store = await libraryStore(storeName);
+  return new Promise((resolve,reject)=>{
+    const req = store.get(id);
+    req.onsuccess = ()=>resolve(req.result||null);
+    req.onerror = ()=>reject(req.error);
+  });
+}
+async function putLibraryItem(storeName, item){
+  const store = await libraryStore(storeName,'readwrite');
+  return new Promise((resolve,reject)=>{
+    const req = store.put(item);
+    req.onsuccess = ()=>resolve(item);
+    req.onerror = ()=>reject(req.error);
+  });
+}
+async function deleteLibraryItem(storeName, id){
+  const store = await libraryStore(storeName,'readwrite');
+  return new Promise((resolve,reject)=>{
+    const req = store.delete(id);
+    req.onsuccess = ()=>resolve();
+    req.onerror = ()=>reject(req.error);
+  });
+}
+function libraryId(prefix){ return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function formatDate(ts){ return new Date(ts).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}); }
+function formatBytes(n){
+  if(!n) return '';
+  if(n<1024) return n+' o';
+  if(n<1024*1024) return Math.round(n/1024)+' Ko';
+  return (n/1024/1024).toFixed(1)+' Mo';
+}
+function cloneCards(cards){ return JSON.parse(JSON.stringify(cards)); }
+function normalizeImportedCards(cards){
+  if(!Array.isArray(cards)) throw new Error('Format invalide');
+  cards.forEach(c=>c.steps?.forEach(s=>{ s.bonus=migrateBonus(s.bonus); s.cost={...makeCost(),...(s.cost||{})}; }));
+  return cards;
+}
+function fileToDataUrl(file){
+  return new Promise((resolve,reject)=>{
+    const r = new FileReader();
+    r.onload = ev=>resolve(ev.target.result);
+    r.onerror = ()=>reject(r.error);
+    r.readAsDataURL(file);
+  });
+}
 
 // ═══════════════════════════════════
 // RENDER HELPERS
@@ -946,6 +1078,7 @@ function renderCardRow(card){
           </div>
         </div>
         <div class="row-actions">
+          <button type="button" class="btn-row-act" data-card="${card.id}" data-action="image-library" aria-label="Choisir une image pour ${escapeHtml(card.name)}">Images</button>
           <button type="button" class="btn-row-act" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer ${escapeHtml(card.name)}">⎘ Dupliquer</button>
           <button type="button" class="btn-row-act danger" data-card="${card.id}" data-action="delete" aria-label="Supprimer ${escapeHtml(card.name)}">🗑 Supprimer</button>
         </div>
@@ -965,6 +1098,7 @@ function renderCardGridItem(card){
       <div class="gi-actions">
         <button class="btn ghost" data-card="${card.id}" data-action="steps" aria-label="Nombre d'étapes">#</button>
         <button class="btn ghost" data-card="${card.id}" data-action="image" aria-label="Illustration">🖼</button>
+        <button class="btn ghost" data-card="${card.id}" data-action="image-library" aria-label="Bibliothèque d'images">Img</button>
         <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer">⎘</button>
         <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer">🗑</button>
       </div>
@@ -1065,6 +1199,7 @@ function editorImage(card){
         <img src="${card.image}" class="img-preview" alt=""/>
         <div style="text-align:center;display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
           <label class="btn">📁 Remplacer <input type="file" id="ed-img-input" accept="image/*" style="display:none"/></label>
+          <button class="btn ghost" id="ed-img-library">Bibliothèque</button>
           <button class="btn ghost" id="ed-img-clear" style="color:var(--danger)">✕ Supprimer</button>
         </div>
       </div>`
@@ -1074,6 +1209,7 @@ function editorImage(card){
           <span style="font-family:'Caveat';font-size:14px">PNG, JPG, WebP</span>
           <input type="file" id="ed-img-input" accept="image/*"/>
         </div>
+        <div style="text-align:center;margin-top:10px"><button class="btn ghost" id="ed-img-library">Choisir dans la bibliothèque</button></div>
       </div>`;
 }
 function editorCost(card, stage){
@@ -1159,6 +1295,8 @@ function bindEditorEvents(card, field, stage){
       r.onload = ev=>{ card.image = ev.target.result; save(); renderCards(); openCellEditor(card.id,'image'); };
       r.readAsDataURL(f);
     };
+    const library = document.getElementById('ed-img-library');
+    if(library) library.onclick = ()=>{ closeCellModal(); openImageLibrary(card.id); };
     const clear = document.getElementById('ed-img-clear');
     if(clear) clear.onclick = ()=>{ card.image=null; save(); renderCards(); openCellEditor(card.id,'image'); };
   }
@@ -1246,6 +1384,157 @@ function updateCopiesDisplay(card){
   }
 }
 
+// ═══════════════════════════════════
+// DECKS + IMAGE LIBRARY
+// ═══════════════════════════════════
+function closeDeckLibrary(){ document.getElementById('deck-modal').classList.remove('open'); }
+function closeImageLibrary(){
+  document.getElementById('image-modal').classList.remove('open');
+  state.imageLibraryTarget = null;
+}
+async function openDeckLibrary(){
+  const modal = document.getElementById('deck-modal');
+  document.getElementById('deck-name-input').value = localStorage.getItem('kr-current-deck-name') || 'Deck Kingdom Reforged';
+  modal.classList.add('open');
+  await renderDeckLibrary();
+  document.getElementById('deck-name-input').focus();
+}
+async function renderDeckLibrary(){
+  const list = document.getElementById('deck-list');
+  list.innerHTML = `<div class="library-empty">Chargement des decks…</div>`;
+  try{
+    const decks = (await getAllLibraryItems('decks')).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+    if(!decks.length){
+      list.innerHTML = `<div class="library-empty">Aucun deck sauvegardé pour l'instant.</div>`;
+      return;
+    }
+    list.innerHTML = decks.map(d=>`
+      <div class="library-row" data-deck-id="${d.id}">
+        <div>
+          <strong>${escapeHtml(d.name)}</strong>
+          <div class="meta">${d.cardCount||0} carte${(d.cardCount||0)>1?'s':''} · ${formatDate(d.updatedAt||d.createdAt)}</div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" data-action="deck-load" data-deck="${d.id}">Charger</button>
+          <button class="btn ghost" data-action="deck-rename" data-deck="${d.id}">Nom → champ</button>
+          <button class="btn ghost" style="color:var(--danger)" data-action="deck-delete" data-deck="${d.id}">Supprimer</button>
+        </div>
+      </div>`).join('');
+  }catch(e){
+    list.innerHTML = `<div class="library-empty">Impossible de lire les decks: ${escapeHtml(e.message)}</div>`;
+  }
+}
+async function saveDeckToLibrary(){
+  const input = document.getElementById('deck-name-input');
+  const name = input.value.trim();
+  if(!name){ input.focus(); showStatus('Donne un nom au deck'); return; }
+  try{
+    const existing = (await getAllLibraryItems('decks')).find(d=>d.name.toLowerCase()===name.toLowerCase());
+    const now = Date.now();
+    const deck = {
+      id: existing?.id || libraryId('deck-'),
+      name,
+      cards: cloneCards(state.cards),
+      cardCount: state.cards.length,
+      createdAt: existing?.createdAt || now,
+      updatedAt: now,
+    };
+    await putLibraryItem('decks', deck);
+    localStorage.setItem('kr-current-deck-name', name);
+    showStatus(existing ? 'Deck mis à jour' : 'Deck sauvegardé');
+    await renderDeckLibrary();
+  }catch(e){ alert('Sauvegarde impossible : '+e.message); }
+}
+async function loadDeckFromLibrary(id){
+  try{
+    const deck = await getLibraryItem('decks', id);
+    if(!deck) return;
+    state.cards = normalizeImportedCards(cloneCards(deck.cards));
+    localStorage.setItem('kr-current-deck-name', deck.name);
+    save(); renderCards(); closeDeckLibrary();
+    showStatus(`Deck chargé: ${deck.name}`);
+  }catch(e){ alert('Chargement impossible : '+e.message); }
+}
+async function deleteDeckFromLibrary(id){
+  const deck = await getLibraryItem('decks', id);
+  if(!deck) return;
+  if(!confirm(`Supprimer le deck « ${deck.name} » ?`)) return;
+  await deleteLibraryItem('decks', id);
+  showStatus('Deck supprimé');
+  await renderDeckLibrary();
+}
+async function setDeckNameFromLibrary(id){
+  const deck = await getLibraryItem('decks', id);
+  if(deck) document.getElementById('deck-name-input').value = deck.name;
+}
+async function openImageLibrary(cardId=null){
+  state.imageLibraryTarget = cardId;
+  const card = cardId ? getCard(cardId) : null;
+  const hint = document.getElementById('image-target-hint');
+  hint.textContent = card ? `Sélection pour: ${card.name}` : 'Ajoute des images ou gère la bibliothèque.';
+  document.getElementById('image-modal').classList.add('open');
+  await renderImageLibrary();
+}
+async function renderImageLibrary(){
+  const grid = document.getElementById('image-library-grid');
+  grid.innerHTML = `<div class="library-empty">Chargement des images…</div>`;
+  try{
+    const images = (await getAllLibraryItems('images')).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    if(!images.length){
+      grid.innerHTML = `<div class="library-empty">Aucune image pour l'instant. Ajoute des PNG, JPG ou WebP.</div>`;
+      return;
+    }
+    const canUse = !!state.imageLibraryTarget;
+    grid.innerHTML = images.map(img=>`
+      <div class="image-tile" data-image-id="${img.id}">
+        <img src="${img.dataUrl}" alt="${escapeHtml(img.name)}"/>
+        <strong title="${escapeHtml(img.name)}">${escapeHtml(img.name)}</strong>
+        <div class="meta">${formatBytes(img.size)} · ${formatDate(img.createdAt)}</div>
+        <div class="actions">
+          ${canUse?`<button class="btn primary" data-action="image-use" data-image="${img.id}">Utiliser</button>`:''}
+          <button class="btn ghost" style="color:var(--danger)" data-action="image-delete" data-image="${img.id}">Suppr.</button>
+        </div>
+      </div>`).join('');
+  }catch(e){
+    grid.innerHTML = `<div class="library-empty">Impossible de lire les images: ${escapeHtml(e.message)}</div>`;
+  }
+}
+async function addImagesToLibrary(files){
+  const images = Array.from(files||[]).filter(f=>f.type.startsWith('image/'));
+  if(!images.length) return;
+  try{
+    for(const file of images){
+      await putLibraryItem('images',{
+        id: libraryId('img-'),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        createdAt: Date.now(),
+        dataUrl: await fileToDataUrl(file),
+      });
+    }
+    showStatus(`${images.length} image${images.length>1?'s':''} ajoutée${images.length>1?'s':''}`);
+    await renderImageLibrary();
+  }catch(e){ alert('Import image impossible : '+e.message); }
+}
+async function useImageFromLibrary(id){
+  const card = getCard(state.imageLibraryTarget);
+  if(!card) return;
+  const image = await getLibraryItem('images', id);
+  if(!image) return;
+  card.image = image.dataUrl;
+  save(); renderCards(); closeImageLibrary();
+  showStatus(`Image appliquée à ${card.name}`);
+}
+async function deleteImageFromLibrary(id){
+  const image = await getLibraryItem('images', id);
+  if(!image) return;
+  if(!confirm(`Supprimer l'image « ${image.name} » ?`)) return;
+  await deleteLibraryItem('images', id);
+  showStatus('Image supprimée');
+  await renderImageLibrary();
+}
+
 function exportToPDF(){
   const cards = filteredCards();
   if(!cards.length){ showStatus('Aucune carte à exporter'); return; }
@@ -1282,9 +1571,7 @@ function openImport(){
   document.getElementById('io-action').textContent='Importer';
   document.getElementById('io-action').onclick=()=>{
     try{
-      const cards=JSON.parse(document.getElementById('io-textarea').value);
-      if(!Array.isArray(cards)) throw new Error('Format invalide');
-      cards.forEach(c=>c.steps?.forEach(s=>{ s.bonus=migrateBonus(s.bonus); }));
+      const cards=normalizeImportedCards(JSON.parse(document.getElementById('io-textarea').value));
       state.cards=cards;
       save(); renderCards();
       modal.classList.remove('open');
@@ -1367,11 +1654,34 @@ function setViewMode(mode){
 function bindEvents(){
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
   document.getElementById('btn-new-card').addEventListener('click', addNewCard);
+  document.getElementById('btn-decks').addEventListener('click', openDeckLibrary);
+  document.getElementById('btn-images').addEventListener('click', ()=>openImageLibrary());
   document.getElementById('btn-import').addEventListener('click', openImport);
   document.getElementById('btn-export').addEventListener('click', openExport);
   document.getElementById('btn-pdf').addEventListener('click', exportToPDF);
   document.getElementById('io-close').addEventListener('click', ()=>document.getElementById('io-modal').classList.remove('open'));
   document.getElementById('io-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
+  document.getElementById('deck-close').addEventListener('click', closeDeckLibrary);
+  document.getElementById('deck-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeDeckLibrary(); });
+  document.getElementById('deck-save').addEventListener('click', saveDeckToLibrary);
+  document.getElementById('deck-list').addEventListener('click', e=>{
+    const action = e.target.closest('[data-action]');
+    if(!action) return;
+    const id = action.dataset.deck;
+    if(action.dataset.action==='deck-load') loadDeckFromLibrary(id);
+    if(action.dataset.action==='deck-delete') deleteDeckFromLibrary(id);
+    if(action.dataset.action==='deck-rename') setDeckNameFromLibrary(id);
+  });
+  document.getElementById('image-close').addEventListener('click', closeImageLibrary);
+  document.getElementById('image-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeImageLibrary(); });
+  document.getElementById('image-library-input').addEventListener('change', e=>addImagesToLibrary(e.target.files).then(()=>{ e.target.value=''; }));
+  document.getElementById('image-library-grid').addEventListener('click', e=>{
+    const action = e.target.closest('[data-action]');
+    if(!action) return;
+    const id = action.dataset.image;
+    if(action.dataset.action==='image-use') useImageFromLibrary(id);
+    if(action.dataset.action==='image-delete') deleteImageFromLibrary(id);
+  });
   document.getElementById('confirm-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
 
   // Cell modal close
@@ -1432,6 +1742,7 @@ function bindEvents(){
       if(a==='delete'){ confirmDelete(cardId); return; }
       if(a==='steps'){ openCellEditor(cardId,'steps',undefined,e); return; }
       if(a==='image'){ openCellEditor(cardId,'image',undefined,e); return; }
+      if(a==='image-library'){ openImageLibrary(cardId); return; }
       if(a==='stage-add'){
         if(card && card.steps.length<4){
           card.steps.push(makeStep(emptyBonus(),makeCost()));
@@ -1566,6 +1877,10 @@ function bindEvents(){
       if(cell.classList.contains('open')){ closeCellModal(); e.preventDefault(); return; }
       const io = document.getElementById('io-modal');
       if(io.classList.contains('open')){ io.classList.remove('open'); e.preventDefault(); return; }
+      const deck = document.getElementById('deck-modal');
+      if(deck.classList.contains('open')){ closeDeckLibrary(); e.preventDefault(); return; }
+      const image = document.getElementById('image-modal');
+      if(image.classList.contains('open')){ closeImageLibrary(); e.preventDefault(); return; }
       const cm = document.getElementById('confirm-modal');
       if(cm.classList.contains('open')){ cm.classList.remove('open'); e.preventDefault(); return; }
     }
