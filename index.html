@@ -24,7 +24,7 @@
   --shadow-soft:0 2px 6px rgba(0,0,0,.08);
   --t-fast:120ms;--t-med:220ms;--t-slow:380ms;
   --ease:cubic-bezier(.4,0,.2,1);
-  --header-h:100px;
+  --header-h:92px;
 }
 :root[data-theme="dark"]{
   --paper:#1c1a16;--paper-2:#26231d;--paper-3:#322d25;
@@ -43,13 +43,12 @@ body{background-image:radial-gradient(circle at 20% 10%,var(--grain),transparent
 h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 
 /* ── HEADER ── */
-.chrome{position:sticky;top:0;z-index:100;background:var(--paper);border-bottom:2px dashed var(--line);padding:12px 20px}
-.chrome-top{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px}
-.brand-mark{width:40px;height:40px;border:2px solid var(--line);border-radius:10px;display:grid;place-items:center;background:var(--paper-2);transform:rotate(-6deg);font-family:'Kalam';font-weight:700;font-size:20px;box-shadow:3px 3px 0 var(--line)}
-.brand h1{font-size:22px}
-.brand .sub{font-family:'Caveat';color:var(--ink-soft);font-size:16px}
-.chrome-actions{margin-left:auto;display:flex;gap:6px;align-items:center}
+.chrome{position:sticky;top:0;z-index:100;background:var(--paper);border-bottom:2px dashed var(--line);padding:8px 18px 10px}
+.chrome-top{display:flex;align-items:center;gap:12px;flex-wrap:nowrap;min-width:0}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-mark{width:34px;height:34px;border:2px solid var(--line);border-radius:8px;display:grid;place-items:center;background:var(--paper-2);transform:rotate(-6deg);font-family:'Kalam';font-weight:700;font-size:17px;box-shadow:3px 3px 0 var(--line);flex-shrink:0}
+.brand h1{font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chrome-actions{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:nowrap;min-width:0}
 
 /* ── BUTTONS ── */
 .btn{font-family:'Kalam';font-weight:700;font-size:13px;border:2px solid var(--line);background:var(--paper);padding:5px 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:2px 2px 0 var(--line);white-space:nowrap;color:var(--ink)}
@@ -151,12 +150,13 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .kcenter.editable{cursor:pointer}.kcenter.editable:hover{box-shadow:0 0 0 3px var(--accent)}
 
 /* ── TOOLBAR ── */
-.toolbar{display:flex;gap:12px;padding:12px 20px;border-bottom:2px dashed var(--line);flex-wrap:wrap;align-items:center;background:var(--paper)}
-.tb-group{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toolbar{display:flex;gap:10px;padding:8px 0 0;border-bottom:none;flex-wrap:nowrap;align-items:center;background:var(--paper);overflow-x:auto;scrollbar-width:none}
+.toolbar::-webkit-scrollbar{display:none}
+.tb-group{display:flex;gap:8px;align-items:center;flex-wrap:nowrap;flex-shrink:0}
 .tb-sep{width:1.5px;align-self:stretch;background:var(--line);opacity:.35;margin:2px 4px}
 .search{display:flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:20px;padding:4px 12px;background:var(--paper-2);min-width:180px;max-width:260px}
 .search input{border:none;outline:none;background:transparent;flex:1;font-family:'Patrick Hand';font-size:15px;color:var(--ink);min-width:80px}
-.chip-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip-group{display:flex;gap:6px;flex-wrap:nowrap;align-items:center;flex-shrink:0}
 .sort-ctrl{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:10px;background:var(--paper);padding:2px 10px;box-shadow:var(--shadow-sm);font-family:'Kalam';font-weight:700;font-size:13px;color:var(--ink-soft)}
 .sort-ctrl .sort-ico{font-size:15px;color:var(--ink)}
 .sort-ctrl select{border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;padding:4px 2px;outline:none}
@@ -407,9 +407,9 @@ main{min-height:50vh}
 
 /* ── RESPONSIVE ── */
 @media (max-width:1250px){
-  /* Force filter chip-groups onto separate rows so type-filter and res-filter stack */
-  .toolbar .chip-group{flex-basis:100%;margin:0}
   .toolbar .tb-sep{display:none}
+  .toolbar .chip-text,.toolbar .chip .c{display:none}
+  .toolbar .chip{padding:4px 8px;min-width:30px;justify-content:center}
 }
 @media (max-width:1100px){
   .card-row{grid-template-columns:180px 180px repeat(4, minmax(90px, 1fr));gap:6px;padding:8px}
@@ -429,10 +429,9 @@ main{min-height:50vh}
   .stage-col .stage-num.shielded{width:32px;height:42px;font-size:14px}
 }
 @media (max-width:768px){
-  .chrome{padding:10px 14px}
+  .chrome{padding:8px 12px 9px}
   .brand h1{font-size:18px}
-  .brand .sub{font-size:14px}
-  .toolbar{padding:10px 12px;gap:8px}
+  .toolbar{padding-top:7px;gap:8px}
   .toolbar .search{min-width:140px}
   .view-toggle{margin-left:0}
   .cards-list{padding:10px;gap:8px}
@@ -448,10 +447,10 @@ main{min-height:50vh}
   .modal{padding:16px}
 }
 @media (max-width:480px){
-  .chrome{padding:8px 10px}
+  .chrome{padding:7px 10px 8px}
   .brand-mark{transform:none;width:36px;height:36px}
   .brand h1{font-size:16px}
-  .brand .sub{display:none}
+  .brand h1 span{display:none}
   .chrome-actions .btn{padding:4px 8px;font-size:12px}
   .autosave{font-size:12px;min-width:0}
   .btn{padding:6px 10px;font-size:13px;min-height:32px}
@@ -495,7 +494,6 @@ main{min-height:50vh}
       <div class="brand-mark" aria-hidden="true">KR</div>
       <div>
         <h1>Kingdom Reforged <span style="font-weight:400;opacity:.6">· Card Editor</span></h1>
-        <div class="sub">Dragon's Hoard — outil d'équilibrage v0.2</div>
       </div>
     </div>
     <div class="chrome-actions">
@@ -508,8 +506,6 @@ main{min-height:50vh}
       <button class="btn" id="btn-pdf" aria-label="Exporter PDF (A4)">🖨 PDF</button>
     </div>
   </div>
-</header>
-
 <div class="toolbar">
   <div class="tb-group">
     <button class="btn primary" id="btn-new-card">＋ Nouvelle carte</button>
@@ -517,19 +513,19 @@ main{min-height:50vh}
   </div>
   <div class="tb-sep" aria-hidden="true"></div>
   <div class="chip-group" id="type-filter" role="group" aria-label="Filtrer par type">
-    <span class="chip on" data-type="all" tabindex="0" role="button">Toutes <span class="c" id="cnt-all">0</span></span>
-    <span class="chip" data-type="building" tabindex="0" role="button">🏗️ Bâtiments <span class="c" id="cnt-building">0</span></span>
-    <span class="chip" data-type="exploration" tabindex="0" role="button">🏞️ Exploration <span class="c" id="cnt-exploration">0</span></span>
-    <span class="chip" data-type="treasure" tabindex="0" role="button">💰 Trésors <span class="c" id="cnt-treasure">0</span></span>
-    <span class="chip" data-type="action" tabindex="0" role="button">🃏 Actions <span class="c" id="cnt-action">0</span></span>
+    <span class="chip on" data-type="all" tabindex="0" role="button"><span class="chip-icon" aria-hidden="true">✦</span><span class="chip-text">Toutes</span> <span class="c" id="cnt-all">0</span></span>
+    <span class="chip" data-type="building" tabindex="0" role="button"><span class="chip-icon" aria-hidden="true">🏗️</span><span class="chip-text">Bâtiments</span> <span class="c" id="cnt-building">0</span></span>
+    <span class="chip" data-type="exploration" tabindex="0" role="button"><span class="chip-icon" aria-hidden="true">🏞️</span><span class="chip-text">Exploration</span> <span class="c" id="cnt-exploration">0</span></span>
+    <span class="chip" data-type="treasure" tabindex="0" role="button"><span class="chip-icon" aria-hidden="true">💰</span><span class="chip-text">Trésors</span> <span class="c" id="cnt-treasure">0</span></span>
+    <span class="chip" data-type="action" tabindex="0" role="button"><span class="chip-icon" aria-hidden="true">🃏</span><span class="chip-text">Actions</span> <span class="c" id="cnt-action">0</span></span>
   </div>
   <div class="tb-sep" aria-hidden="true"></div>
   <div class="chip-group" id="res-filter" role="group" aria-label="Filtrer par ressource">
-    <span class="chip" data-res="wood" tabindex="0" role="button"><span class="res wood sm" aria-hidden="true">B</span> Bois</span>
-    <span class="chip" data-res="stone" tabindex="0" role="button"><span class="res stone sm" aria-hidden="true">P</span> Pierre</span>
-    <span class="chip" data-res="wheat" tabindex="0" role="button"><span class="res wheat sm" aria-hidden="true">Bl</span> Blé</span>
-    <span class="chip" data-res="iron" tabindex="0" role="button"><span class="res iron sm" aria-hidden="true">F</span> Fer</span>
-    <span class="chip" data-res="water" tabindex="0" role="button"><span class="res water sm" aria-hidden="true">E</span> Eau</span>
+    <span class="chip" data-res="wood" tabindex="0" role="button"><span class="res wood sm" aria-hidden="true">B</span><span class="chip-text">Bois</span></span>
+    <span class="chip" data-res="stone" tabindex="0" role="button"><span class="res stone sm" aria-hidden="true">P</span><span class="chip-text">Pierre</span></span>
+    <span class="chip" data-res="wheat" tabindex="0" role="button"><span class="res wheat sm" aria-hidden="true">Bl</span><span class="chip-text">Blé</span></span>
+    <span class="chip" data-res="iron" tabindex="0" role="button"><span class="res iron sm" aria-hidden="true">F</span><span class="chip-text">Fer</span></span>
+    <span class="chip" data-res="water" tabindex="0" role="button"><span class="res water sm" aria-hidden="true">E</span><span class="chip-text">Eau</span></span>
   </div>
   <div class="tb-sep" aria-hidden="true"></div>
   <div class="view-toggle" role="group" aria-label="Mode d'affichage">
@@ -542,6 +538,7 @@ main{min-height:50vh}
     <button type="button" id="zoom-plus" aria-label="Augmenter le zoom">+</button>
   </div>
 </div>
+</header>
 
 <main id="cards-container" class="cards-list" aria-label="Cartes"></main>
 <div id="print-area" aria-hidden="true"></div>
@@ -770,12 +767,26 @@ const state = {
 // ═══════════════════════════════════
 // PERSISTENCE
 // ═══════════════════════════════════
+function cardsForLocalStorage(){
+  return cloneCards(state.cards).map(card=>{
+    if(isEmbeddedImage(card.image)) card.image = card.imageName || null;
+    return card;
+  });
+}
 function save(){
-  localStorage.setItem('kr-cards', JSON.stringify(state.cards));
+  try{
+    localStorage.setItem('kr-cards', JSON.stringify(cardsForLocalStorage()));
+  }catch(e){
+    console.warn(e);
+    const el = document.getElementById('autosave-status');
+    if(el) el.textContent = 'sauvegarde locale trop lourde';
+    return false;
+  }
   const el = document.getElementById('autosave-status');
   el.textContent = '✓ sauvegardé';
   clearTimeout(save._t);
   save._t = setTimeout(()=>{ el.textContent=''; }, 2000);
+  return true;
 }
 let _saveDebounceT;
 function saveDebounced(delay=400){
@@ -790,9 +801,7 @@ function load(){
   const raw = localStorage.getItem('kr-cards');
   if(raw){
     try{
-      const cards = JSON.parse(raw);
-      cards.forEach(c=>c.steps?.forEach(s=>{ s.bonus=migrateBonus(s.bonus); }));
-      state.cards = cards;
+      state.cards = normalizeImportedCards(JSON.parse(raw));
     }catch{ state.cards = JSON.parse(JSON.stringify(DEFAULT_CARDS)); }
   } else {
     state.cards = JSON.parse(JSON.stringify(DEFAULT_CARDS));
@@ -1020,8 +1029,9 @@ function renderCardHtml(card, sizeClass='', interactive=false){
   const centerAttrs = interactive
     ? `data-action="image-library" data-card="${card.id}" role="button" tabindex="0" aria-label="Choisir une image pour ${escapeHtml(card.name)}"`
     : `data-field="name" aria-label="Nom: ${escapeHtml(card.name)}"`;
-  const center = card.image
-    ? `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}><img src="${card.image}" alt="${escapeHtml(card.name)}"/></div>`
+  const imageSrc = isEmbeddedImage(card.image) ? card.image : '';
+  const center = imageSrc
+    ? `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}><img src="${imageSrc}" alt="${escapeHtml(card.name)}"/></div>`
     : `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}>${escapeHtml(card.name)}</div>`;
 
   return `<div class="kcard ${sizeClass} ${bg}" data-id="${card.id}" style="transform:rotate(${rot}deg)">
@@ -1071,8 +1081,9 @@ function renderCardRow(card){
   const numSteps = card.steps.length;
   const copies = card.copies != null ? card.copies : 1;
   const typeOptions = Object.entries(TYPE_META).map(([k,v])=>`<option value="${k}"${card.type===k?' selected':''}>${v.icon} ${v.label}</option>`).join('');
-  const imgZoneInner = card.image
-    ? `<img src="${card.image}" class="inline-img-thumb" alt=""/><span class="inline-img-label">Choisir dans la bibliothèque</span>`
+  const imageSrc = isEmbeddedImage(card.image) ? card.image : '';
+  const imgZoneInner = imageSrc
+    ? `<img src="${imageSrc}" class="inline-img-thumb" alt=""/><span class="inline-img-label">Choisir dans la bibliothèque</span>`
     : `<span class="inline-img-ghost">Choisir dans la bibliothèque</span>`;
 
   const stageCols = [];
@@ -1163,11 +1174,40 @@ function renderCardGridItem(card){
 // ═══════════════════════════════════
 // CELL EDITORS
 // ═══════════════════════════════════
+function currentUiScale(){
+  return (UI_ZOOMS.includes(state.uiZoom) ? state.uiZoom : 100) / 100;
+}
+function placeAnchoredModal(modal, clickEvent){
+  const panel = modal.querySelector('.modal');
+  if(!panel) return null;
+  if(!(clickEvent && clickEvent.clientX != null)){
+    modal.classList.remove('anchored');
+    panel.style.left=''; panel.style.top='';
+    return null;
+  }
+  modal.classList.add('anchored');
+  panel.style.left = '0px';
+  panel.style.top = '0px';
+  panel.style.transform = '';
+  const update = ()=>{
+    const rect = panel.getBoundingClientRect();
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const scale = currentUiScale();
+    let x = clickEvent.clientX + 10;
+    let y = clickEvent.clientY + 10;
+    if(x + rect.width + 8 > vw) x = Math.max(8, clickEvent.clientX - rect.width - 10);
+    if(y + rect.height + 8 > vh) y = Math.max(8, vh - rect.height - 8);
+    if(x < 8) x = 8; if(y < 8) y = 8;
+    panel.style.left = (x / scale) + 'px';
+    panel.style.top = (y / scale) + 'px';
+  };
+  requestAnimationFrame(update);
+  return update;
+}
 function openCellEditor(cardId, field, stage, clickEvent){
   const card = getCard(cardId); if(!card) return;
   state.editing = {cardId, field, stage, returnFocus: document.activeElement};
   const modal = document.getElementById('cell-modal');
-  const panel = modal.querySelector('.modal');
   const titleEl = document.getElementById('cell-modal-title-text');
   const body = document.getElementById('cell-modal-body');
   let title='Éditer', html='';
@@ -1183,27 +1223,7 @@ function openCellEditor(cardId, field, stage, clickEvent){
   titleEl.textContent = title;
   body.innerHTML = html;
   modal.classList.add('open');
-  // Anchor popup at click coords when editing a cell via click
-  if(clickEvent && clickEvent.clientX != null){
-    modal.classList.add('anchored');
-    panel.style.left = '0px';
-    panel.style.top = '0px';
-    panel.style.transform = '';
-    requestAnimationFrame(()=>{
-      const rect = panel.getBoundingClientRect();
-      const vw = window.innerWidth, vh = window.innerHeight;
-      let x = clickEvent.clientX + 10;
-      let y = clickEvent.clientY + 10;
-      if(x + rect.width + 8 > vw) x = Math.max(8, clickEvent.clientX - rect.width - 10);
-      if(y + rect.height + 8 > vh) y = Math.max(8, vh - rect.height - 8);
-      if(x < 8) x = 8; if(y < 8) y = 8;
-      panel.style.left = x + 'px';
-      panel.style.top = y + 'px';
-    });
-  } else {
-    modal.classList.remove('anchored');
-    panel.style.left=''; panel.style.top='';
-  }
+  placeAnchoredModal(modal, clickEvent);
   setTimeout(()=>{
     const first = body.querySelector('input,select,textarea,button');
     if(first) first.focus();
@@ -1248,9 +1268,10 @@ function editorSteps(card){
   </div>`;
 }
 function editorImage(card){
-  return card.image
+  const imageSrc = isEmbeddedImage(card.image) ? card.image : '';
+  return imageSrc
     ? `<div class="cell-field">
-        <img src="${card.image}" class="img-preview" alt=""/>
+        <img src="${imageSrc}" class="img-preview" alt=""/>
         <div style="text-align:center;display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
           <button class="btn primary" id="ed-img-library">Choisir dans la bibliothèque</button>
           <button class="btn ghost" id="ed-img-clear" style="color:var(--danger)">✕ Supprimer</button>
@@ -1532,31 +1553,10 @@ async function openImageLibrary(cardId=null, clickEvent=null){
   const hint = document.getElementById('image-target-hint');
   hint.textContent = card ? `Sélection pour: ${card.name}` : 'Ajoute des images ou gère la bibliothèque.';
   const modal = document.getElementById('image-modal');
-  const panel = modal.querySelector('.modal');
-  const placeNearClick = ()=>{
-    const rect = panel.getBoundingClientRect();
-    const vw = window.innerWidth, vh = window.innerHeight;
-    let x = clickEvent.clientX + 10;
-    let y = clickEvent.clientY + 10;
-    if(x + rect.width + 8 > vw) x = Math.max(8, clickEvent.clientX - rect.width - 10);
-    if(y + rect.height + 8 > vh) y = Math.max(8, vh - rect.height - 8);
-    if(x < 8) x = 8; if(y < 8) y = 8;
-    panel.style.left = x + 'px';
-    panel.style.top = y + 'px';
-  };
   modal.classList.add('open');
-  if(clickEvent && clickEvent.clientX != null){
-    modal.classList.add('anchored');
-    panel.style.left = '0px';
-    panel.style.top = '0px';
-    panel.style.transform = '';
-    requestAnimationFrame(placeNearClick);
-  } else {
-    modal.classList.remove('anchored');
-    panel.style.left=''; panel.style.top='';
-  }
+  const reposition = placeAnchoredModal(modal, clickEvent);
   await renderImageLibrary();
-  if(clickEvent && clickEvent.clientX != null) requestAnimationFrame(placeNearClick);
+  if(reposition) requestAnimationFrame(reposition);
 }
 async function renderImageLibrary(){
   const grid = document.getElementById('image-library-grid');
@@ -1977,6 +1977,10 @@ bindEvents();
 trackHeaderHeight();
 applyUiZoom();
 setViewMode(state.viewMode);
+hydrateImportedImages(state.cards).then(()=>{
+  renderCards();
+  save();
+}).catch(()=>{});
 </script>
 </body>
 </html>
