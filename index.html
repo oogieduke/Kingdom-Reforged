@@ -26,7 +26,7 @@
   --ease:cubic-bezier(.4,0,.2,1);
   --header-h:92px;
   --grid-card-size:286px;
-  --grid-col-size:306px;
+  --grid-col-size:340px;
 }
 :root[data-theme="dark"]{
   --paper:#1c1a16;--paper-2:#26231d;--paper-3:#322d25;
@@ -78,7 +78,7 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 /* ── CARD ── */
 .kcard{
   width:var(--sz,220px);height:var(--sz,220px);position:relative;
-  border:3px solid var(--line);border-radius:14px;
+  border:calc(var(--sz,220px) * .014) solid var(--line);border-radius:calc(var(--sz,220px) * .064);
   background:repeating-linear-gradient(90deg,var(--wood) 0 3px,var(--wood-2) 3px 8px,var(--wood) 8px 14px);
   box-shadow:4px 4px 0 rgba(0,0,0,.12);overflow:hidden;
   transition:transform .45s cubic-bezier(.65,0,.35,1);flex-shrink:0;
@@ -88,11 +88,11 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .kcard.treasure{background:repeating-linear-gradient(45deg,#e6cf91 0 5px,#d9bc75 5px 12px)}
 .kcard.action{background:repeating-linear-gradient(90deg,#cbbce0 0 4px,#b9a5d4 4px 10px)}
 /* corner stage number */
-.corner{position:absolute;width:26px;height:26px;border:2px solid var(--line);border-radius:50%;background:var(--paper);display:grid;place-items:center;font-family:'Kalam';font-weight:700;font-size:12px;z-index:3;color:var(--ink)}
-.corner.top{top:5px;left:50%;transform:translateX(-50%)}
-.corner.right{right:5px;top:50%;transform:translateY(-50%) rotate(90deg)}
-.corner.bottom{bottom:5px;left:50%;transform:translateX(-50%) rotate(180deg)}
-.corner.left{left:5px;top:50%;transform:translateY(-50%) rotate(-90deg)}
+.corner{position:absolute;width:calc(var(--sz,220px) * .118);height:calc(var(--sz,220px) * .118);border:calc(var(--sz,220px) * .009) solid var(--line);border-radius:50%;background:var(--paper);display:grid;place-items:center;font-family:'Kalam';font-weight:700;font-size:calc(var(--sz,220px) * .055);z-index:3;color:var(--ink)}
+.corner.top{top:calc(var(--sz,220px) * .023);left:50%;transform:translateX(-50%)}
+.corner.right{right:calc(var(--sz,220px) * .023);top:50%;transform:translateY(-50%) rotate(90deg)}
+.corner.bottom{bottom:calc(var(--sz,220px) * .023);left:50%;transform:translateX(-50%) rotate(180deg)}
+.corner.left{left:calc(var(--sz,220px) * .023);top:50%;transform:translateY(-50%) rotate(-90deg)}
 /* heraldic shield corner: stage number visible inside */
 .corner.shielded{
   background:linear-gradient(155deg,#f3d77b 0%,#dca83d 45%,#9e6e17 100%);
@@ -100,7 +100,7 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
   border:none;
   clip-path:polygon(0 0,100% 0,100% 55%,86% 82%,50% 100%,14% 82%,0 55%);
   border-radius:3px 3px 0 0;
-  width:26px;height:30px;font-size:12px;
+  width:calc(var(--sz,220px) * .118);height:calc(var(--sz,220px) * .136);font-size:calc(var(--sz,220px) * .055);
   align-items:center;padding:0;
   text-shadow:0 1px 0 rgba(255,255,255,.35);
   box-shadow:inset 0 0 0 2px #5e3f0f,inset 0 -4px 6px rgba(0,0,0,.2),inset 0 3px 4px rgba(255,255,255,.22);
@@ -109,15 +109,16 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 /* diagonal cost ribbon — edge-to-edge across each corner (clipped by .kcard overflow:hidden).
    For symmetric placement, offsets satisfy: perpendicular_offset + parallel_offset = (W-H)/2 / S.
    With W=60% H≈11% → offsets: ~10.5% inner (top/bottom) + 14% outward (right/left). */
-.ribbon{position:absolute;width:60%;height:24px;background:repeating-linear-gradient(90deg,#f0e7d4 0 6px,#e4d7ba 6px 12px);border-top:1.5px solid var(--line);border-bottom:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;gap:3px;font-family:'Kalam';font-size:10px;font-weight:700;z-index:2;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08);transform-origin:center}
+.ribbon{position:absolute;width:60%;height:calc(var(--sz,220px) * .109);background:repeating-linear-gradient(90deg,#f0e7d4 0 6px,#e4d7ba 6px 12px);border-top:calc(var(--sz,220px) * .007) solid var(--line);border-bottom:calc(var(--sz,220px) * .007) solid var(--line);display:flex;align-items:center;justify-content:center;gap:calc(var(--sz,220px) * .014);font-family:'Kalam';font-size:calc(var(--sz,220px) * .045);font-weight:700;z-index:2;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08);transform-origin:center}
 .ribbon.tr{top:10.5%;right:-14%;transform:rotate(45deg)}
 .ribbon.br{bottom:10.5%;right:-14%;transform:rotate(-45deg)}
 .ribbon.bl{bottom:10.5%;left:-14%;transform:rotate(45deg)}
 .ribbon.tl{top:10.5%;left:-14%;transform:rotate(-45deg)}
 .ribbon.editable{cursor:pointer}.ribbon.editable:hover{background:repeating-linear-gradient(90deg,#fff5d6 0 6px,#f5e5ab 6px 12px)}
+.ribbon.add-ribbon{opacity:.45;border-style:dashed;background:rgba(244,239,228,.72)}
 /* bonus slot — anchored via center so content width doesn't shift placement.
    Centers sit 20% from each edge, aligned with the stage marker on that edge. */
-.bonus{position:absolute;background:var(--paper);border:1.5px solid var(--line);border-radius:7px;padding:3px 7px;font-family:'Kalam';font-size:11px;font-weight:700;display:flex;align-items:center;gap:3px;z-index:4;white-space:nowrap;color:var(--ink);box-shadow:1px 1px 0 rgba(0,0,0,.08)}
+.bonus{position:absolute;background:var(--paper);border:calc(var(--sz,220px) * .007) solid var(--line);border-radius:calc(var(--sz,220px) * .032);padding:calc(var(--sz,220px) * .014) calc(var(--sz,220px) * .032);font-family:'Kalam';font-size:calc(var(--sz,220px) * .05);font-weight:700;display:flex;align-items:center;gap:calc(var(--sz,220px) * .014);z-index:4;white-space:nowrap;color:var(--ink);box-shadow:1px 1px 0 rgba(0,0,0,.08)}
 .bonus.top{top:20%;left:50%;transform:translate(-50%,-50%)}
 .bonus.right{right:20%;top:50%;transform:translate(50%,-50%) rotate(90deg);max-width:calc(var(--sz,220px) * .34);overflow:hidden}
 .bonus.bottom{bottom:20%;left:50%;transform:translate(-50%,50%) rotate(180deg)}
@@ -126,12 +127,12 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 /* bonus icons */
 .bpv{display:inline-flex;align-items:center;gap:1px;font-family:'Kalam';font-weight:700}
 .bpv::before{content:'★';color:#c2410c}
-.bworker::before{content:'👷';font-size:10px}
-.baction::before{content:'⚡';font-size:10px}
-.bdraw::before{content:'📜';font-size:10px}
-.bchain{color:var(--accent-2)}
+.bworker::before{content:'👷';font-size:.9em}
+.baction::before{content:'⚡';font-size:.9em}
+.bdraw::before{content:'📜';font-size:.9em}
 .bprod{opacity:.8}
-.bprod-badge::after{content:'⟳';font-size:9px;opacity:.7}
+.bprod-badge::after{content:'⟳';font-size:.82em;opacity:.7}
+.bnote{font-family:'Caveat';font-size:.9em;max-width:calc(var(--sz,220px) * .28);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block}
 /* bonus structured editor (reused in cell modal) */
 .bonus-editor{display:flex;flex-direction:column;gap:6px}
 .be-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -144,12 +145,14 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .be-note{font-family:'Patrick Hand';font-size:14px;border:1.5px dashed var(--line);border-radius:6px;background:var(--paper);padding:4px 8px;width:100%;outline:none;color:var(--ink)}
 .be-note:focus{border-style:solid;background:var(--focus-bg)}
 /* center illustration — shrunk so side bonus labels sit clearly outside */
-.kcenter{position:absolute;inset:32%;border:2.5px solid var(--line);border-radius:50%;background:radial-gradient(circle,#a8c35a,#6b8b2e);display:grid;place-items:center;color:#fff;font-family:'Kalam';font-weight:700;font-size:12px;text-align:center;z-index:2;overflow:hidden}
+.kcenter{position:absolute;inset:32%;border:calc(var(--sz,220px) * .011) solid var(--line);border-radius:50%;background:radial-gradient(circle,#a8c35a,#6b8b2e);display:grid;place-items:center;color:#fff;font-family:'Kalam';font-weight:700;font-size:calc(var(--sz,220px) * .055);text-align:center;z-index:2;overflow:hidden}
 .kcard.exploration .kcenter{background:radial-gradient(circle,#e9c57a,#b88437)}
 .kcard.treasure .kcenter{background:radial-gradient(circle,#f4d871,#b8892a)}
 .kcard.action .kcenter{background:radial-gradient(circle,#c4a7e0,#7b5db0)}
 .kcenter img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .kcenter.editable{cursor:pointer}.kcenter.editable:hover{box-shadow:0 0 0 3px var(--accent)}
+.kcard .res{width:calc(var(--sz,220px) * .1);height:calc(var(--sz,220px) * .1);border-width:calc(var(--sz,220px) * .007);font-size:calc(var(--sz,220px) * .045)}
+.kcard .res.sm{width:calc(var(--sz,220px) * .082);height:calc(var(--sz,220px) * .082);font-size:calc(var(--sz,220px) * .041)}
 
 /* ── TOOLBAR ── */
 .toolbar{display:flex;gap:10px;padding:8px 0 0;border-bottom:none;flex-wrap:nowrap;align-items:center;background:var(--paper);overflow-x:auto;scrollbar-width:none}
@@ -287,7 +290,7 @@ main{min-height:50vh}
 .grid-item{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-width:0}
 .grid-item .gi-name-input{width:min(var(--grid-card-size),100%);border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:center;padding:2px 6px;outline:none}
 .grid-item .gi-name-input:hover,.grid-item .gi-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
-.grid-card-actions{position:absolute;top:6px;right:calc(50% - (var(--grid-card-size) / 2) + 6px);display:flex;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20}
+.grid-card-actions{position:absolute;top:4px;left:calc(50% + (var(--grid-card-size) / 2) + 6px);display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20}
 .grid-item:hover .grid-card-actions,.grid-item:focus-within .grid-card-actions{opacity:1;pointer-events:auto}
 .grid-card-actions .btn{width:30px;height:30px;padding:0;display:grid;place-items:center;box-shadow:var(--shadow-sm);background:var(--paper);font-size:13px}
 
@@ -313,15 +316,15 @@ main{min-height:50vh}
 .library-row .meta{font-family:'Caveat';font-size:14px;color:var(--ink-soft)}
 .library-row .actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
 .library-row .actions .btn{box-shadow:none;padding:3px 8px;font-size:12px}
-.image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;max-height:50vh;overflow:auto;padding-right:4px}
-.image-tile{border:1.5px solid var(--line);border-radius:8px;background:var(--paper-2);padding:8px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(94px,1fr));gap:8px;max-height:62vh;overflow:auto;padding-right:4px}
+.image-tile{border:1.5px solid var(--line);border-radius:8px;background:var(--paper-2);padding:5px;display:flex;flex-direction:column;gap:3px;min-width:0;position:relative}
 .image-tile[data-usable="true"]{cursor:pointer}
 .image-tile[data-usable="true"]:hover{background:var(--paper);box-shadow:var(--shadow-sm)}
-.image-tile img{width:100%;aspect-ratio:1;border:1.5px solid var(--line);border-radius:8px;object-fit:cover;background:var(--paper)}
-.image-tile strong{font-family:'Kalam';font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.image-tile .meta{font-family:'Caveat';font-size:13px;color:var(--ink-soft)}
-.image-tile .actions{display:flex;gap:4px;flex-wrap:wrap}
-.image-tile .actions .btn{box-shadow:none;padding:3px 7px;font-size:11px}
+.image-tile img{width:100%;aspect-ratio:1;border:1.5px solid var(--line);border-radius:6px;object-fit:cover;background:var(--paper)}
+.image-name-input{width:100%;border:1.5px dashed transparent;border-radius:5px;background:transparent;color:var(--ink);font-family:'Kalam';font-size:12px;text-align:center;padding:1px 3px;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.image-name-input:hover,.image-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
+.image-delete-btn{position:absolute;top:8px;right:8px;width:24px;height:24px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);color:var(--danger);font-family:'Kalam';font-weight:700;display:grid;place-items:center;opacity:0;pointer-events:none;cursor:pointer;box-shadow:var(--shadow-sm)}
+.image-tile:hover .image-delete-btn,.image-tile:focus-within .image-delete-btn{opacity:1;pointer-events:auto}
 .library-empty{font-family:'Caveat';font-size:17px;color:var(--ink-ghost);text-align:center;padding:24px 12px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper-2)}
 
 .cell-field{margin:10px 0}
@@ -404,6 +407,23 @@ main{min-height:50vh}
 :root[data-theme="dark"] .res.wheat{background:#c9ae4a;color:#2a1d02}
 :root[data-theme="dark"] .res.iron{background:#bfa032;color:#1f1500}
 :root[data-theme="dark"] .res.water{background:#5a8aad;color:#02141f}
+:root[data-theme="dark"] .kcard{background:repeating-linear-gradient(90deg,#d7b27a 0 3px,#c69a5c 3px 8px,#d7b27a 8px 14px);border-color:#2a2722}
+:root[data-theme="dark"] .kcard.exploration{background:repeating-linear-gradient(0deg,#cfdab6 0 4px,#bccca0 4px 10px)}
+:root[data-theme="dark"] .kcard.treasure{background:repeating-linear-gradient(45deg,#e6cf91 0 5px,#d9bc75 5px 12px)}
+:root[data-theme="dark"] .kcard.action{background:repeating-linear-gradient(90deg,#cbbce0 0 4px,#b9a5d4 4px 10px)}
+:root[data-theme="dark"] .kcenter{background:radial-gradient(circle,#a8c35a,#6b8b2e);border-color:#2a2722;color:#fff}
+:root[data-theme="dark"] .kcard.exploration .kcenter{background:radial-gradient(circle,#e9c57a,#b88437)}
+:root[data-theme="dark"] .kcard.treasure .kcenter{background:radial-gradient(circle,#f4d871,#b8892a)}
+:root[data-theme="dark"] .kcard.action .kcenter{background:radial-gradient(circle,#c4a7e0,#7b5db0)}
+:root[data-theme="dark"] .ribbon{background:repeating-linear-gradient(90deg,#f0e7d4 0 6px,#e4d7ba 6px 12px);border-top-color:#2a2722;border-bottom-color:#2a2722;color:#1b1a17}
+:root[data-theme="dark"] .ribbon.add-ribbon{background:rgba(244,239,228,.72)}
+:root[data-theme="dark"] .bonus,:root[data-theme="dark"] .corner{background:#f4efe4;border-color:#2a2722;color:#1b1a17}
+:root[data-theme="dark"] .corner.shielded{background:linear-gradient(155deg,#f3d77b 0%,#dca83d 45%,#9e6e17 100%);color:#3a1e04}
+:root[data-theme="dark"] .kcard .res.wood{background:#e2c391;color:#5a3a12}
+:root[data-theme="dark"] .kcard .res.stone{background:#d4d1ca;color:#3a3a3a}
+:root[data-theme="dark"] .kcard .res.wheat{background:#f1d983;color:#6b4a0a}
+:root[data-theme="dark"] .kcard .res.iron{background:#e7c547;color:#5a4108}
+:root[data-theme="dark"] .kcard .res.water{background:#9ec9e6;color:#0a3856}
 
 /* ── RESPONSIVE ── */
 @media (max-width:1250px){
@@ -549,6 +569,7 @@ main{min-height:50vh}
     <h3 id="cell-modal-title"><span id="cell-modal-title-text">Éditer</span><button class="modal-close" id="cell-modal-close" aria-label="Fermer">✕</button></h3>
     <div id="cell-modal-body"></div>
     <div class="modal-actions">
+      <button class="btn ghost" id="cell-modal-clear" type="button" style="color:var(--danger);display:none">Reset</button>
       <button class="btn primary" id="cell-modal-done">Fermer</button>
     </div>
   </div>
@@ -618,15 +639,12 @@ const TYPE_META = {
   treasure:    {label:'Trésor',     icon:'💰', bg:'treasure'},
   action:      {label:'Action',     icon:'🃏', bg:'action'},
 };
-const CHAIN_LABELS = {building:'🔗🏗',harvest:'🔗👷',explore:'🔗🏞'};
-const CHAIN_FULL   = {building:'🔗🏗 Bâtiment',harvest:'🔗👷 Récolte',explore:'🔗🏞 Exploration'};
-
 function makeCost(w=0,s=0,wh=0,f=0,e=0){ return {wood:w,stone:s,wheat:wh,iron:f,water:e}; }
 function emptyBonus(){
   return {wood:0,stone:0,wheat:0,iron:0,water:0,
           prod_wood:0,prod_stone:0,prod_wheat:0,prod_iron:0,
           pv:0,workers:0,actions:0,draw:0,explorers:0,
-          chain:'',note:''};
+          note:''};
 }
 function makeBonus(o={}){ return {...emptyBonus(),...o}; }
 function makeStep(bonus,cost,shield=false){
@@ -676,7 +694,7 @@ const DEFAULT_CARDS = [
   ]},
   {id:'taverne',name:'Taverne',type:'building',image:null,steps:[
     makeStep(B({wheat:1}),            makeCost(1,0,1),   false),
-    makeStep(B({chain:'building'}),   makeCost(),        false),
+    makeStep(B(),                     makeCost(),        false),
   ]},
   {id:'joaillier',name:'Joaillier',type:'building',image:null,steps:[
     makeStep(B(),                     makeCost(0,1,0,1), false),
@@ -685,7 +703,7 @@ const DEFAULT_CARDS = [
   ]},
   {id:'atelier',name:'Atelier',type:'building',image:null,steps:[
     makeStep(B({workers:1}),          makeCost(1,0,0,1), false),
-    makeStep(B({chain:'harvest'}),    makeCost(),        true),
+    makeStep(B(),                     makeCost(),        true),
   ]},
   {id:'temple',name:'Temple',type:'building',image:null,steps:[
     makeStep(B({pv:1}),               makeCost(0,2,1),   true),
@@ -694,7 +712,7 @@ const DEFAULT_CARDS = [
   ]},
   {id:'marche',name:'Marché couvert',type:'building',image:null,steps:[
     makeStep(B({draw:1}),             makeCost(2),       false),
-    makeStep(B({chain:'explore'}),    makeCost(),        true),
+    makeStep(B(),                     makeCost(),        true),
   ]},
   {id:'ecurie',name:'Écurie',type:'building',image:null,steps:[
     makeStep(B({workers:2}),          makeCost(1,0,2),   false),
@@ -984,8 +1002,7 @@ function renderBonusHtml(b){
   if(b.actions>0) parts.push(`<span class="baction">${b.actions>1?b.actions:''}</span>`);
   if(b.draw>0) parts.push(`<span class="bdraw">${b.draw>1?b.draw:''}</span>`);
   if(b.explorers>0) parts.push(`<span>+${b.explorers}🏔</span>`);
-  if(b.chain&&CHAIN_LABELS[b.chain]) parts.push(`<span class="bchain">${CHAIN_LABELS[b.chain]}</span>`);
-  if(b.note) parts.push(`<span style="font-family:'Caveat';font-size:10px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block">${b.note}</span>`);
+  if(b.note) parts.push(`<span class="bnote">${escapeHtml(b.note)}</span>`);
   return parts.join('');
 }
 
@@ -1011,8 +1028,9 @@ function renderCardHtml(card, sizeClass='', interactive=false){
     const editCls = interactive ? ' editable' : '';
     corners += `<div class="corner${shieldCls} ${STAGE_POSITIONS[i]}${editCls}" data-field="shield" data-stage="${i}"${interactive?' role="button" tabindex="0"':''} aria-label="Étape ${STAGE_NUMS[i]}${step.shield?' protégée':''}">${STAGE_NUMS[i]}</div>`;
     // Ribbon at corner i sits between stage i and stage i+1 → shows cost of next stage (what you pay to advance)
+    const isWrapCost = i === n - 1 && n < 4;
     const nextIdx = (i + 1) % n;
-    const nextStep = card.steps[nextIdx];
+    const nextStep = isWrapCost ? null : card.steps[nextIdx];
     if(nextStep && hasCost(nextStep.cost))
       ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${editCls}" data-stage="${nextIdx}" data-field="cost"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">${costHtml(nextStep.cost,'sm')}</div>`;
     else if(interactive && nextStep)
@@ -1022,6 +1040,10 @@ function renderCardHtml(card, sizeClass='', interactive=false){
       bonuses += `<div class="bonus ${STAGE_POSITIONS[i]}${editCls}" data-stage="${i}" data-field="bonus"${interactive?' role="button" tabindex="0"':''} aria-label="Bonus étape ${STAGE_NUMS[i]}">${bHtml}</div>`;
     else if(interactive)
       bonuses += `<div class="bonus ${STAGE_POSITIONS[i]} editable" data-stage="${i}" data-field="bonus" role="button" tabindex="0" aria-label="Bonus étape ${STAGE_NUMS[i]}" style="opacity:.45">＋</div>`;
+  }
+  if(interactive && n < 4){
+    const addAt = Math.max(0, n - 1);
+    ribbons += `<div class="ribbon ${RIBBON_POSITIONS[addAt]} editable add-ribbon" data-card="${card.id}" data-action="stage-add" role="button" tabindex="0" aria-label="Ajouter l'étape ${STAGE_NUMS[n]}">＋</div>`;
   }
 
   const centerAttrs = interactive
@@ -1213,6 +1235,13 @@ function openCellEditor(cardId, field, stage, clickEvent){
   }
   titleEl.textContent = title;
   body.innerHTML = html;
+  const clearBtn = document.getElementById('cell-modal-clear');
+  if(clearBtn){
+    const canClear = field === 'cost' || field === 'bonus';
+    clearBtn.style.display = canClear ? 'inline-flex' : 'none';
+    clearBtn.textContent = field === 'cost' ? 'Vider le coût' : 'Vider le bonus';
+    clearBtn.onclick = canClear ? ()=>clearCurrentEditor(card, field, stage) : null;
+  }
   modal.classList.add('open');
   placeAnchoredModal(modal, clickEvent);
   setTimeout(()=>{
@@ -1231,6 +1260,28 @@ function closeCellModal(){
   const ret = state.editing?.returnFocus;
   state.editing = null;
   if(ret && document.contains(ret)) { try{ ret.focus(); }catch{} }
+}
+function removeStep(card, stage){
+  if(!card || card.steps.length <= 1 || stage <= 0) return false;
+  card.steps.splice(stage, 1);
+  state.stageByCard[card.id] = Math.min(getStage(card.id), card.steps.length - 1);
+  return true;
+}
+function clearCurrentEditor(card, field, stage){
+  if(!card || !card.steps[stage]) return;
+  if(field === 'cost'){
+    card.steps[stage].cost = makeCost();
+    if(removeStep(card, stage)){
+      closeCellModal();
+      save(); renderCards();
+      return;
+    }
+    save(); renderCards(); openCellEditor(card.id, 'cost', stage);
+  }
+  if(field === 'bonus'){
+    card.steps[stage].bonus = emptyBonus();
+    save(); renderCards(); openCellEditor(card.id, 'bonus', stage);
+  }
 }
 
 function editorName(card){
@@ -1311,13 +1362,6 @@ function editorBonus(card, stage){
         <div class="be-stepper" title="Piocher">📜<button data-bfield="draw" data-bdelta="-1" aria-label="Diminuer pioche">−</button><span id="ed-b-draw">${b.draw||0}</span><button data-bfield="draw" data-bdelta="1" aria-label="Augmenter pioche">+</button></div>
         <div class="be-stepper" title="Explorateurs">🏔<button data-bfield="explorers" data-bdelta="-1" aria-label="Diminuer explorateurs">−</button><span id="ed-b-explorers">${b.explorers||0}</span><button data-bfield="explorers" data-bdelta="1" aria-label="Augmenter explorateurs">+</button></div>
       </div>
-      <div class="be-row">
-        <span class="be-label">Chaînage</span>
-        <select class="be-select" id="ed-b-chain">
-          <option value="">—</option>
-          ${Object.entries(CHAIN_FULL).map(([k,v])=>`<option value="${k}"${b.chain===k?' selected':''}>${v}</option>`).join('')}
-        </select>
-      </div>
       <div class="be-row" style="flex-direction:column;align-items:stretch">
         <span class="be-label">Note</span>
         <input class="be-note" id="ed-b-note" type="text" value="${escapeHtml(b.note||'')}" placeholder="effet spécial…"/>
@@ -1363,6 +1407,12 @@ function bindEditorEvents(card, field, stage){
       const r = btn.dataset.cost, d = +btn.dataset.delta;
       step.cost[r] = Math.max(0,Math.min(9,(step.cost[r]||0)+d));
       document.getElementById('ed-cost-'+r).textContent = step.cost[r];
+      if(!hasCost(step.cost) && stage > 0 && card.steps.length > 1){
+        removeStep(card, stage);
+        closeCellModal();
+        save(); renderCards();
+        return;
+      }
       save(); renderCards();
     }));
   }
@@ -1374,7 +1424,6 @@ function bindEditorEvents(card, field, stage){
       document.getElementById('ed-b-'+f).textContent = step.bonus[f];
       save(); renderCards();
     }));
-    document.getElementById('ed-b-chain').onchange = e=>{ step.bonus.chain = e.target.value; save(); renderCards(); };
     document.getElementById('ed-b-note').oninput = e=>{ step.bonus.note = e.target.value; save(); renderCards(); };
   }
   if(field==='shield'){
@@ -1594,12 +1643,8 @@ async function renderImageLibrary(){
     grid.innerHTML = images.map(img=>`
       <div class="image-tile" data-image-id="${img.id}" data-usable="${canUse?'true':'false'}">
         <img src="${img.dataUrl}" alt="${escapeHtml(img.name)}"/>
-        <strong title="${escapeHtml(img.name)}">${escapeHtml(img.name)}</strong>
-        <div class="meta">${formatBytes(img.size)} · ${formatDate(img.createdAt)}</div>
-        <div class="actions">
-          ${canUse?`<button class="btn primary" data-action="image-use" data-image="${img.id}">Utiliser</button>`:''}
-          <button class="btn ghost" style="color:var(--danger)" data-action="image-delete" data-image="${img.id}">Suppr.</button>
-        </div>
+        <input class="image-name-input" data-image="${img.id}" value="${escapeHtml(img.name)}" title="${escapeHtml(img.name)}" aria-label="Nom de l'image"/>
+        <button class="image-delete-btn" data-action="image-delete" data-image="${img.id}" aria-label="Supprimer ${escapeHtml(img.name)}">×</button>
       </div>`).join('');
   }catch(e){
     grid.innerHTML = `<div class="library-empty">Impossible de lire les images: ${escapeHtml(e.message)}</div>`;
@@ -1649,6 +1694,22 @@ async function deleteImageFromLibrary(id){
   await deleteLibraryItem('images', id);
   showStatus('Image supprimée');
   await renderImageLibrary();
+}
+async function renameImageInLibrary(id, name){
+  const image = await getLibraryItem('images', id);
+  if(!image) return;
+  const nextName = name.trim() || image.name;
+  const previousName = image.name;
+  image.name = nextName;
+  await putLibraryItem('images', image);
+  state.cards.forEach(card=>{
+    if(card.imageLibraryId === id || card.imageName === previousName){
+      card.imageName = nextName;
+    }
+  });
+  save();
+  renderCards();
+  showStatus('Image renommée');
 }
 function clearImageFromLibraryTarget(){
   const card = getCard(state.imageLibraryTarget);
@@ -1768,7 +1829,7 @@ function applyUiZoom(){
   const value = UI_ZOOMS.includes(state.uiZoom) ? state.uiZoom : 130;
   const cardSize = Math.round(220 * value / 100);
   document.documentElement.style.setProperty('--grid-card-size', `${cardSize}px`);
-  document.documentElement.style.setProperty('--grid-col-size', `${cardSize + 20}px`);
+  document.documentElement.style.setProperty('--grid-col-size', `${cardSize + 54}px`);
   const label = document.getElementById('zoom-value');
   if(label) label.textContent = `${value}%`;
   const i = UI_ZOOMS.indexOf(value);
@@ -1824,15 +1885,20 @@ function bindEvents(){
   document.getElementById('image-clear-current').addEventListener('click', clearImageFromLibraryTarget);
   document.getElementById('image-library-input').addEventListener('change', e=>addImagesToLibrary(e.target.files).then(()=>{ e.target.value=''; }));
   document.getElementById('image-library-grid').addEventListener('click', e=>{
+    if(e.target.matches('.image-name-input')) return;
     const action = e.target.closest('[data-action]');
     if(action){
       const id = action.dataset.image;
-      if(action.dataset.action==='image-use') useImageFromLibrary(id);
       if(action.dataset.action==='image-delete') deleteImageFromLibrary(id);
       return;
     }
     const tile = e.target.closest('[data-image-id]');
     if(tile && state.imageLibraryTarget) useImageFromLibrary(tile.dataset.imageId);
+  });
+  document.getElementById('image-library-grid').addEventListener('change', e=>{
+    const input = e.target.closest('.image-name-input');
+    if(!input) return;
+    renameImageInLibrary(input.dataset.image, input.value);
   });
   document.getElementById('confirm-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
 
@@ -1896,9 +1962,7 @@ function bindEvents(){
       }
       if(a==='stage-delete'){
         const st = action.dataset.stage != null ? +action.dataset.stage : -1;
-        if(card && st>=0 && card.steps.length>1){
-          card.steps.splice(st,1);
-          state.stageByCard[cardId]=Math.min(getStage(cardId),card.steps.length-1);
+        if(card && st>=0 && removeStep(card, st)){
           save(); renderCards();
         }
         return;
