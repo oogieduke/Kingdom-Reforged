@@ -151,7 +151,7 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .be-note:focus{border-style:solid;background:var(--focus-bg)}
 .icon-editor-list{display:flex;flex-direction:column;gap:8px}
 .icon-editor-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;padding:6px 8px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper)}
-.editor-icon-img{width:30px;height:30px;object-fit:contain;display:block}
+.editor-icon-img{width:34px;height:34px;object-fit:contain;display:block}
 .icon-editor-row .icon-label{font-family:'Kalam';font-size:14px;color:var(--ink)}
 .icon-editor-row .qty{min-width:24px;text-align:center;font-family:'Kalam';font-weight:700;color:var(--ink)}
 .icon-editor-row .cost-stepper{gap:4px}
@@ -166,8 +166,11 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .kcard .res{width:calc(var(--sz,220px) * .1);height:calc(var(--sz,220px) * .1);border-width:calc(var(--sz,220px) * .007);font-size:calc(var(--sz,220px) * .045)}
 .kcard .res.sm{width:calc(var(--sz,220px) * .082);height:calc(var(--sz,220px) * .082);font-size:calc(var(--sz,220px) * .041)}
 .res.has-custom{background:transparent !important;border:none !important;box-shadow:none !important;color:inherit}
-.res.has-custom.lg,.res.has-custom.sm{width:1.25em;height:1.25em}
-.kcard .res.has-custom,.kcard .res.has-custom.sm{width:calc(var(--sz,220px) * .095);height:calc(var(--sz,220px) * .095)}
+.res.has-custom.lg,.res.has-custom.sm{width:1.45em;height:1.45em}
+.kcard .res.has-custom,.kcard .res.has-custom.sm{width:calc(var(--sz,220px) * .112);height:calc(var(--sz,220px) * .112)}
+.custom-icon-stack{display:inline-flex;align-items:center;gap:calc(var(--sz,220px) * .012)}
+.custom-card-icon{width:calc(var(--sz,220px) * .112);height:calc(var(--sz,220px) * .112);object-fit:contain;display:block}
+.custom-card-icon.bonus-custom{width:1.35em;height:1.35em}
 .danger-center,.treasure-center{position:absolute;inset:28%;border:calc(var(--sz,220px) * .014) solid var(--line);border-radius:50%;background:var(--paper);display:grid;place-items:center;text-align:center;font-family:'Kalam';font-weight:700;color:var(--ink);z-index:5;cursor:pointer}
 .danger-center{background:radial-gradient(circle,#f5e8c8,#d6aa58);font-size:calc(var(--sz,220px) * .052)}
 .danger-center b{font-size:calc(var(--sz,220px) * .18);line-height:.9}
@@ -690,12 +693,12 @@ function emptyBonus(){
   return {wood:0,stone:0,wheat:0,iron:0,water:0,
           prod_wood:0,prod_stone:0,prod_wheat:0,prod_iron:0,
           pv:0,workers:0,actions:0,draw:0,explorers:0,
-          note:''};
+          note:'',icons:{}};
 }
 function makeBonus(o={}){ return {...emptyBonus(),...o}; }
 function makeStep(bonus,cost,shield=false){
   const b = (typeof bonus==='string') ? emptyBonus() : {...emptyBonus(),...bonus};
-  return {bonus:b, cost:{wood:0,stone:0,wheat:0,iron:0,water:0,...cost}, shield};
+  return {bonus:b, cost:{wood:0,stone:0,wheat:0,iron:0,water:0,...cost}, costIcons:{}, shield};
 }
 function newId(){ return 'c'+(Date.now()+Math.random()).toString(36); }
 
@@ -827,6 +830,7 @@ const state = {
   imageLibraryTarget: null,
   iconAssignments: {resource:{}, bonus:{}},
   iconLibraryCategory: 'bonus',
+  iconCache: {resource:[], bonus:[], byId:{}},
   uiZoom: 130,
 };
 
@@ -972,7 +976,12 @@ function formatBytes(n){
 function cloneCards(cards){ return JSON.parse(JSON.stringify(cards)); }
 function normalizeImportedCards(cards){
   if(!Array.isArray(cards)) throw new Error('Format invalide');
-  cards.forEach(c=>c.steps?.forEach(s=>{ s.bonus=migrateBonus(s.bonus); s.cost={...makeCost(),...(s.cost||{})}; }));
+  cards.forEach(c=>c.steps?.forEach(s=>{
+    s.bonus=migrateBonus(s.bonus);
+    s.bonus.icons = {...(s.bonus.icons||{})};
+    s.cost={...makeCost(),...(s.cost||{})};
+    s.costIcons = {...(s.costIcons||{})};
+  }));
   return cards;
 }
 function isEmbeddedImage(value){
@@ -1042,14 +1051,28 @@ function fileToDataUrl(file){
 function getOrCreateStep(card, stage=0){
   const index = Math.max(0, Math.min(3, Number(stage)||0));
   while(card.steps.length <= index) card.steps.push(makeStep(emptyBonus(),makeCost()));
+  card.steps[index].costIcons = {...(card.steps[index].costIcons||{})};
+  card.steps[index].bonus = migrateBonus(card.steps[index].bonus);
+  card.steps[index].bonus.icons = {...(card.steps[index].bonus.icons||{})};
   return card.steps[index];
+}
+async function refreshIconCache(){
+  const icons = await getAllLibraryItems('icons').catch(()=>[]);
+  const byId = {};
+  icons.forEach(icon=>{ byId[icon.id] = icon; });
+  state.iconCache = {
+    resource: icons.filter(icon=>(icon.category || 'resource') === 'resource').sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)),
+    bonus: icons.filter(icon=>(icon.category || 'resource') === 'bonus').sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)),
+    byId,
+  };
+  return state.iconCache;
 }
 
 // ═══════════════════════════════════
 // RENDER HELPERS
 // ═══════════════════════════════════
 function assignedIcon(kind, key){
-  return state.iconAssignments?.[kind]?.[key] || '';
+  return '';
 }
 function iconImg(kind, key, label, className=''){
   const src = assignedIcon(kind, key);
@@ -1062,12 +1085,31 @@ function resHtml(type, qty=1, size='sm'){
   const content = icon || `<span aria-hidden="true">${RES_LABELS[type]}</span>`;
   return Array(qty).fill(`<span class="res ${type} ${size}${icon?' has-custom':''}" role="img" aria-label="${label}">${content}</span>`).join('');
 }
+function customIconQtyHtml(iconId, qty=1, className='custom-card-icon'){
+  const icon = state.iconCache.byId[iconId];
+  const n = Math.max(0, Math.min(9, Number(qty)||0));
+  if(!icon || !n) return '';
+  return `<span class="custom-icon-stack">${Array(n).fill(`<img class="${className}" src="${icon.dataUrl}" alt="${escapeHtml(icon.name)}"/>`).join('')}</span>`;
+}
+function iconMapHtml(map={}, className='custom-card-icon'){
+  return Object.entries(map||{}).filter(([,qty])=>qty>0).map(([id,qty])=>customIconQtyHtml(id, qty, className)).join('');
+}
 function costHtml(cost, size='sm'){
   if(!cost) return '—';
   const parts = RES_TYPES.filter(r=>cost[r]>0).map(r=>resHtml(r,cost[r],size));
   return parts.length ? parts.join('') : '—';
 }
 function hasCost(cost){ return cost && RES_TYPES.some(r=>cost[r]>0); }
+function stepCostHtml(step, size='sm'){
+  const parts = [];
+  RES_TYPES.filter(r=>step.cost?.[r]>0).forEach(r=>parts.push(resHtml(r, step.cost[r], size)));
+  const custom = iconMapHtml(step.costIcons, 'custom-card-icon');
+  if(custom) parts.push(custom);
+  return parts.length ? parts.join('') : '—';
+}
+function hasStepCost(step){
+  return hasCost(step?.cost) || Object.values(step?.costIcons||{}).some(v=>v>0);
+}
 function typeColor(type){ return TYPE_META[type]?.bg||''; }
 
 function renderBonusHtml(b){
@@ -1082,6 +1124,8 @@ function renderBonusHtml(b){
   if(b.actions>0) parts.push(renderBonusIcon('actions', b.actions));
   if(b.draw>0) parts.push(renderBonusIcon('draw', b.draw));
   if(b.explorers>0) parts.push(renderBonusIcon('explorers', b.explorers));
+  const custom = iconMapHtml(b.icons, 'custom-card-icon bonus-custom');
+  if(custom) parts.push(custom);
   if(b.note) parts.push(`<span class="bnote">${escapeHtml(b.note)}</span>`);
   return parts.join('');
 }
@@ -1142,13 +1186,21 @@ function renderCardHtml(card, sizeClass='', interactive=false){
   const bg = typeColor(card.type);
   const rot = -stage * 90;
 
-  let corners='', bonuses='';
+  let corners='', ribbons='', bonuses='';
   for(let i=0;i<4;i++){
     if(i>=n) continue;
     const step = card.steps[i];
     const shieldCls = step.shield ? ' shielded' : '';
     const editCls = interactive ? ' editable' : '';
     corners += `<div class="corner${shieldCls} ${STAGE_POSITIONS[i]}${editCls}" data-field="cost" data-stage="${i}"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[i]}">${STAGE_NUMS[i]}</div>`;
+    const isWrapCost = i === n - 1 && n < 4;
+    const nextIdx = (i + 1) % n;
+    const nextStep = isWrapCost ? null : card.steps[nextIdx];
+    if(nextStep && hasStepCost(nextStep)){
+      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${editCls}" data-stage="${nextIdx}" data-field="cost"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">${stepCostHtml(nextStep,'sm')}</div>`;
+    } else if(interactive && nextStep){
+      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]} editable empty-ribbon" data-stage="${nextIdx}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">＋</div>`;
+    }
     const bHtml = renderBonusHtml(step.bonus);
     if(bHtml)
       bonuses += `<div class="bonus ${STAGE_POSITIONS[i]}${editCls}" data-stage="${i}" data-field="bonus"${interactive?' role="button" tabindex="0"':''} aria-label="Bonus étape ${STAGE_NUMS[i]}">${bHtml}</div>`;
@@ -1164,7 +1216,7 @@ function renderCardHtml(card, sizeClass='', interactive=false){
     : `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}>${escapeHtml(card.name)}</div>`;
 
   return `<div class="kcard ${sizeClass} ${bg}" data-id="${card.id}" style="transform:rotate(${rot}deg)">
-    ${corners}${bonuses}${center}
+    ${corners}${ribbons}${bonuses}${center}
   </div>`;
 }
 
@@ -1406,6 +1458,7 @@ function clearCurrentEditor(card, field, stage){
   const step = getOrCreateStep(card, stage);
   if(field === 'cost'){
     step.cost = makeCost();
+    step.costIcons = {};
     save(); renderCards(); refreshCurrentEditor(card, field, stage);
     showStatus('Coût vidé');
   }
@@ -1461,9 +1514,9 @@ function editorImage(card){
 }
 function editorCost(card, stage){
   const step = getOrCreateStep(card, stage);
-  const rows = editorIconRows('resource', RES_TYPES, r=>step.cost[r]||0, r=>'data-cost="'+r+'"');
+  const rows = editorIconRows(state.iconCache.resource, icon=>step.costIcons?.[icon.id]||0, icon=>'data-cost-icon="'+icon.id+'"');
   return `<div class="cell-field">
-    ${rows || `<div class="icon-empty">Ajoute d'abord des icônes dans le menu Ressources, puis assigne-les à Bois, Pierre, Blé, Fer ou Eau.</div>`}
+    ${rows || `<div class="icon-empty">Ajoute d'abord des icônes dans le menu Ressources.</div>`}
     <label class="shield-cell" style="margin-top:10px;padding:8px;border:1.5px dashed var(--line);border-radius:8px;justify-content:flex-start">
       <input type="checkbox" id="ed-cost-shield"${step.shield?' checked':''}/>
       <span style="font-family:'Patrick Hand';font-size:15px">Étape protégée</span>
@@ -1473,11 +1526,10 @@ function editorCost(card, stage){
 function editorBonus(card, stage){
   const step = getOrCreateStep(card, stage);
   const b = step.bonus;
-  const bonusKeys = Object.keys(BONUS_ICON_LABELS);
-  const rows = editorIconRows('bonus', bonusKeys, key=>b[key]||0, key=>'data-bfield="'+key+'"');
+  const rows = editorIconRows([...state.iconCache.resource, ...state.iconCache.bonus], icon=>b.icons?.[icon.id]||0, icon=>'data-bicon="'+icon.id+'"');
   return `<div class="cell-field">
     <div class="bonus-editor">
-      ${rows || `<div class="icon-empty">Ajoute d'abord des icônes dans le menu Icônes, puis assigne-les à PV, Ouvriers, Actions, Pioche ou Explorateurs.</div>`}
+      ${rows || `<div class="icon-empty">Ajoute d'abord des icônes dans les menus Ressources ou Icônes.</div>`}
       <div class="be-row" style="flex-direction:column;align-items:stretch">
         <span class="be-label">Note</span>
         <input class="be-note" id="ed-b-note" type="text" value="${escapeHtml(b.note||'')}" placeholder="effet spécial…"/>
@@ -1496,19 +1548,17 @@ function editorDanger(card){
     </div>
   </div>`;
 }
-function editorIconRows(kind, keys, valueFor, attrFor){
-  const rows = keys.filter(key=>assignedIcon(kind, key)).map(key=>{
-    const labels = kind === 'resource' ? RES_NAMES : BONUS_ICON_LABELS;
-    const idPrefix = kind === 'resource' ? 'ed-cost-' : 'ed-b-';
-    const deltaAttr = kind === 'resource' ? 'data-delta' : 'data-bdelta';
-    const attr = attrFor(key);
+function editorIconRows(icons, valueFor, attrFor){
+  const rows = icons.map(icon=>{
+    const attr = attrFor(icon);
+    const deltaAttr = attr.includes('data-bicon') ? 'data-bdelta' : 'data-delta';
     return `<div class="icon-editor-row">
-      <img class="editor-icon-img" src="${assignedIcon(kind, key)}" alt="${escapeHtml(labels[key])}"/>
-      <span class="icon-label">${escapeHtml(labels[key])}</span>
+      <img class="editor-icon-img" src="${icon.dataUrl}" alt="${escapeHtml(icon.name)}"/>
+      <span class="icon-label">${escapeHtml(icon.name)}</span>
       <div class="cost-stepper">
-        <button ${attr} ${deltaAttr}="-1" aria-label="Diminuer ${escapeHtml(labels[key])}">−</button>
-        <span class="qty" id="${idPrefix}${key}">${valueFor(key)}</span>
-        <button ${attr} ${deltaAttr}="1" aria-label="Augmenter ${escapeHtml(labels[key])}">+</button>
+        <button ${attr} ${deltaAttr}="-1" aria-label="Diminuer ${escapeHtml(icon.name)}">−</button>
+        <span class="qty">${valueFor(icon)}</span>
+        <button ${attr} ${deltaAttr}="1" aria-label="Augmenter ${escapeHtml(icon.name)}">+</button>
       </div>
     </div>`;
   }).join('');
@@ -1548,10 +1598,11 @@ function bindEditorEvents(card, field, stage){
   }
   if(field==='cost'){
     const step = getOrCreateStep(card, stage);
-    document.querySelectorAll('#cell-modal [data-cost]').forEach(btn=>btn.addEventListener('click',()=>{
-      const r = btn.dataset.cost, d = +btn.dataset.delta;
-      step.cost[r] = Math.max(0,Math.min(9,(step.cost[r]||0)+d));
-      document.getElementById('ed-cost-'+r).textContent = step.cost[r];
+    document.querySelectorAll('#cell-modal [data-cost-icon]').forEach(btn=>btn.addEventListener('click',()=>{
+      const id = btn.dataset.costIcon, d = +btn.dataset.delta;
+      step.costIcons = {...(step.costIcons||{})};
+      step.costIcons[id] = Math.max(0,Math.min(9,(step.costIcons[id]||0)+d));
+      btn.parentElement.querySelector('.qty').textContent = step.costIcons[id];
       save(); renderCards();
     }));
     const shield = document.getElementById('ed-cost-shield');
@@ -1559,10 +1610,11 @@ function bindEditorEvents(card, field, stage){
   }
   if(field==='bonus'){
     const step = getOrCreateStep(card, stage);
-    document.querySelectorAll('#cell-modal [data-bfield]').forEach(btn=>btn.addEventListener('click',()=>{
-      const f = btn.dataset.bfield, d = +btn.dataset.bdelta;
-      step.bonus[f] = Math.max(0,Math.min(9,(step.bonus[f]||0)+d));
-      document.getElementById('ed-b-'+f).textContent = step.bonus[f];
+    document.querySelectorAll('#cell-modal [data-bicon]').forEach(btn=>btn.addEventListener('click',()=>{
+      const id = btn.dataset.bicon, d = +btn.dataset.bdelta;
+      step.bonus.icons = {...(step.bonus.icons||{})};
+      step.bonus.icons[id] = Math.max(0,Math.min(9,(step.bonus.icons[id]||0)+d));
+      btn.parentElement.querySelector('.qty').textContent = step.bonus.icons[id];
       save(); renderCards();
     }));
     document.getElementById('ed-b-note').oninput = e=>{ step.bonus.note = e.target.value; save(); renderCards(); };
@@ -1891,8 +1943,8 @@ async function openIconLibrary(category='bonus'){
   if(inputCategory) inputCategory.value = category;
   const hint = document.getElementById('icon-library-hint');
   if(hint) hint.textContent = category === 'resource'
-    ? 'Importe tes ressources, puis assigne-les à Bois, Pierre, Blé, Fer ou Eau.'
-    : 'Importe tes bonus, puis assigne-les à PV, Ouvriers, Actions, Pioche ou Explorateurs.';
+    ? 'Importe tes ressources. Elles apparaîtront dans les coûts et les bonus.'
+    : 'Importe tes bonus. Ils apparaîtront dans le menu bonus des cartes.';
   const modal = document.getElementById('icon-modal');
   modal.classList.add('open');
   await renderIconLibrary();
@@ -1910,14 +1962,9 @@ async function renderIconLibrary(){
       return;
     }
     grid.innerHTML = icons.map(icon=>{
-      const category = categoryFilter;
-      const slot = assignedSlotForIcon(icon);
       return `<div class="image-tile icon-tile" data-icon-id="${icon.id}">
         <img src="${icon.dataUrl}" alt="${escapeHtml(icon.name)}"/>
         <input class="image-name-input" data-icon-name="${icon.id}" value="${escapeHtml(icon.name)}" title="${escapeHtml(icon.name)}" aria-label="Nom de l'icône"/>
-        <select class="icon-slot-select" data-icon-slot="${icon.id}" data-category="${category}" aria-label="Symbole associé">
-          ${iconSlotOptions(category, slot)}
-        </select>
         <button class="image-delete-btn" data-action="icon-delete" data-icon="${icon.id}" aria-label="Supprimer ${escapeHtml(icon.name)}">×</button>
       </div>`;
     }).join('');
@@ -1942,6 +1989,8 @@ async function addIconsToLibrary(files){
       });
     }
     showStatus(`${icons.length} icône${icons.length>1?'s':''} ajoutée${icons.length>1?'s':''}`);
+    await refreshIconCache();
+    renderCards();
     await renderIconLibrary();
   }catch(e){ alert('Import icône impossible : '+e.message); }
 }
@@ -1950,6 +1999,8 @@ async function renameIconInLibrary(id, name){
   if(!icon) return;
   icon.name = name.trim() || icon.name;
   await putLibraryItem('icons', icon);
+  await refreshIconCache();
+  renderCards();
   showStatus('Icône renommée');
 }
 async function setIconCategory(id, category){
@@ -1957,6 +2008,8 @@ async function setIconCategory(id, category){
   if(!icon) return;
   icon.category = category;
   await putLibraryItem('icons', icon);
+  await refreshIconCache();
+  renderCards();
   await renderIconLibrary();
 }
 async function assignIconToSlot(id, category, slot){
@@ -1977,13 +2030,13 @@ async function deleteIconFromLibrary(id){
   if(!icon) return;
   if(!confirm(`Supprimer l'icône « ${icon.name} » ?`)) return;
   await deleteLibraryItem('icons', id);
-  ['resource','bonus'].forEach(category=>{
-    Object.keys(state.iconAssignments[category]).forEach(key=>{
-      if(state.iconAssignments[category][key] === icon.dataUrl) delete state.iconAssignments[category][key];
-    });
-  });
-  saveIconAssignments();
+  state.cards.forEach(card=>card.steps?.forEach(step=>{
+    if(step.costIcons) delete step.costIcons[id];
+    if(step.bonus?.icons) delete step.bonus.icons[id];
+  }));
+  await refreshIconCache();
   renderCards();
+  save();
   showStatus('Icône supprimée');
   await renderIconLibrary();
 }
@@ -2180,10 +2233,6 @@ function bindEvents(){
   document.getElementById('icon-library-grid').addEventListener('change', e=>{
     const name = e.target.closest('[data-icon-name]');
     if(name){ renameIconInLibrary(name.dataset.iconName, name.value); return; }
-    const category = e.target.closest('[data-icon-category]');
-    if(category){ setIconCategory(category.dataset.iconCategory, category.value); return; }
-    const slot = e.target.closest('[data-icon-slot]');
-    if(slot){ assignIconToSlot(slot.dataset.iconSlot, slot.dataset.category, slot.value); return; }
   });
   document.getElementById('confirm-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
 
@@ -2240,11 +2289,9 @@ function bindEvents(){
       if(a==='image-library'){ openImageLibrary(cardId, e); return; }
       if(a==='stage-add'){
         if(card && !['exploration','treasure'].includes(card.type) && card.steps.length<4){
-          const anchor = {clientX:e.clientX, clientY:e.clientY};
-          const newStage = card.steps.length;
           card.steps.push(makeStep(emptyBonus(),makeCost()));
           save(); renderCards();
-          requestAnimationFrame(()=>openCellEditor(cardId, 'cost', newStage, anchor));
+          showStatus('Étape ajoutée');
         }
         return;
       }
@@ -2380,6 +2427,7 @@ bindEvents();
 trackHeaderHeight();
 applyUiZoom();
 renderCards();
+refreshIconCache().then(()=>renderCards()).catch(()=>{});
 hydrateImportedImages(state.cards).then(()=>{
   renderCards();
   save();
