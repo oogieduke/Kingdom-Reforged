@@ -149,6 +149,13 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .be-select{font-family:'Kalam';font-size:12px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);padding:3px 6px;cursor:pointer;color:var(--ink)}
 .be-note{font-family:'Patrick Hand';font-size:14px;border:1.5px dashed var(--line);border-radius:6px;background:var(--paper);padding:4px 8px;width:100%;outline:none;color:var(--ink)}
 .be-note:focus{border-style:solid;background:var(--focus-bg)}
+.icon-editor-list{display:flex;flex-direction:column;gap:8px}
+.icon-editor-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;padding:6px 8px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper)}
+.editor-icon-img{width:30px;height:30px;object-fit:contain;display:block}
+.icon-editor-row .icon-label{font-family:'Kalam';font-size:14px;color:var(--ink)}
+.icon-editor-row .qty{min-width:24px;text-align:center;font-family:'Kalam';font-weight:700;color:var(--ink)}
+.icon-editor-row .cost-stepper{gap:4px}
+.icon-empty{font-family:'Caveat';font-size:16px;color:var(--ink-ghost);text-align:center;padding:16px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper-2)}
 /* center illustration — shrunk so side bonus labels sit clearly outside */
 .kcenter{position:absolute;inset:32%;border:calc(var(--sz,220px) * .011) solid var(--line);border-radius:50%;background:radial-gradient(circle,#a8c35a,#6b8b2e);display:grid;place-items:center;color:#fff;font-family:'Kalam';font-weight:700;font-size:calc(var(--sz,220px) * .055);text-align:center;z-index:2;overflow:hidden}
 .kcard.exploration .kcenter{background:radial-gradient(circle,#e9c57a,#b88437)}
@@ -158,6 +165,9 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .kcenter.editable{cursor:pointer}.kcenter.editable:hover{box-shadow:0 0 0 3px var(--accent)}
 .kcard .res{width:calc(var(--sz,220px) * .1);height:calc(var(--sz,220px) * .1);border-width:calc(var(--sz,220px) * .007);font-size:calc(var(--sz,220px) * .045)}
 .kcard .res.sm{width:calc(var(--sz,220px) * .082);height:calc(var(--sz,220px) * .082);font-size:calc(var(--sz,220px) * .041)}
+.res.has-custom{background:transparent !important;border:none !important;box-shadow:none !important;color:inherit}
+.res.has-custom.lg,.res.has-custom.sm{width:1.25em;height:1.25em}
+.kcard .res.has-custom,.kcard .res.has-custom.sm{width:calc(var(--sz,220px) * .095);height:calc(var(--sz,220px) * .095)}
 .danger-center,.treasure-center{position:absolute;inset:28%;border:calc(var(--sz,220px) * .014) solid var(--line);border-radius:50%;background:var(--paper);display:grid;place-items:center;text-align:center;font-family:'Kalam';font-weight:700;color:var(--ink);z-index:5;cursor:pointer}
 .danger-center{background:radial-gradient(circle,#f5e8c8,#d6aa58);font-size:calc(var(--sz,220px) * .052)}
 .danger-center b{font-size:calc(var(--sz,220px) * .18);line-height:.9}
@@ -301,9 +311,11 @@ main{min-height:50vh}
 .grid-item{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-width:0}
 .grid-item .gi-name-input{width:min(var(--grid-card-size),100%);border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:center;padding:2px 6px;outline:none}
 .grid-item .gi-name-input:hover,.grid-item .gi-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
-.grid-card-actions{position:absolute;top:4px;left:calc(50% + (var(--grid-card-size) / 2) + 6px);display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20}
+.grid-card-actions{position:absolute;top:4px;right:4px;display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20}
 .grid-item:hover .grid-card-actions,.grid-item:focus-within .grid-card-actions{opacity:1;pointer-events:auto}
 .grid-card-actions .btn{width:30px;height:30px;padding:0;display:grid;place-items:center;box-shadow:var(--shadow-sm);background:var(--paper);font-size:13px}
+.grid-card-actions .stage-action{font-size:18px}
+.grid-card-actions .stage-action:disabled{opacity:.35;cursor:not-allowed;transform:none}
 
 /* ── MODALS ── */
 .modal-overlay{position:fixed;inset:0;background:var(--overlay);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
@@ -534,7 +546,8 @@ main{min-height:50vh}
       <button class="theme-toggle" id="theme-toggle" aria-label="Basculer thème sombre" title="Thème sombre"><span aria-hidden="true">🌙</span></button>
       <button class="btn ghost" id="btn-decks" aria-label="Ouvrir les decks sauvegardés">Decks</button>
       <button class="btn ghost" id="btn-images" aria-label="Ouvrir la bibliothèque d'images">Images</button>
-      <button class="btn ghost" id="btn-icons" aria-label="Ouvrir la bibliothèque d'icônes">Icônes</button>
+      <button class="btn ghost" id="btn-resources" aria-label="Ouvrir les icônes de ressources">Ressources</button>
+      <button class="btn ghost" id="btn-icons" aria-label="Ouvrir les icônes de bonus">Icônes</button>
       <button class="btn ghost" id="btn-import" aria-label="Importer JSON">↓ Import</button>
       <button class="btn ghost" id="btn-export" aria-label="Exporter JSON">↑ Export</button>
       <button class="btn" id="btn-pdf" aria-label="Exporter PDF (A4)">🖨 PDF</button>
@@ -635,11 +648,8 @@ main{min-height:50vh}
     <h3 id="icon-modal-title">Bibliothèque d'icônes<button class="modal-close" id="icon-close" aria-label="Fermer">✕</button></h3>
     <div class="library-tools">
       <input type="file" id="icon-library-input" accept="image/*" multiple aria-label="Ajouter des icônes"/>
-      <select id="icon-import-category" class="icon-category-select" aria-label="Catégorie des nouvelles icônes">
-        <option value="resource">Ressources</option>
-        <option value="bonus">Bonus</option>
-      </select>
-      <span class="hint">Importe une image, puis assigne-la à un symbole.</span>
+      <input type="hidden" id="icon-import-category" value="bonus"/>
+      <span class="hint" id="icon-library-hint">Importe une image, puis assigne-la à un symbole.</span>
     </div>
     <div id="icon-library-grid" class="image-grid icon-grid"></div>
   </div>
@@ -816,6 +826,7 @@ const state = {
   editing: null,
   imageLibraryTarget: null,
   iconAssignments: {resource:{}, bonus:{}},
+  iconLibraryCategory: 'bonus',
   uiZoom: 130,
 };
 
@@ -1049,7 +1060,7 @@ function resHtml(type, qty=1, size='sm'){
   const label = `${RES_NAMES[type]}${qty>1?' x'+qty:''}`;
   const icon = iconImg('resource', type, RES_NAMES[type]);
   const content = icon || `<span aria-hidden="true">${RES_LABELS[type]}</span>`;
-  return Array(qty).fill(`<span class="res ${type} ${size}" role="img" aria-label="${label}">${content}</span>`).join('');
+  return Array(qty).fill(`<span class="res ${type} ${size}${icon?' has-custom':''}" role="img" aria-label="${label}">${content}</span>`).join('');
 }
 function costHtml(cost, size='sm'){
   if(!cost) return '—';
@@ -1131,32 +1142,19 @@ function renderCardHtml(card, sizeClass='', interactive=false){
   const bg = typeColor(card.type);
   const rot = -stage * 90;
 
-  let corners='', ribbons='', bonuses='';
+  let corners='', bonuses='';
   for(let i=0;i<4;i++){
     if(i>=n) continue;
     const step = card.steps[i];
     const shieldCls = step.shield ? ' shielded' : '';
     const editCls = interactive ? ' editable' : '';
-    corners += `<div class="corner${shieldCls} ${STAGE_POSITIONS[i]}${editCls}" data-field="shield" data-stage="${i}"${interactive?' role="button" tabindex="0"':''} aria-label="Étape ${STAGE_NUMS[i]}${step.shield?' protégée':''}">${STAGE_NUMS[i]}</div>`;
-    // Ribbon at corner i sits between stage i and stage i+1 → shows cost of next stage (what you pay to advance)
-    const isWrapCost = i === n - 1 && n < 4;
-    const nextIdx = (i + 1) % n;
-    const nextStep = isWrapCost ? null : card.steps[nextIdx];
-    if(nextStep && hasCost(nextStep.cost))
-      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${editCls}" data-stage="${nextIdx}" data-field="cost"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">${costHtml(nextStep.cost,'sm')}</div>`;
-    else if(interactive && nextStep)
-      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]} editable empty-ribbon" data-stage="${nextIdx}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">＋</div>`;
+    corners += `<div class="corner${shieldCls} ${STAGE_POSITIONS[i]}${editCls}" data-field="cost" data-stage="${i}"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[i]}">${STAGE_NUMS[i]}</div>`;
     const bHtml = renderBonusHtml(step.bonus);
     if(bHtml)
       bonuses += `<div class="bonus ${STAGE_POSITIONS[i]}${editCls}" data-stage="${i}" data-field="bonus"${interactive?' role="button" tabindex="0"':''} aria-label="Bonus étape ${STAGE_NUMS[i]}">${bHtml}</div>`;
     else if(interactive)
       bonuses += `<div class="bonus ${STAGE_POSITIONS[i]} editable" data-stage="${i}" data-field="bonus" role="button" tabindex="0" aria-label="Bonus étape ${STAGE_NUMS[i]}" style="opacity:.45">＋</div>`;
   }
-  if(interactive && n < 4){
-    const addAt = Math.max(0, n - 1);
-    ribbons += `<div class="ribbon ${RIBBON_POSITIONS[addAt]} editable add-ribbon" data-card="${card.id}" data-action="stage-add" role="button" tabindex="0" aria-label="Ajouter l'étape ${STAGE_NUMS[n]}">＋</div>`;
-  }
-
   const centerAttrs = interactive
     ? `data-action="image-library" data-card="${card.id}" role="button" tabindex="0" aria-label="Choisir une image pour ${escapeHtml(card.name)}"`
     : `data-field="name" aria-label="Nom: ${escapeHtml(card.name)}"`;
@@ -1166,7 +1164,7 @@ function renderCardHtml(card, sizeClass='', interactive=false){
     : `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}>${escapeHtml(card.name)}</div>`;
 
   return `<div class="kcard ${sizeClass} ${bg}" data-id="${card.id}" style="transform:rotate(${rot}deg)">
-    ${corners}${ribbons}${bonuses}${center}
+    ${corners}${bonuses}${center}
   </div>`;
 }
 
@@ -1287,11 +1285,14 @@ function renderCardRow(card){
 }
 
 function renderCardGridItem(card){
+  const canEditStages = !['exploration','treasure'].includes(card.type);
   return `
     <div class="grid-item" data-id="${card.id}">
       ${renderCardHtml(card,'md',true)}
       <input class="gi-name-input" data-card="${card.id}" data-field="name-grid" value="${escapeHtml(card.name)}" aria-label="Nom de la carte"/>
       <div class="grid-card-actions">
+        ${canEditStages ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="stage-add" ${card.steps.length>=4?'disabled':''} aria-label="Ajouter une étape" title="Ajouter une étape">+</button>` : ''}
+        ${canEditStages ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="stage-remove" ${card.steps.length<=1?'disabled':''} aria-label="Enlever une étape" title="Enlever une étape">−</button>` : ''}
         <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer ${escapeHtml(card.name)}" title="Dupliquer">⎘</button>
         <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer ${escapeHtml(card.name)}" title="Supprimer">🗑</button>
       </div>
@@ -1460,39 +1461,23 @@ function editorImage(card){
 }
 function editorCost(card, stage){
   const step = getOrCreateStep(card, stage);
-  const rows = RES_TYPES.map(r=>`
-    <div class="cost-row">
-      ${resHtml(r,1,'lg')}
-      <span class="res-name">${RES_NAMES[r]}</span>
-      <div class="cost-stepper">
-        <button data-cost="${r}" data-delta="-1" aria-label="Diminuer ${RES_NAMES[r]}">−</button>
-        <span class="qty" id="ed-cost-${r}">${step.cost[r]||0}</span>
-        <button data-cost="${r}" data-delta="1" aria-label="Augmenter ${RES_NAMES[r]}">+</button>
-      </div>
-    </div>`).join('');
-  return `<div class="cell-field"><div class="cost-editor">${rows}</div></div>`;
+  const rows = editorIconRows('resource', RES_TYPES, r=>step.cost[r]||0, r=>'data-cost="'+r+'"');
+  return `<div class="cell-field">
+    ${rows || `<div class="icon-empty">Ajoute d'abord des icônes dans le menu Ressources, puis assigne-les à Bois, Pierre, Blé, Fer ou Eau.</div>`}
+    <label class="shield-cell" style="margin-top:10px;padding:8px;border:1.5px dashed var(--line);border-radius:8px;justify-content:flex-start">
+      <input type="checkbox" id="ed-cost-shield"${step.shield?' checked':''}/>
+      <span style="font-family:'Patrick Hand';font-size:15px">Étape protégée</span>
+    </label>
+  </div>`;
 }
 function editorBonus(card, stage){
   const step = getOrCreateStep(card, stage);
   const b = step.bonus;
+  const bonusKeys = Object.keys(BONUS_ICON_LABELS);
+  const rows = editorIconRows('bonus', bonusKeys, key=>b[key]||0, key=>'data-bfield="'+key+'"');
   return `<div class="cell-field">
     <div class="bonus-editor">
-      <div class="be-row">
-        <span class="be-label">Ressources</span>
-        ${RES_TYPES.map(r=>`<div class="be-stepper">${resHtml(r,1,'sm')}<button data-bfield="${r}" data-bdelta="-1" aria-label="Diminuer ${RES_NAMES[r]}">−</button><span id="ed-b-${r}">${b[r]||0}</span><button data-bfield="${r}" data-bdelta="1" aria-label="Augmenter ${RES_NAMES[r]}">+</button></div>`).join('')}
-      </div>
-      <div class="be-row">
-        <span class="be-label">Prod./cycle</span>
-        ${['wood','stone','wheat','iron'].map(r=>`<div class="be-stepper">${resHtml(r,1,'sm')}<button data-bfield="prod_${r}" data-bdelta="-1" aria-label="Diminuer prod. ${RES_NAMES[r]}">−</button><span id="ed-b-prod_${r}">${b['prod_'+r]||0}</span><button data-bfield="prod_${r}" data-bdelta="1" aria-label="Augmenter prod. ${RES_NAMES[r]}">+</button></div>`).join('')}
-      </div>
-      <div class="be-row">
-        <span class="be-label">Autres</span>
-        <div class="be-stepper" title="Points de victoire">★PV<button data-bfield="pv" data-bdelta="-1" aria-label="Diminuer PV">−</button><span id="ed-b-pv">${b.pv||0}</span><button data-bfield="pv" data-bdelta="1" aria-label="Augmenter PV">+</button></div>
-        <div class="be-stepper" title="Ouvriers">👷<button data-bfield="workers" data-bdelta="-1" aria-label="Diminuer ouvriers">−</button><span id="ed-b-workers">${b.workers||0}</span><button data-bfield="workers" data-bdelta="1" aria-label="Augmenter ouvriers">+</button></div>
-        <div class="be-stepper" title="Actions">⚡<button data-bfield="actions" data-bdelta="-1" aria-label="Diminuer actions">−</button><span id="ed-b-actions">${b.actions||0}</span><button data-bfield="actions" data-bdelta="1" aria-label="Augmenter actions">+</button></div>
-        <div class="be-stepper" title="Piocher">📜<button data-bfield="draw" data-bdelta="-1" aria-label="Diminuer pioche">−</button><span id="ed-b-draw">${b.draw||0}</span><button data-bfield="draw" data-bdelta="1" aria-label="Augmenter pioche">+</button></div>
-        <div class="be-stepper" title="Explorateurs">🏔<button data-bfield="explorers" data-bdelta="-1" aria-label="Diminuer explorateurs">−</button><span id="ed-b-explorers">${b.explorers||0}</span><button data-bfield="explorers" data-bdelta="1" aria-label="Augmenter explorateurs">+</button></div>
-      </div>
+      ${rows || `<div class="icon-empty">Ajoute d'abord des icônes dans le menu Icônes, puis assigne-les à PV, Ouvriers, Actions, Pioche ou Explorateurs.</div>`}
       <div class="be-row" style="flex-direction:column;align-items:stretch">
         <span class="be-label">Note</span>
         <input class="be-note" id="ed-b-note" type="text" value="${escapeHtml(b.note||'')}" placeholder="effet spécial…"/>
@@ -1510,6 +1495,24 @@ function editorDanger(card){
       <span class="hint">(0 à 9)</span>
     </div>
   </div>`;
+}
+function editorIconRows(kind, keys, valueFor, attrFor){
+  const rows = keys.filter(key=>assignedIcon(kind, key)).map(key=>{
+    const labels = kind === 'resource' ? RES_NAMES : BONUS_ICON_LABELS;
+    const idPrefix = kind === 'resource' ? 'ed-cost-' : 'ed-b-';
+    const deltaAttr = kind === 'resource' ? 'data-delta' : 'data-bdelta';
+    const attr = attrFor(key);
+    return `<div class="icon-editor-row">
+      <img class="editor-icon-img" src="${assignedIcon(kind, key)}" alt="${escapeHtml(labels[key])}"/>
+      <span class="icon-label">${escapeHtml(labels[key])}</span>
+      <div class="cost-stepper">
+        <button ${attr} ${deltaAttr}="-1" aria-label="Diminuer ${escapeHtml(labels[key])}">−</button>
+        <span class="qty" id="${idPrefix}${key}">${valueFor(key)}</span>
+        <button ${attr} ${deltaAttr}="1" aria-label="Augmenter ${escapeHtml(labels[key])}">+</button>
+      </div>
+    </div>`;
+  }).join('');
+  return rows ? `<div class="icon-editor-list">${rows}</div>` : '';
 }
 function editorShield(card, stage){
   const step = card.steps[stage];
@@ -1551,6 +1554,8 @@ function bindEditorEvents(card, field, stage){
       document.getElementById('ed-cost-'+r).textContent = step.cost[r];
       save(); renderCards();
     }));
+    const shield = document.getElementById('ed-cost-shield');
+    if(shield) shield.onchange = e=>{ step.shield = e.target.checked; save(); renderCards(); };
   }
   if(field==='bonus'){
     const step = getOrCreateStep(card, stage);
@@ -1878,7 +1883,16 @@ function assignedSlotForIcon(icon){
   const src = icon.dataUrl;
   return Object.entries(state.iconAssignments[category] || {}).find(([,value])=>value === src)?.[0] || '';
 }
-async function openIconLibrary(){
+async function openIconLibrary(category='bonus'){
+  state.iconLibraryCategory = category;
+  const title = document.getElementById('icon-modal-title');
+  if(title) title.firstChild.nodeValue = category === 'resource' ? 'Bibliothèque de ressources' : "Bibliothèque d'icônes";
+  const inputCategory = document.getElementById('icon-import-category');
+  if(inputCategory) inputCategory.value = category;
+  const hint = document.getElementById('icon-library-hint');
+  if(hint) hint.textContent = category === 'resource'
+    ? 'Importe tes ressources, puis assigne-les à Bois, Pierre, Blé, Fer ou Eau.'
+    : 'Importe tes bonus, puis assigne-les à PV, Ouvriers, Actions, Pioche ou Explorateurs.';
   const modal = document.getElementById('icon-modal');
   modal.classList.add('open');
   await renderIconLibrary();
@@ -1887,21 +1901,20 @@ async function renderIconLibrary(){
   const grid = document.getElementById('icon-library-grid');
   grid.innerHTML = `<div class="library-empty">Chargement des icônes...</div>`;
   try{
-    const icons = (await getAllLibraryItems('icons')).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    const categoryFilter = state.iconLibraryCategory || 'bonus';
+    const icons = (await getAllLibraryItems('icons'))
+      .filter(icon=>(icon.category || 'resource') === categoryFilter)
+      .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
     if(!icons.length){
-      grid.innerHTML = `<div class="library-empty">Aucune icône pour l'instant. Ajoute des PNG, SVG ou WebP.</div>`;
+      grid.innerHTML = `<div class="library-empty">Aucune ${categoryFilter === 'resource' ? 'ressource' : 'icône'} pour l'instant. Ajoute des PNG, SVG ou WebP.</div>`;
       return;
     }
     grid.innerHTML = icons.map(icon=>{
-      const category = icon.category || 'resource';
+      const category = categoryFilter;
       const slot = assignedSlotForIcon(icon);
       return `<div class="image-tile icon-tile" data-icon-id="${icon.id}">
         <img src="${icon.dataUrl}" alt="${escapeHtml(icon.name)}"/>
         <input class="image-name-input" data-icon-name="${icon.id}" value="${escapeHtml(icon.name)}" title="${escapeHtml(icon.name)}" aria-label="Nom de l'icône"/>
-        <select class="icon-category-select" data-icon-category="${icon.id}" aria-label="Type d'icône">
-          <option value="resource"${category==='resource'?' selected':''}>Ressource</option>
-          <option value="bonus"${category==='bonus'?' selected':''}>Bonus</option>
-        </select>
         <select class="icon-slot-select" data-icon-slot="${icon.id}" data-category="${category}" aria-label="Symbole associé">
           ${iconSlotOptions(category, slot)}
         </select>
@@ -2083,7 +2096,7 @@ function applyUiZoom(){
   const value = UI_ZOOMS.includes(state.uiZoom) ? state.uiZoom : 130;
   const cardSize = Math.round(220 * value / 100);
   document.documentElement.style.setProperty('--grid-card-size', `${cardSize}px`);
-  document.documentElement.style.setProperty('--grid-col-size', `${cardSize + 54}px`);
+  document.documentElement.style.setProperty('--grid-col-size', `${cardSize + 86}px`);
   const label = document.getElementById('zoom-value');
   if(label) label.textContent = `${value}%`;
   const i = UI_ZOOMS.indexOf(value);
@@ -2116,7 +2129,8 @@ function bindEvents(){
   });
   document.getElementById('btn-decks').addEventListener('click', openDeckLibrary);
   document.getElementById('btn-images').addEventListener('click', ()=>openImageLibrary());
-  document.getElementById('btn-icons').addEventListener('click', openIconLibrary);
+  document.getElementById('btn-resources').addEventListener('click', ()=>openIconLibrary('resource'));
+  document.getElementById('btn-icons').addEventListener('click', ()=>openIconLibrary('bonus'));
   document.getElementById('btn-import').addEventListener('click', openImport);
   document.getElementById('btn-export').addEventListener('click', openExport);
   document.getElementById('btn-pdf').addEventListener('click', exportToPDF);
@@ -2225,12 +2239,21 @@ function bindEvents(){
       if(a==='image'){ openCellEditor(cardId,'image',undefined,e); return; }
       if(a==='image-library'){ openImageLibrary(cardId, e); return; }
       if(a==='stage-add'){
-        if(card && card.steps.length<4){
+        if(card && !['exploration','treasure'].includes(card.type) && card.steps.length<4){
           const anchor = {clientX:e.clientX, clientY:e.clientY};
           const newStage = card.steps.length;
           card.steps.push(makeStep(emptyBonus(),makeCost()));
           save(); renderCards();
           requestAnimationFrame(()=>openCellEditor(cardId, 'cost', newStage, anchor));
+        }
+        return;
+      }
+      if(a==='stage-remove'){
+        if(card && !['exploration','treasure'].includes(card.type) && card.steps.length>1){
+          card.steps.pop();
+          state.stageByCard[card.id] = Math.min(getStage(card.id), card.steps.length - 1);
+          save(); renderCards();
+          showStatus('Étape retirée');
         }
         return;
       }
