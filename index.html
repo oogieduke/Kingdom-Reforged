@@ -105,19 +105,22 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
   box-shadow:inset 0 0 0 2px #5e3f0f,inset 0 -4px 6px rgba(0,0,0,.2),inset 0 3px 4px rgba(255,255,255,.22);
 }
 .corner.editable{cursor:pointer}
-/* diagonal cost ribbon */
-.ribbon{position:absolute;width:54%;height:20px;background:repeating-linear-gradient(-45deg,#f0e7d4 0 6px,#e4d7ba 6px 12px);border-top:1.5px solid var(--line);border-bottom:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;gap:2px;font-family:'Kalam';font-size:10px;font-weight:700;z-index:2;color:var(--ink)}
-.ribbon.tr{top:22px;right:-18%;transform:rotate(-45deg)}
-.ribbon.br{bottom:22px;right:-18%;transform:rotate(45deg)}
-.ribbon.bl{bottom:22px;left:-18%;transform:rotate(-45deg)}
-.ribbon.tl{top:22px;left:-18%;transform:rotate(45deg)}
-.ribbon.editable{cursor:pointer}.ribbon.editable:hover{background:repeating-linear-gradient(-45deg,#fff5d6 0 6px,#f5e5ab 6px 12px)}
-/* bonus slot */
-.bonus{position:absolute;background:var(--paper);border:1.5px solid var(--line);border-radius:7px;padding:3px 7px;font-family:'Kalam';font-size:11px;font-weight:700;display:flex;align-items:center;gap:3px;z-index:2;white-space:nowrap;color:var(--ink)}
-.bonus.top{top:30px;left:50%;transform:translateX(-50%)}
-.bonus.right{right:4px;top:50%;transform:translateY(-50%) rotate(90deg);max-width:calc(var(--sz,220px) * .4);overflow:hidden}
-.bonus.bottom{bottom:30px;left:50%;transform:translateX(-50%) rotate(180deg)}
-.bonus.left{left:4px;top:50%;transform:translateY(-50%) rotate(-90deg);max-width:calc(var(--sz,220px) * .4);overflow:hidden}
+/* diagonal cost ribbon — edge-to-edge across each corner (clipped by .kcard overflow:hidden).
+   For symmetric placement, offsets satisfy: perpendicular_offset + parallel_offset = (W-H)/2 / S.
+   With W=60% H≈11% → offsets: ~10.5% inner (top/bottom) + 14% outward (right/left). */
+.ribbon{position:absolute;width:60%;height:24px;background:repeating-linear-gradient(90deg,#f0e7d4 0 6px,#e4d7ba 6px 12px);border-top:1.5px solid var(--line);border-bottom:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;gap:3px;font-family:'Kalam';font-size:10px;font-weight:700;z-index:2;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08);transform-origin:center}
+.ribbon.tr{top:10.5%;right:-14%;transform:rotate(45deg)}
+.ribbon.br{bottom:10.5%;right:-14%;transform:rotate(-45deg)}
+.ribbon.bl{bottom:10.5%;left:-14%;transform:rotate(45deg)}
+.ribbon.tl{top:10.5%;left:-14%;transform:rotate(-45deg)}
+.ribbon.editable{cursor:pointer}.ribbon.editable:hover{background:repeating-linear-gradient(90deg,#fff5d6 0 6px,#f5e5ab 6px 12px)}
+/* bonus slot — anchored via center so content width doesn't shift placement.
+   Centers sit 20% from each edge, aligned with the stage marker on that edge. */
+.bonus{position:absolute;background:var(--paper);border:1.5px solid var(--line);border-radius:7px;padding:3px 7px;font-family:'Kalam';font-size:11px;font-weight:700;display:flex;align-items:center;gap:3px;z-index:4;white-space:nowrap;color:var(--ink);box-shadow:1px 1px 0 rgba(0,0,0,.08)}
+.bonus.top{top:20%;left:50%;transform:translate(-50%,-50%)}
+.bonus.right{right:20%;top:50%;transform:translate(50%,-50%) rotate(90deg);max-width:calc(var(--sz,220px) * .34);overflow:hidden}
+.bonus.bottom{bottom:20%;left:50%;transform:translate(-50%,50%) rotate(180deg)}
+.bonus.left{left:20%;top:50%;transform:translate(-50%,-50%) rotate(-90deg);max-width:calc(var(--sz,220px) * .34);overflow:hidden}
 .bonus.editable{cursor:pointer}.bonus.editable:hover{background:var(--focus-bg)}
 /* bonus icons */
 .bpv{display:inline-flex;align-items:center;gap:1px;font-family:'Kalam';font-weight:700}
@@ -139,8 +142,8 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .be-select{font-family:'Kalam';font-size:12px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);padding:3px 6px;cursor:pointer;color:var(--ink)}
 .be-note{font-family:'Patrick Hand';font-size:14px;border:1.5px dashed var(--line);border-radius:6px;background:var(--paper);padding:4px 8px;width:100%;outline:none;color:var(--ink)}
 .be-note:focus{border-style:solid;background:var(--focus-bg)}
-/* center illustration */
-.kcenter{position:absolute;inset:26%;border:2.5px solid var(--line);border-radius:50%;background:radial-gradient(circle,#a8c35a,#6b8b2e);display:grid;place-items:center;color:#fff;font-family:'Kalam';font-weight:700;font-size:12px;text-align:center;z-index:2;overflow:hidden}
+/* center illustration — shrunk so side bonus labels sit clearly outside */
+.kcenter{position:absolute;inset:32%;border:2.5px solid var(--line);border-radius:50%;background:radial-gradient(circle,#a8c35a,#6b8b2e);display:grid;place-items:center;color:#fff;font-family:'Kalam';font-weight:700;font-size:12px;text-align:center;z-index:2;overflow:hidden}
 .kcard.exploration .kcenter{background:radial-gradient(circle,#e9c57a,#b88437)}
 .kcard.treasure .kcenter{background:radial-gradient(circle,#f4d871,#b8892a)}
 .kcard.action .kcenter{background:radial-gradient(circle,#c4a7e0,#7b5db0)}
@@ -154,30 +157,13 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .search{display:flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:20px;padding:4px 12px;background:var(--paper-2);min-width:180px;max-width:260px}
 .search input{border:none;outline:none;background:transparent;flex:1;font-family:'Patrick Hand';font-size:15px;color:var(--ink);min-width:80px}
 .chip-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sort-ctrl{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:10px;background:var(--paper);padding:2px 10px;box-shadow:var(--shadow-sm);font-family:'Kalam';font-weight:700;font-size:13px;color:var(--ink-soft)}
+.sort-ctrl .sort-ico{font-size:15px;color:var(--ink)}
+.sort-ctrl select{border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;padding:4px 2px;outline:none}
 .view-toggle{display:inline-flex;border:2px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-sm);margin-left:auto}
 .vt-btn{border:none;background:var(--paper);padding:6px 14px;cursor:pointer;font-family:'Kalam';font-weight:700;font-size:13px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:4px}
 .vt-btn.on{background:var(--ink);color:var(--paper)}
 .vt-btn:not(.on):hover{background:var(--paper-2)}
-.template-select{border:2px solid var(--line);border-radius:8px;background:var(--paper);padding:5px 10px;font-family:'Kalam';font-size:13px;color:var(--ink);box-shadow:var(--shadow-sm);cursor:pointer}
-.template-select:focus{background:var(--focus-bg)}
-
-/* ── BALANCE PANEL ── */
-.balance-panel{padding:14px 20px;border-bottom:2px dashed var(--line);background:var(--paper-2)}
-.balance-inner{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:minmax(260px,1fr) minmax(280px,1.4fr);gap:14px;align-items:start}
-.balance-card{border:2px solid var(--line);border-radius:8px;background:var(--paper);padding:12px;box-shadow:var(--shadow-md)}
-.balance-card h2{font-size:17px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
-.metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.metric{border:1.5px dashed var(--line);border-radius:8px;padding:8px;background:var(--paper-2);min-height:58px}
-.metric .k{font-family:'Kalam';font-size:10px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.3px}
-.metric .v{font-family:'Kalam';font-size:20px;font-weight:700;color:var(--ink)}
-.metric .s{font-family:'Caveat';font-size:13px;color:var(--ink-ghost)}
-.issue-list{display:flex;flex-direction:column;gap:6px;max-height:170px;overflow:auto;padding-right:4px}
-.issue{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;border:1.5px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--paper-2);font-family:'Patrick Hand';font-size:14px}
-.issue.warn{border-color:var(--accent-3)}
-.issue.bad{border-color:var(--danger)}
-.issue .tag{font-family:'Kalam';font-size:10px;text-transform:uppercase;color:var(--ink-soft)}
-.issue .jump{font-size:11px;padding:2px 7px;box-shadow:none}
-.issue-empty{font-family:'Caveat';font-size:16px;color:var(--ink-soft);padding:8px}
 
 /* ── MAIN ── */
 main{min-height:50vh}
@@ -185,41 +171,91 @@ main{min-height:50vh}
 .empty-state .icon{font-size:48px}
 
 /* ── LIST MODE ── */
-.cards-list{display:flex;flex-direction:column;gap:14px;padding:20px;max-width:1200px;margin:0 auto}
-.card-row{display:grid;grid-template-columns:230px 240px 1fr;gap:18px;padding:14px;border:2px solid var(--line);border-radius:14px;background:var(--paper-2);box-shadow:var(--shadow-md);align-items:center}
-.row-preview{display:grid;place-items:center;min-height:230px}
-.row-info{display:flex;flex-direction:column;gap:6px}
-.info-cell{padding:7px 10px;border:1.5px dashed transparent;border-radius:8px;cursor:pointer;display:flex;gap:8px;align-items:baseline;transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
-.info-cell:hover,.info-cell:focus-visible{border-color:var(--line);background:var(--focus-bg);outline:none}
-.info-cell .label{font-family:'Kalam';font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-soft);min-width:56px;font-weight:700}
-.info-cell .value{font-family:'Patrick Hand';font-size:15px;flex:1;color:var(--ink);word-break:break-word}
-.info-cell .value.placeholder{color:var(--ink-ghost);font-family:'Caveat';font-style:italic}
-/* Inline editors for row-info (name/type/steps/image) */
-.info-inline{display:flex;align-items:center;gap:10px;padding:4px 8px;border:1.5px dashed transparent;border-radius:8px;transition:border-color var(--t-fast) var(--ease)}
+.cards-list{display:flex;flex-direction:column;gap:10px;padding:16px;max-width:1500px;margin:0 auto}
+.card-row{display:grid;grid-template-columns:220px 200px repeat(4, minmax(110px, 1fr));gap:10px;padding:10px;border:2px solid var(--line);border-radius:14px;background:var(--paper-2);box-shadow:var(--shadow-md);align-items:stretch}
+.row-actions{display:flex;gap:4px;margin-top:4px;padding-top:4px;border-top:1px dashed var(--line);justify-content:space-between}
+.row-actions .btn-row-act{flex:1;padding:3px 6px;font-size:11px;box-shadow:none;border:1.5px solid var(--line);background:var(--paper);border-radius:6px;font-family:'Kalam';font-weight:700;color:var(--ink);cursor:pointer;font-size:11px;display:inline-flex;align-items:center;justify-content:center;gap:3px;transition:background var(--t-fast) var(--ease)}
+.row-actions .btn-row-act:hover{background:var(--paper-2)}
+.row-actions .btn-row-act.danger{color:var(--danger);border-color:var(--danger)}
+.row-actions .btn-row-act.danger:hover{background:var(--danger);color:#fff}
+.row-preview{display:flex;justify-content:center;align-items:center;min-width:0}
+.row-info{display:flex;flex-direction:column;gap:3px;min-width:0;justify-content:center}
+/* Inline editors for row-info (name/type/image/copies) */
+.info-inline{display:flex;align-items:center;gap:8px;padding:3px 6px;border:1.5px dashed transparent;border-radius:8px;transition:border-color var(--t-fast) var(--ease)}
 .info-inline:hover{border-color:var(--line)}
-.info-inline .label{font-family:'Kalam';font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-soft);min-width:56px;font-weight:700;flex-shrink:0}
-.inline-input{flex:1;min-width:0;font-family:'Patrick Hand';font-size:15px;color:var(--ink);padding:4px 8px;background:transparent;border:1.5px dashed transparent;border-radius:6px;outline:none}
+.info-inline .label{font-family:'Kalam';font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-soft);min-width:44px;font-weight:700;flex-shrink:0}
+.inline-input{flex:1;min-width:0;font-family:'Patrick Hand';font-size:14px;color:var(--ink);padding:3px 6px;background:transparent;border:1.5px dashed transparent;border-radius:6px;outline:none}
 .inline-input:hover{border-color:var(--line);background:var(--paper-3)}
 .inline-input:focus{border-style:solid;border-color:var(--accent);background:var(--focus-bg)}
-.inline-select{border:1.5px solid var(--line);border-radius:6px;background:var(--paper);padding:4px 8px;font-family:'Patrick Hand';font-size:14px;color:var(--ink);cursor:pointer;outline:none}
+.inline-select{border:1.5px solid var(--line);border-radius:6px;background:var(--paper);padding:3px 6px;font-family:'Patrick Hand';font-size:13px;color:var(--ink);cursor:pointer;outline:none}
 .inline-select:focus{border-color:var(--accent);background:var(--focus-bg)}
-.inline-stepper{display:inline-flex;align-items:center;gap:6px}
-.inline-stepper b{font-family:'Kalam';font-weight:700;font-size:16px;min-width:20px;text-align:center;color:var(--ink)}
-.btn-mini{width:24px;height:24px;border:1.5px solid var(--line);border-radius:50%;background:var(--paper);cursor:pointer;font-family:'Kalam';font-weight:700;font-size:13px;color:var(--ink);display:grid;place-items:center;padding:0;line-height:1;transition:background var(--t-fast) var(--ease)}
+.inline-stepper{display:inline-flex;align-items:center;gap:4px}
+.inline-stepper b{font-family:'Kalam';font-weight:700;font-size:14px;min-width:16px;text-align:center;color:var(--ink)}
+.btn-mini{width:22px;height:22px;border:1.5px solid var(--line);border-radius:50%;background:var(--paper);cursor:pointer;font-family:'Kalam';font-weight:700;font-size:12px;color:var(--ink);display:grid;place-items:center;padding:0;line-height:1;transition:background var(--t-fast) var(--ease)}
 .btn-mini:hover:not(:disabled){background:var(--paper-2)}
 .btn-mini:disabled{opacity:.35;cursor:not-allowed}
-.inline-imgzone{flex:1;min-height:40px;border:1.5px dashed var(--line);border-radius:6px;padding:4px 8px;position:relative;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:'Caveat';color:var(--ink-ghost);font-size:13px;transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease);overflow:hidden}
+.inline-imgzone{flex:1;min-height:32px;border:1.5px dashed var(--line);border-radius:6px;padding:3px 6px;position:relative;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:'Caveat';color:var(--ink-ghost);font-size:12px;transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease);overflow:hidden}
 .inline-imgzone:hover{background:var(--focus-bg);border-color:var(--line)}
 .inline-imgzone.dragover{background:var(--focus-bg);border-color:var(--accent);border-style:solid}
 .inline-imgzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.inline-img-thumb{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid var(--line);flex-shrink:0}
-.inline-img-label{flex:1;color:var(--ink-soft);font-size:12px}
+.inline-img-thumb{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1.5px solid var(--line);flex-shrink:0}
+.inline-img-label{flex:1;color:var(--ink-soft);font-size:11px}
 .inline-img-ghost{flex:1;text-align:center}
 .img-clear{margin-left:auto;color:var(--danger);border-color:var(--danger);z-index:2;position:relative}
-.row-actions{display:flex;gap:4px;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
-.row-actions .btn{padding:4px 8px;font-size:12px;box-shadow:none}
-.row-stages{display:grid;grid-template-columns:46px 1fr 1fr;gap:6px 10px;align-items:center}
-.rs-head{font-family:'Kalam';font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-soft);padding:0 4px;font-weight:700}
+/* Stage columns (6-col list layout) */
+.stage-col{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border:1.5px dashed var(--line);border-radius:10px;background:var(--paper);min-height:100%;min-width:0;position:relative}
+.stage-col.empty{border-style:dashed;background:repeating-linear-gradient(45deg,transparent 0 8px,rgba(0,0,0,.03) 8px 9px);cursor:pointer;opacity:.45;transition:opacity var(--t-fast) var(--ease),background var(--t-fast) var(--ease)}
+.stage-col.empty:hover{opacity:1;background:var(--focus-bg)}
+.stage-col.empty.disabled{cursor:default;opacity:.22}
+.stage-col.empty.disabled:hover{opacity:.22;background:repeating-linear-gradient(45deg,transparent 0 8px,rgba(0,0,0,.03) 8px 9px)}
+.stage-col .add-stage-ico{font-family:'Kalam';font-weight:700;font-size:32px;color:var(--ink-soft);line-height:1;margin:auto;user-select:none}
+.stage-col .stage-num{width:44px;height:44px;font-size:18px}
+.stage-col .stage-num.shielded{width:40px;height:52px;font-size:18px}
+.stage-col .stage-cell{width:100%;justify-content:center;text-align:center;min-height:28px;flex-wrap:wrap;padding:4px 6px}
+.stage-del{position:absolute;top:2px;right:2px;width:18px;height:18px;border:1.5px solid var(--line);border-radius:50%;background:var(--paper);color:var(--danger);font-family:'Kalam';font-weight:700;font-size:11px;cursor:pointer;display:grid;place-items:center;line-height:1;padding:0;opacity:0;transition:opacity var(--t-fast) var(--ease),background var(--t-fast) var(--ease);z-index:3}
+.stage-col:hover .stage-del,.stage-col:focus-within .stage-del{opacity:1}
+.stage-del:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+
+/* Styled cost/bonus encarts — blueprint for cost, parchment for bonus */
+.stage-box{width:100%;border-radius:8px;padding:4px 6px 6px;position:relative;cursor:pointer;transition:transform var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
+.stage-box:hover{transform:translateY(-1px);box-shadow:var(--shadow-soft)}
+.stage-box-label{font-family:'Kalam';font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.5px;text-align:center;line-height:1;margin-bottom:3px;opacity:.75}
+.stage-box-content{min-height:22px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:3px;font-family:'Kalam';font-size:12px}
+.stage-box-content.empty{color:var(--ink-ghost);font-family:'Caveat';font-style:italic;font-size:13px;opacity:.55}
+/* Blueprint — plan de construction */
+.stage-box.cost{
+  background:#dce9f3;
+  background-image:
+    linear-gradient(to right, rgba(35,80,120,.18) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(35,80,120,.18) 1px, transparent 1px);
+  background-size:6px 6px;
+  border:1.5px solid #4a7ba0;
+  color:#1a3a55;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);
+}
+.stage-box.cost .stage-box-label{color:#1a3a55}
+.stage-box.cost.empty-slot{opacity:.45;background:repeating-linear-gradient(45deg,#dce9f3 0 6px,#c8d8e6 6px 7px)}
+/* Parchment — bonus */
+.stage-box.bonus-box{
+  background:linear-gradient(135deg,#f6e8c3 0%,#ecd7a0 55%,#dcbf7a 100%);
+  border:1.5px solid #8b6a2f;
+  color:#3a2608;
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.4),inset 0 -2px 4px rgba(120,80,20,.15);
+  position:relative;
+}
+.stage-box.bonus-box::before{
+  content:'';position:absolute;inset:0;border-radius:7px;pointer-events:none;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(100,60,0,.08) 0 12%, transparent 25%),
+    radial-gradient(circle at 85% 80%, rgba(100,60,0,.07) 0 10%, transparent 22%);
+}
+.stage-box.bonus-box .stage-box-label{color:#5a3d10}
+.stage-box.bonus-box.empty-slot{opacity:.45}
+/* Dark-mode adjustments for encarts */
+:root[data-theme="dark"] .stage-box.cost{background:#1e2f42;background-image:linear-gradient(to right,rgba(120,170,210,.15) 1px,transparent 1px),linear-gradient(to bottom,rgba(120,170,210,.15) 1px,transparent 1px);background-size:6px 6px;border-color:#5a8ab0;color:#cbdef0}
+:root[data-theme="dark"] .stage-box.cost .stage-box-label{color:#cbdef0}
+:root[data-theme="dark"] .stage-box.bonus-box{background:linear-gradient(135deg,#4a3a18 0%,#3d2f12 55%,#2e230b 100%);border-color:#b8944b;color:#f0dfaf}
+:root[data-theme="dark"] .stage-box.bonus-box .stage-box-label{color:#e8cd82}
 .stage-num{width:38px;height:38px;border:2px solid var(--line);border-radius:50%;background:var(--paper);display:grid;place-items:center;font-family:'Kalam';font-weight:700;font-size:15px;color:var(--ink);cursor:pointer;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease);outline:none}
 .stage-num:hover{background:var(--paper-3)}
 .stage-num:active{transform:translateY(1px)}
@@ -249,20 +285,6 @@ main{min-height:50vh}
 .grid-item .gi-actions{display:flex;gap:3px;margin-top:2px;opacity:.6;transition:opacity var(--t-fast) var(--ease)}
 .grid-item:hover .gi-actions,.grid-item:focus-within .gi-actions{opacity:1}
 .gi-actions .btn{padding:2px 6px;font-size:11px;box-shadow:none}
-
-/* ── TABLE MODE ── */
-.cards-table-wrap{padding:20px;max-width:1500px;margin:0 auto;overflow:auto}
-.cards-table{width:100%;border-collapse:separate;border-spacing:0 8px;min-width:980px}
-.cards-table th{font-family:'Kalam';font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-soft);text-align:left;padding:0 10px}
-.cards-table td{background:var(--paper-2);border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 10px;vertical-align:middle;font-family:'Patrick Hand';font-size:15px}
-.cards-table td:first-child{border-left:2px solid var(--line);border-radius:8px 0 0 8px}
-.cards-table td:last-child{border-right:2px solid var(--line);border-radius:0 8px 8px 0}
-.table-name{font-family:'Kalam';font-weight:700;cursor:pointer;border:1.5px dashed transparent;border-radius:6px;padding:3px 6px;display:inline-block}
-.table-name:hover{border-color:var(--line);background:var(--focus-bg)}
-.score-pill{display:inline-flex;align-items:center;justify-content:center;min-width:34px;border:1.5px solid var(--line);border-radius:8px;padding:2px 8px;font-family:'Kalam';font-weight:700;background:var(--paper)}
-.score-pill.hot{background:#f5d0c2}.score-pill.cold{background:#d6e8df}
-.table-actions{display:flex;gap:4px;white-space:nowrap}
-.table-actions .btn{padding:3px 7px;font-size:11px;box-shadow:none}
 
 /* ── MODALS ── */
 .modal-overlay{position:fixed;inset:0;background:var(--overlay);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
@@ -326,7 +348,6 @@ main{min-height:50vh}
 .vt-btn{transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
 .card-row{transition:box-shadow var(--t-med) var(--ease),transform var(--t-med) var(--ease)}
 .card-row:hover{box-shadow:var(--shadow-md),var(--shadow-soft)}
-.focus-pulse{box-shadow:0 0 0 4px rgba(15,118,110,.28),var(--shadow-md) !important}
 .grid-item .kcard{transition:transform var(--t-med) var(--ease),box-shadow var(--t-med) var(--ease)}
 .grid-item:hover .kcard{box-shadow:4px 4px 0 rgba(0,0,0,.14),var(--shadow-soft)}
 .ribbon,.bonus,.kcenter,.corner{transition:background var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
@@ -351,8 +372,8 @@ main{min-height:50vh}
 :root[data-theme="dark"] .kcard.exploration .kcenter{background:radial-gradient(circle,#8a6a2b,#5e4616)}
 :root[data-theme="dark"] .kcard.treasure .kcenter{background:radial-gradient(circle,#8f7320,#5a4610)}
 :root[data-theme="dark"] .kcard.action .kcenter{background:radial-gradient(circle,#6e5598,#3e2c6a)}
-:root[data-theme="dark"] .ribbon{background:repeating-linear-gradient(-45deg,#3a342a 0 6px,#2d281f 6px 12px);border-top-color:var(--line);border-bottom-color:var(--line);color:var(--ink)}
-:root[data-theme="dark"] .ribbon.editable:hover{background:repeating-linear-gradient(-45deg,#4a3e26 0 6px,#3d3120 6px 12px)}
+:root[data-theme="dark"] .ribbon{background:repeating-linear-gradient(90deg,#3a342a 0 6px,#2d281f 6px 12px);border-top-color:var(--line);border-bottom-color:var(--line);color:var(--ink)}
+:root[data-theme="dark"] .ribbon.editable:hover{background:repeating-linear-gradient(90deg,#4a3e26 0 6px,#3d3120 6px 12px)}
 :root[data-theme="dark"] .corner.shielded,:root[data-theme="dark"] .stage-num.shielded{background:#c8a04a;border-color:#3a2a08;color:#1c0f02}
 :root[data-theme="dark"] .res.wood{background:#a17b3f;color:#1c0f02}
 :root[data-theme="dark"] .res.stone{background:#7d7a72;color:#0f0f0f}
@@ -361,12 +382,27 @@ main{min-height:50vh}
 :root[data-theme="dark"] .res.water{background:#5a8aad;color:#02141f}
 
 /* ── RESPONSIVE ── */
+@media (max-width:1250px){
+  /* Force filter chip-groups onto separate rows so type-filter and res-filter stack */
+  .toolbar .chip-group{flex-basis:100%;margin:0}
+  .toolbar .tb-sep{display:none}
+}
 @media (max-width:1100px){
-  .balance-inner{grid-template-columns:1fr}
-  .metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .card-row{grid-template-columns:200px 1fr;grid-template-rows:auto auto}
-  .row-stages{grid-column:1/-1}
-  .row-preview{min-height:auto}
+  .card-row{grid-template-columns:180px 180px repeat(4, minmax(90px, 1fr));gap:6px;padding:8px}
+  .card-row .row-preview .kcard{--sz:170px}
+  .stage-col{padding:6px 3px}
+  .stage-col .stage-num{width:38px;height:38px;font-size:16px}
+  .stage-col .stage-num.shielded{width:34px;height:44px;font-size:15px}
+  .stage-col .stage-cell{padding:3px 4px;min-height:24px}
+}
+@media (max-width:900px){
+  /* Preview on the left spanning 2 rows; info on top-right; 4 stage cols on bottom-right */
+  .card-row{grid-template-columns:150px repeat(4, minmax(0, 1fr));grid-template-rows:auto 1fr;gap:8px}
+  .card-row .row-preview{grid-column:1;grid-row:1 / span 2}
+  .card-row .row-preview .kcard{--sz:140px}
+  .card-row .row-info{grid-column:2 / -1;grid-row:1}
+  .stage-col .stage-num{width:36px;height:36px;font-size:15px}
+  .stage-col .stage-num.shielded{width:32px;height:42px;font-size:14px}
 }
 @media (max-width:768px){
   .chrome{padding:10px 14px}
@@ -374,11 +410,16 @@ main{min-height:50vh}
   .brand .sub{font-size:14px}
   .toolbar{padding:10px 12px;gap:8px}
   .toolbar .search{min-width:140px}
-  .balance-panel{padding:10px 12px}
   .view-toggle{margin-left:0}
-  .cards-list{padding:12px;gap:10px}
-  .card-row{grid-template-columns:1fr;gap:12px;padding:12px}
-  .row-preview{justify-self:center}
+  .cards-list{padding:10px;gap:8px}
+  .card-row{grid-template-columns:1fr;grid-template-rows:none;gap:8px;padding:10px}
+  .card-row .row-preview,.card-row .row-info,.card-row .stage-col{grid-column:auto;grid-row:auto}
+  .card-row .row-preview .kcard{--sz:min(80vw,260px)}
+  .stage-col{flex-direction:row;align-items:center;gap:10px;padding:6px 10px}
+  .stage-col .stage-num{flex-shrink:0}
+  .stage-col .stage-cell{flex:1;min-height:28px;text-align:left;justify-content:flex-start}
+  .stage-col.empty{justify-content:center;min-height:38px}
+  .stage-col.empty.disabled{display:none}
   .cards-grid{padding:14px;gap:16px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
   .modal{padding:16px}
 }
@@ -390,12 +431,10 @@ main{min-height:50vh}
   .chrome-actions .btn{padding:4px 8px;font-size:12px}
   .autosave{font-size:12px;min-width:0}
   .btn{padding:6px 10px;font-size:13px;min-height:32px}
-  .metric-grid{grid-template-columns:1fr}
   .chip{padding:4px 10px;font-size:12px;min-height:28px}
-  .row-stages{grid-template-columns:40px 1fr;gap:4px 8px}
-  .row-stages .rs-head:nth-child(3){display:none}
-  .row-stages .stage-num{grid-row:span 2;align-self:start;margin-top:2px}
-  .stage-cell:nth-of-type(2n){grid-column:2;grid-row:auto}
+  .stage-col{flex-direction:column;align-items:stretch;gap:6px;padding:8px}
+  .stage-col .stage-num{align-self:center}
+  .stage-col .stage-cell{text-align:center;justify-content:center}
   .cards-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
   .kcard{--sz:140px}
   .kcard.sm{--sz:130px}
@@ -404,19 +443,22 @@ main{min-height:50vh}
   .modal,.confirm-box{padding:14px}
 }
 
+/* ── PRINT (PDF export) ── */
+#print-area{display:none}
+@media print{
+  @page{size:A4;margin:1cm}
+  html,body{background:#fff !important;overflow:visible !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important}
+  body > *:not(#print-area){display:none !important}
+  #print-area,#print-area *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important}
+  #print-area{display:grid !important;grid-template-columns:repeat(3,1fr);gap:.4cm;padding:0}
+  .print-card{page-break-inside:avoid;break-inside:avoid;display:flex;flex-direction:column;align-items:center;gap:2px}
+  .print-card .kcard{--sz:6cm;box-shadow:none !important;transform:none !important}
+  .print-card .print-label{font-family:'Kalam',sans-serif;font-size:9pt;color:#333;text-align:center;margin-top:2px}
+}
+
 /* ── REDUCED MOTION ── */
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
-}
-@media print{
-  @page{size:A4;margin:10mm}
-  html,body{background:#fff;color:#000}
-  .chrome,.toolbar,.balance-panel,.grid-item .gi-actions,.gi-name,.gi-meta,.row-info,.row-stages,.cards-table-wrap,.empty-state{display:none !important}
-  main{display:block}
-  .cards-list,.cards-grid{display:grid !important;grid-template-columns:repeat(3,58mm);gap:6mm;padding:0;margin:0;max-width:none}
-  .card-row,.grid-item{display:block;border:none;box-shadow:none;background:transparent;padding:0;margin:0;break-inside:avoid}
-  .row-preview{display:block;min-height:0}
-  .kcard{--sz:58mm !important;box-shadow:none !important;break-inside:avoid}
 }
 </style>
 </head>
@@ -433,27 +475,16 @@ main{min-height:50vh}
     </div>
     <div class="chrome-actions">
       <span class="autosave" id="autosave-status" role="status" aria-live="polite"></span>
-      <button class="btn ghost" id="btn-undo" aria-label="Annuler la dernière modification" disabled>↶ Undo</button>
-      <button class="btn ghost" id="btn-redo" aria-label="Rétablir la modification" disabled>↷ Redo</button>
       <button class="theme-toggle" id="theme-toggle" aria-label="Basculer thème sombre" title="Thème sombre"><span aria-hidden="true">🌙</span></button>
       <button class="btn ghost" id="btn-import" aria-label="Importer JSON">↓ Import</button>
       <button class="btn ghost" id="btn-export" aria-label="Exporter JSON">↑ Export</button>
-      <button class="btn ghost" id="btn-backup" aria-label="Télécharger une sauvegarde JSON">Backup</button>
-      <button class="btn ghost" id="btn-csv" aria-label="Exporter un tableau CSV">CSV</button>
-      <button class="btn teal" id="btn-print" aria-label="Imprimer les cartes">Imprimer</button>
+      <button class="btn" id="btn-pdf" aria-label="Exporter PDF (A4)">🖨 PDF</button>
     </div>
   </div>
 </header>
 
 <div class="toolbar">
   <div class="tb-group">
-    <select class="template-select" id="template-select" aria-label="Modèle de nouvelle carte">
-      <option value="building">Bâtiment</option>
-      <option value="exploration">Exploration</option>
-      <option value="treasure">Trésor</option>
-      <option value="action">Action</option>
-      <option value="blank">Vide</option>
-    </select>
     <button class="btn primary" id="btn-new-card">＋ Nouvelle carte</button>
     <div class="search"><span aria-hidden="true">🔍</span><input type="text" id="search-input" placeholder="chercher…" aria-label="Rechercher une carte"/></div>
   </div>
@@ -473,15 +504,23 @@ main{min-height:50vh}
     <span class="chip" data-res="iron" tabindex="0" role="button"><span class="res iron sm" aria-hidden="true">F</span> Fer</span>
     <span class="chip" data-res="water" tabindex="0" role="button"><span class="res water sm" aria-hidden="true">E</span> Eau</span>
   </div>
+  <div class="tb-sep" aria-hidden="true"></div>
+  <label class="sort-ctrl" aria-label="Trier les cartes"><span class="sort-ico" aria-hidden="true">⇅</span>
+    <select id="sort-select">
+      <option value="custom">Ordre d'ajout</option>
+      <option value="name">Nom (A→Z)</option>
+      <option value="name-desc">Nom (Z→A)</option>
+      <option value="type">Type</option>
+    </select>
+  </label>
   <div class="view-toggle" role="group" aria-label="Mode d'affichage">
     <button class="vt-btn on" data-mode="list" aria-pressed="true"><span aria-hidden="true">☰</span> Liste</button>
     <button class="vt-btn" data-mode="grid" aria-pressed="false"><span aria-hidden="true">⊞</span> Grille</button>
-    <button class="vt-btn" data-mode="table" aria-pressed="false"><span aria-hidden="true">▦</span> Tableau</button>
   </div>
 </div>
 
-<section class="balance-panel" id="balance-panel" aria-label="Analyse d'équilibrage"></section>
 <main id="cards-container" class="cards-list" aria-label="Cartes"></main>
+<div id="print-area" aria-hidden="true"></div>
 
 <!-- Cell-edit modal -->
 <div class="modal-overlay" id="cell-modal" role="dialog" aria-modal="true" aria-labelledby="cell-modal-title">
@@ -500,7 +539,6 @@ main{min-height:50vh}
     <h3 id="io-modal-title">Export JSON<button class="modal-close" id="io-close" aria-label="Fermer">✕</button></h3>
     <textarea id="io-textarea" spellcheck="false" aria-label="Contenu JSON"></textarea>
     <div class="modal-actions">
-      <button class="btn ghost" id="io-secondary" type="button">Télécharger</button>
       <button class="btn primary" id="io-action">Copier</button>
     </div>
   </div>
@@ -675,36 +713,16 @@ const state = {
   typeFilter: 'all',
   resFilter: null,
   searchQ: '',
+  sortBy: 'custom',
   viewMode: 'list',
   editing: null,
-  undoStack: [],
-  redoStack: [],
-  lastSnapshot: '',
-  historyLocked: false,
 };
 
 // ═══════════════════════════════════
 // PERSISTENCE
 // ═══════════════════════════════════
-function snapshotCards(){ return JSON.stringify(state.cards); }
-function updateHistoryButtons(){
-  const undo=document.getElementById('btn-undo');
-  const redo=document.getElementById('btn-redo');
-  if(undo) undo.disabled = !state.undoStack.length;
-  if(redo) redo.disabled = !state.redoStack.length;
-}
 function save(){
-  const next = snapshotCards();
-  if(!state.historyLocked && state.lastSnapshot && next!==state.lastSnapshot){
-    state.undoStack.push(state.lastSnapshot);
-    if(state.undoStack.length>60) state.undoStack.shift();
-    state.redoStack = [];
-    state.lastSnapshot = next;
-  } else if(!state.lastSnapshot) {
-    state.lastSnapshot = next;
-  }
-  localStorage.setItem('kr-cards', next);
-  updateHistoryButtons();
+  localStorage.setItem('kr-cards', JSON.stringify(state.cards));
   const el = document.getElementById('autosave-status');
   el.textContent = '✓ sauvegardé';
   clearTimeout(save._t);
@@ -719,187 +737,22 @@ function migrateBonus(b){
   if(!b || typeof b==='object') return {...emptyBonus(),...(b||{})};
   return {...emptyBonus(), note: b==='—'?'':b};
 }
-function normalizeCost(cost={}){
-  return RES_TYPES.reduce((acc,r)=>{ acc[r]=Math.max(0,Math.min(9,Number(cost?.[r])||0)); return acc; }, {});
-}
-function normalizeStep(step={}){
-  return {bonus:migrateBonus(step.bonus), cost:normalizeCost(step.cost), shield:!!step.shield};
-}
-function normalizeCard(card={}, index=0){
-  const steps = Array.isArray(card.steps) && card.steps.length ? card.steps.slice(0,4).map(normalizeStep) : [makeStep(emptyBonus(),makeCost())];
-  return {
-    id: String(card.id||newId()+index),
-    name: String(card.name||'Carte sans nom'),
-    type: TYPE_META[card.type] ? card.type : 'building',
-    image: card.image||null,
-    steps,
-  };
-}
-function normalizeCards(cards){
-  if(!Array.isArray(cards)) throw new Error('Format invalide');
-  return cards.map(normalizeCard);
-}
 function load(){
   const raw = localStorage.getItem('kr-cards');
   if(raw){
     try{
-      state.cards = normalizeCards(JSON.parse(raw));
+      const cards = JSON.parse(raw);
+      cards.forEach(c=>c.steps?.forEach(s=>{ s.bonus=migrateBonus(s.bonus); }));
+      state.cards = cards;
     }catch{ state.cards = JSON.parse(JSON.stringify(DEFAULT_CARDS)); }
   } else {
     state.cards = JSON.parse(JSON.stringify(DEFAULT_CARDS));
   }
   const mode = localStorage.getItem('kr-view-mode');
-  if(mode==='grid'||mode==='list'||mode==='table') state.viewMode = mode;
-  state.lastSnapshot = snapshotCards();
-  updateHistoryButtons();
+  if(mode==='grid'||mode==='list') state.viewMode = mode;
 }
 function getCard(id){ return state.cards.find(c=>c.id===id)||null; }
 function getStage(cardId){ return state.stageByCard[cardId]||0; }
-function restoreSnapshot(snapshot, msg){
-  clearTimeout(_saveDebounceT);
-  state.historyLocked = true;
-  state.cards = normalizeCards(JSON.parse(snapshot));
-  state.lastSnapshot = snapshotCards();
-  localStorage.setItem('kr-cards', state.lastSnapshot);
-  state.historyLocked = false;
-  updateHistoryButtons();
-  renderCards();
-  showStatus(msg);
-}
-function undo(){
-  const current = snapshotCards();
-  if(current!==state.lastSnapshot){
-    state.redoStack.push(current);
-    restoreSnapshot(state.lastSnapshot,'Annulé');
-    return;
-  }
-  if(!state.undoStack.length) return;
-  state.redoStack.push(snapshotCards());
-  const prev = state.undoStack.pop();
-  restoreSnapshot(prev,'Annulé');
-}
-function redo(){
-  if(!state.redoStack.length) return;
-  state.undoStack.push(snapshotCards());
-  const next = state.redoStack.pop();
-  restoreSnapshot(next,'Rétabli');
-}
-
-// ═══════════════════════════════════
-// BALANCE / VALIDATION HELPERS
-// ═══════════════════════════════════
-function addResourceTotals(target, source, prefix=''){
-  RES_TYPES.forEach(r=>{ target[r] = (target[r]||0) + (Number(source?.[prefix+r])||0); });
-}
-function emptyResourceTotals(){ return RES_TYPES.reduce((acc,r)=>{ acc[r]=0; return acc; }, {}); }
-function sumResources(o){ return RES_TYPES.reduce((sum,r)=>sum+(Number(o?.[r])||0),0); }
-function resourceTotalsHtml(totals, size='sm'){
-  const parts = RES_TYPES.filter(r=>(totals[r]||0)>0).map(r=>resHtml(r,totals[r],size));
-  return parts.length ? parts.join('') : '—';
-}
-function cardStats(card){
-  const cost = emptyResourceTotals();
-  const gain = emptyResourceTotals();
-  const prod = emptyResourceTotals();
-  const stat = {cost,gain,prod,pv:0,workers:0,actions:0,draw:0,explorers:0,shields:0,chains:0,notes:0,emptySteps:0};
-  card.steps.forEach(step=>{
-    addResourceTotals(cost, step.cost);
-    addResourceTotals(gain, step.bonus);
-    addResourceTotals(prod, step.bonus, 'prod_');
-    stat.pv += Number(step.bonus?.pv)||0;
-    stat.workers += Number(step.bonus?.workers)||0;
-    stat.actions += Number(step.bonus?.actions)||0;
-    stat.draw += Number(step.bonus?.draw)||0;
-    stat.explorers += Number(step.bonus?.explorers)||0;
-    stat.shields += step.shield ? 1 : 0;
-    stat.chains += step.bonus?.chain ? 1 : 0;
-    stat.notes += step.bonus?.note ? 1 : 0;
-    if(!hasCost(step.cost) && !renderBonusHtml(step.bonus) && !step.shield) stat.emptySteps++;
-  });
-  stat.totalCost = sumResources(cost);
-  stat.totalGain = sumResources(gain);
-  stat.totalProd = sumResources(prod);
-  stat.value = stat.totalGain + stat.totalProd*3 + stat.pv*2 + stat.workers*2 + stat.actions*2 + stat.draw*1.5 + stat.explorers*1.5 + stat.shields + stat.chains*2;
-  stat.score = Math.round((stat.value - stat.totalCost*1.15 - Math.max(0,card.steps.length-2)*.5)*10)/10;
-  return stat;
-}
-function cardSearchText(card){
-  const meta = TYPE_META[card.type]||{};
-  const bits = [card.name, card.type, meta.label];
-  card.steps.forEach((s,i)=>{
-    bits.push(STAGE_NUMS[i], s.shield?'bouclier protege shield':'');
-    RES_TYPES.forEach(r=>{
-      if(s.cost?.[r]) bits.push('cout', RES_NAMES[r], r, String(s.cost[r]));
-      if(s.bonus?.[r]) bits.push('bonus', RES_NAMES[r], r, String(s.bonus[r]));
-      if(s.bonus?.['prod_'+r]) bits.push('production', RES_NAMES[r], r, String(s.bonus['prod_'+r]));
-    });
-    ['pv','workers','actions','draw','explorers','note','chain'].forEach(k=>{ if(s.bonus?.[k]) bits.push(k, String(s.bonus[k])); });
-  });
-  return bits.join(' ').toLowerCase();
-}
-function collectIssues(cards=state.cards){
-  const issues = [];
-  const imageIssues = [];
-  const names = new Map();
-  cards.forEach(card=>{
-    const key = card.name.trim().toLowerCase();
-    if(key) names.set(key,(names.get(key)||0)+1);
-  });
-  cards.forEach(card=>{
-    const stats = cardStats(card);
-    if(!card.name.trim()) issues.push({level:'bad',card,message:'Nom manquant',tag:'donnée'});
-    if(names.get(card.name.trim().toLowerCase())>1) issues.push({level:'warn',card,message:'Nom en double',tag:'donnée'});
-    if(!card.image) imageIssues.push({level:'warn',card,message:'Pas encore d’illustration',tag:'prod'});
-    if(stats.emptySteps) issues.push({level:'warn',card,message:`${stats.emptySteps} étape vide`,tag:'design'});
-    if(card.type==='building' && stats.totalCost===0 && stats.value>0) issues.push({level:'bad',card,message:'Bâtiment gratuit avec bonus',tag:'balance'});
-    if(stats.score>=15) issues.push({level:'warn',card,message:`Score très haut (${stats.score})`,tag:'balance'});
-    if(stats.score<=-5 && stats.value>0) issues.push({level:'warn',card,message:`Score très bas (${stats.score})`,tag:'balance'});
-    card.steps.forEach((step,i)=>{
-      if((step.bonus?.note||'').length>28) issues.push({level:'warn',card,message:`Note longue étape ${STAGE_NUMS[i]}`,tag:'lisibilité'});
-    });
-  });
-  return issues.concat(imageIssues.slice(0,3));
-}
-function deckStats(cards=state.cards){
-  const totals = {cards:cards.length,steps:0,cost:0,pv:0,prod:0,warnings:collectIssues(cards).length};
-  cards.forEach(card=>{
-    const s = cardStats(card);
-    totals.steps += card.steps.length;
-    totals.cost += s.totalCost;
-    totals.pv += s.pv;
-    totals.prod += s.totalProd;
-  });
-  return totals;
-}
-function renderBalancePanel(filtered=state.cards){
-  const panel = document.getElementById('balance-panel');
-  if(!panel) return;
-  const all = deckStats(state.cards);
-  const visible = deckStats(filtered);
-  const issues = collectIssues(state.cards).slice(0,8);
-  const issueHtml = issues.length ? issues.map(i=>`
-    <div class="issue ${i.level}">
-      <span class="tag">${escapeHtml(i.tag)}</span>
-      <span><b>${escapeHtml(i.card.name)}</b> · ${escapeHtml(i.message)}</span>
-      <button class="btn ghost jump" data-action="jump" data-card="${i.card.id}">voir</button>
-    </div>`).join('') : `<div class="issue-empty">Aucun gros caillou dans la chaussure pour l’instant.</div>`;
-  panel.innerHTML = `
-    <div class="balance-inner">
-      <div class="balance-card">
-        <h2>Équilibrage rapide</h2>
-        <div class="metric-grid">
-          <div class="metric"><div class="k">Cartes</div><div class="v">${all.cards}</div><div class="s">${visible.cards} visibles</div></div>
-          <div class="metric"><div class="k">Étapes</div><div class="v">${all.steps}</div><div class="s">${(all.steps/Math.max(1,all.cards)).toFixed(1)} / carte</div></div>
-          <div class="metric"><div class="k">Coût total</div><div class="v">${all.cost}</div><div class="s">ressources</div></div>
-          <div class="metric"><div class="k">PV + prod.</div><div class="v">${all.pv + all.prod}</div><div class="s">${all.pv} PV · ${all.prod} prod.</div></div>
-        </div>
-      </div>
-      <div class="balance-card">
-        <h2>Points à vérifier <span class="chip">${all.warnings}</span></h2>
-        <div class="issue-list">${issueHtml}</div>
-      </div>
-    </div>`;
-}
 
 // ═══════════════════════════════════
 // RENDER HELPERS
@@ -930,7 +783,7 @@ function renderBonusHtml(b){
   if(b.draw>0) parts.push(`<span class="bdraw">${b.draw>1?b.draw:''}</span>`);
   if(b.explorers>0) parts.push(`<span>+${b.explorers}🏔</span>`);
   if(b.chain&&CHAIN_LABELS[b.chain]) parts.push(`<span class="bchain">${CHAIN_LABELS[b.chain]}</span>`);
-  if(b.note) parts.push(`<span style="font-family:'Caveat';font-size:10px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block">${escapeHtml(b.note)}</span>`);
+  if(b.note) parts.push(`<span style="font-family:'Caveat';font-size:10px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block">${b.note}</span>`);
   return parts.join('');
 }
 
@@ -955,10 +808,13 @@ function renderCardHtml(card, sizeClass='', interactive=false){
     const shieldCls = step.shield ? ' shielded' : '';
     const editCls = interactive ? ' editable' : '';
     corners += `<div class="corner${shieldCls} ${STAGE_POSITIONS[i]}${editCls}" data-field="shield" data-stage="${i}"${interactive?' role="button" tabindex="0"':''} aria-label="Étape ${STAGE_NUMS[i]}${step.shield?' protégée':''}">${STAGE_NUMS[i]}</div>`;
-    if(hasCost(step.cost))
-      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${editCls}" data-stage="${i}" data-field="cost"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[i]}">${costHtml(step.cost,'sm')}</div>`;
-    else if(interactive)
-      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]} editable" data-stage="${i}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[i]}" style="opacity:.45">＋</div>`;
+    // Ribbon at corner i sits between stage i and stage i+1 → shows cost of next stage (what you pay to advance)
+    const nextIdx = (i + 1) % n;
+    const nextStep = card.steps[nextIdx];
+    if(nextStep && hasCost(nextStep.cost))
+      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${editCls}" data-stage="${nextIdx}" data-field="cost"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">${costHtml(nextStep.cost,'sm')}</div>`;
+    else if(interactive && nextStep)
+      ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]} editable" data-stage="${nextIdx}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[nextIdx]}" style="opacity:.45">＋</div>`;
     const bHtml = renderBonusHtml(step.bonus);
     if(bHtml)
       bonuses += `<div class="bonus ${STAGE_POSITIONS[i]}${editCls}" data-stage="${i}" data-field="bonus"${interactive?' role="button" tabindex="0"':''} aria-label="Bonus étape ${STAGE_NUMS[i]}">${bHtml}</div>`;
@@ -983,11 +839,21 @@ function filteredCards(){
   if(state.typeFilter!=='all') cards = cards.filter(c=>c.type===state.typeFilter);
   if(state.resFilter) cards = cards.filter(c=>c.steps.some(s=>s.cost[state.resFilter]>0)||c.steps.some(s=>s.bonus[state.resFilter]>0));
   if(state.searchQ){
-    const terms = state.searchQ.toLowerCase().split(/\s+/).filter(Boolean);
-    cards = cards.filter(c=>{
-      const hay = cardSearchText(c);
-      return terms.every(t=>hay.includes(t));
-    });
+    const q = state.searchQ.toLowerCase();
+    cards = cards.filter(c=>c.name.toLowerCase().includes(q));
+  }
+  if(state.sortBy && state.sortBy !== 'custom'){
+    const coll = new Intl.Collator('fr', {sensitivity:'base', numeric:true});
+    cards = cards.slice();
+    if(state.sortBy === 'name') cards.sort((a,b)=>coll.compare(a.name, b.name));
+    else if(state.sortBy === 'name-desc') cards.sort((a,b)=>coll.compare(b.name, a.name));
+    else if(state.sortBy === 'type'){
+      const order = ['building','exploration','treasure','action'];
+      cards.sort((a,b)=>{
+        const d = order.indexOf(a.type) - order.indexOf(b.type);
+        return d !== 0 ? d : coll.compare(a.name, b.name);
+      });
+    }
   }
   return cards;
 }
@@ -1002,35 +868,56 @@ function updateCounts(){
 function renderCards(){
   updateCounts();
   const container = document.getElementById('cards-container');
+  container.className = state.viewMode==='grid' ? 'cards-grid' : 'cards-list';
   const cards = filteredCards();
-  renderBalancePanel(cards);
-  container.className = state.viewMode==='grid' ? 'cards-grid' : state.viewMode==='table' ? 'cards-table-host' : 'cards-list';
   if(!cards.length){
     container.innerHTML = `<div class="empty-state"><div class="icon" aria-hidden="true">🏰</div><div>Aucune carte ne correspond aux filtres.</div></div>`;
     return;
   }
-  container.innerHTML = state.viewMode==='table'
-    ? renderCardTable(cards)
-    : cards.map(c=> state.viewMode==='grid' ? renderCardGridItem(c) : renderCardRow(c)).join('');
+  container.innerHTML = cards.map(c=> state.viewMode==='grid' ? renderCardGridItem(c) : renderCardRow(c)).join('');
 }
 
 function renderCardRow(card){
-  const meta = TYPE_META[card.type];
   const numSteps = card.steps.length;
-  const stageRows = card.steps.map((step,i)=>{
-    const shieldCls = step.shield ? ' shielded' : '';
-    const costHas = hasCost(step.cost);
-    const bonusHas = renderBonusHtml(step.bonus);
-    return `
-      <div class="stage-num${shieldCls}" data-card="${card.id}" data-field="shield-num" data-stage="${i}" role="button" tabindex="0" aria-pressed="${step.shield?'true':'false'}" aria-label="Étape ${STAGE_NUMS[i]} ${step.shield?'protégée — cliquer pour désactiver':'non protégée — cliquer pour activer'}">${STAGE_NUMS[i]}</div>
-      <div class="stage-cell${costHas?'':' empty'}" data-card="${card.id}" data-field="cost" data-stage="${i}" role="button" tabindex="0" aria-label="Éditer coût étape ${STAGE_NUMS[i]}">${costHas?costHtml(step.cost,'sm'):'—'}</div>
-      <div class="stage-cell${bonusHas?'':' empty'}" data-card="${card.id}" data-field="bonus" data-stage="${i}" role="button" tabindex="0" aria-label="Éditer bonus étape ${STAGE_NUMS[i]}">${bonusHas||'—'}</div>
-    `;
-  }).join('');
+  const copies = card.copies != null ? card.copies : 1;
   const typeOptions = Object.entries(TYPE_META).map(([k,v])=>`<option value="${k}"${card.type===k?' selected':''}>${v.icon} ${v.label}</option>`).join('');
   const imgZoneInner = card.image
-    ? `<img src="${card.image}" class="inline-img-thumb" alt=""/><span class="inline-img-label">Glisser pour remplacer</span><button type="button" class="btn-mini img-clear" data-card="${card.id}" data-action="image-clear" aria-label="Supprimer l'image">✕</button>`
-    : `<span class="inline-img-ghost">Glisser une image ou cliquer</span>`;
+    ? `<img src="${card.image}" class="inline-img-thumb" alt=""/><span class="inline-img-label">Remplacer</span><button type="button" class="btn-mini img-clear" data-card="${card.id}" data-action="image-clear" aria-label="Supprimer l'image">✕</button>`
+    : `<span class="inline-img-ghost">Glisser / cliquer</span>`;
+
+  const stageCols = [];
+  for(let i=0;i<4;i++){
+    if(i >= numSteps){
+      const canAdd = (i === numSteps) && numSteps < 4;
+      if(canAdd){
+        stageCols.push(`<div class="stage-col empty" data-card="${card.id}" data-action="stage-add" role="button" tabindex="0" aria-label="Ajouter l'étape ${STAGE_NUMS[i]}"><span class="add-stage-ico" aria-hidden="true">+</span></div>`);
+      } else {
+        stageCols.push(`<div class="stage-col empty disabled" aria-hidden="true"></div>`);
+      }
+      continue;
+    }
+    const step = card.steps[i];
+    const shieldCls = step.shield ? ' shielded' : '';
+    // Cost under stage i = cost to build/reach stage i (stage I is usually empty — cycle IV→I)
+    const costHas = hasCost(step.cost);
+    const bonusHtml = renderBonusHtml(step.bonus);
+    const canDelete = numSteps > 1;
+    stageCols.push(`
+      <div class="stage-col" data-stage="${i}">
+        ${canDelete?`<button type="button" class="stage-del" data-card="${card.id}" data-action="stage-delete" data-stage="${i}" aria-label="Supprimer l'étape ${STAGE_NUMS[i]}">✕</button>`:''}
+        <div class="stage-num${shieldCls}" data-card="${card.id}" data-field="shield-num" data-stage="${i}" role="button" tabindex="0" aria-pressed="${step.shield?'true':'false'}" aria-label="Étape ${STAGE_NUMS[i]} ${step.shield?'protégée — cliquer pour désactiver':'non protégée — cliquer pour activer'}">${STAGE_NUMS[i]}</div>
+        <div class="stage-box cost" data-card="${card.id}" data-field="cost" data-stage="${i}" role="button" tabindex="0" aria-label="Éditer coût de l'étape ${STAGE_NUMS[i]}">
+          <div class="stage-box-label">Coût${i===0?' (cycle)':''}</div>
+          <div class="stage-box-content${costHas?'':' empty'}">${costHas?costHtml(step.cost,'sm'):'—'}</div>
+        </div>
+        <div class="stage-box bonus-box" data-card="${card.id}" data-field="bonus" data-stage="${i}" role="button" tabindex="0" aria-label="Éditer bonus étape ${STAGE_NUMS[i]}">
+          <div class="stage-box-label">Bonus</div>
+          <div class="stage-box-content${bonusHtml?'':' empty'}">${bonusHtml||'—'}</div>
+        </div>
+      </div>
+    `);
+  }
+
   return `
     <article class="card-row" data-id="${card.id}">
       <div class="row-preview">${renderCardHtml(card,'md',false)}</div>
@@ -1043,14 +930,6 @@ function renderCardRow(card){
           <span class="label">Type</span>
           <select class="inline-select" data-card="${card.id}" data-field="type-direct" aria-label="Type de carte">${typeOptions}</select>
         </label>
-        <div class="info-inline">
-          <span class="label">Étapes</span>
-          <div class="inline-stepper" role="group" aria-label="Nombre d'étapes">
-            <button type="button" class="btn-mini" data-card="${card.id}" data-action="steps-minus" aria-label="Diminuer étapes"${numSteps<=1?' disabled':''}>−</button>
-            <b>${numSteps}</b>
-            <button type="button" class="btn-mini" data-card="${card.id}" data-action="steps-plus" aria-label="Augmenter étapes"${numSteps>=4?' disabled':''}>+</button>
-          </div>
-        </div>
         <label class="info-inline">
           <span class="label">Image</span>
           <div class="inline-imgzone" data-card="${card.id}" data-field="image-drop">
@@ -1058,19 +937,20 @@ function renderCardRow(card){
             <input type="file" accept="image/*" data-card="${card.id}" data-field="image-file" aria-label="Téléverser illustration"/>
           </div>
         </label>
+        <div class="info-inline">
+          <span class="label">Copies</span>
+          <div class="inline-stepper" role="group" aria-label="Nombre de copies">
+            <button type="button" class="btn-mini" data-card="${card.id}" data-action="copies-minus" aria-label="Diminuer copies"${copies<=1?' disabled':''}>−</button>
+            <b data-copies-value="${card.id}">${copies}</b>
+            <button type="button" class="btn-mini" data-card="${card.id}" data-action="copies-plus" aria-label="Augmenter copies">+</button>
+          </div>
+        </div>
         <div class="row-actions">
-          <button class="btn ghost" data-card="${card.id}" data-action="move-up" aria-label="Monter ${escapeHtml(card.name)}">↑</button>
-          <button class="btn ghost" data-card="${card.id}" data-action="move-down" aria-label="Descendre ${escapeHtml(card.name)}">↓</button>
-          <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer ${escapeHtml(card.name)}">⎘ Dupliquer</button>
-          <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer ${escapeHtml(card.name)}">🗑</button>
+          <button type="button" class="btn-row-act" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer ${escapeHtml(card.name)}">⎘ Dupliquer</button>
+          <button type="button" class="btn-row-act danger" data-card="${card.id}" data-action="delete" aria-label="Supprimer ${escapeHtml(card.name)}">🗑 Supprimer</button>
         </div>
       </div>
-      <div class="row-stages">
-        <div class="rs-head">Étape</div>
-        <div class="rs-head">Coût</div>
-        <div class="rs-head">Bonus</div>
-        ${stageRows}
-      </div>
+      ${stageCols.join('')}
     </article>
   `;
 }
@@ -1085,49 +965,11 @@ function renderCardGridItem(card){
       <div class="gi-actions">
         <button class="btn ghost" data-card="${card.id}" data-action="steps" aria-label="Nombre d'étapes">#</button>
         <button class="btn ghost" data-card="${card.id}" data-action="image" aria-label="Illustration">🖼</button>
-        <button class="btn ghost" data-card="${card.id}" data-action="move-up" aria-label="Monter">↑</button>
-        <button class="btn ghost" data-card="${card.id}" data-action="move-down" aria-label="Descendre">↓</button>
         <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer">⎘</button>
         <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer">🗑</button>
       </div>
     </div>
   `;
-}
-
-function renderCardTable(cards){
-  const rows = cards.map(card=>{
-    const meta = TYPE_META[card.type];
-    const s = cardStats(card);
-    const scoreCls = s.score>=12 ? ' hot' : s.score<=0 ? ' cold' : '';
-    return `
-      <tr data-id="${card.id}">
-        <td><span class="table-name" data-card="${card.id}" data-field="name" role="button" tabindex="0">${escapeHtml(card.name)}</span></td>
-        <td data-card="${card.id}" data-field="type" role="button" tabindex="0">${meta.icon} ${meta.label}</td>
-        <td>${card.steps.length}</td>
-        <td>${resourceTotalsHtml(s.cost,'sm')}</td>
-        <td>${resourceTotalsHtml(s.gain,'sm')}</td>
-        <td>${resourceTotalsHtml(s.prod,'sm')}</td>
-        <td>${s.pv}</td>
-        <td>${s.workers}</td>
-        <td>${s.draw}</td>
-        <td><span class="score-pill${scoreCls}">${s.score}</span></td>
-        <td class="table-actions">
-          <button class="btn ghost" data-card="${card.id}" data-action="jump">ouvrir</button>
-          <button class="btn ghost" data-card="${card.id}" data-action="move-up">↑</button>
-          <button class="btn ghost" data-card="${card.id}" data-action="move-down">↓</button>
-          <button class="btn ghost" data-card="${card.id}" data-action="duplicate">dupliquer</button>
-          <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)">suppr.</button>
-        </td>
-      </tr>`;
-  }).join('');
-  return `<div class="cards-table-wrap">
-    <table class="cards-table">
-      <thead><tr>
-        <th>Carte</th><th>Type</th><th>Étapes</th><th>Coût</th><th>Gain</th><th>Prod.</th><th>PV</th><th>Ouv.</th><th>Pioche</th><th>Score</th><th>Actions</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  </div>`;
 }
 
 // ═══════════════════════════════════
@@ -1350,56 +1192,28 @@ function bindEditorEvents(card, field, stage){
 // ═══════════════════════════════════
 // CARD ACTIONS
 // ═══════════════════════════════════
-function createCardFromTemplate(kind='building'){
-  const base = {id:newId(), image:null};
-  if(kind==='exploration') return {...base,name:'Nouvelle exploration',type:'exploration',steps:[
-    makeStep(makeBonus({note:'Danger 1'}), makeCost(), false),
-    makeStep(makeBonus({wood:1}), makeCost(), false),
-    makeStep(makeBonus({wheat:1}), makeCost(), false),
-    makeStep(makeBonus(), makeCost(), false),
-  ]};
-  if(kind==='treasure') return {...base,name:'Nouveau trésor',type:'treasure',steps:[
-    makeStep(makeBonus({pv:2}), makeCost(), false),
-  ]};
-  if(kind==='action') return {...base,name:'Nouvelle action',type:'action',steps:[
-    makeStep(makeBonus({note:'Effet immédiat'}), makeCost(), false),
-    makeStep(makeBonus(), makeCost(), false),
-    makeStep(makeBonus(), makeCost(), false),
-    makeStep(makeBonus({draw:1}), makeCost(), false),
-  ]};
-  if(kind==='blank') return {...base,name:'Carte sans nom',type:'building',steps:[
-    makeStep(makeBonus(), makeCost(), false),
-  ]};
-  return {...base,name:'Nouveau bâtiment',type:'building',steps:[
-    makeStep(makeBonus(), makeCost(1), false),
-    makeStep(makeBonus({workers:1}), makeCost(1,1), false),
-    makeStep(makeBonus({pv:2}), makeCost(), true),
-  ]};
-}
 function addNewCard(){
-  const kind = document.getElementById('template-select')?.value || 'building';
-  const card = createCardFromTemplate(kind);
+  const card = {id:newId(),name:'Nouvelle carte',type:'building',image:null,copies:1,
+    steps:[makeStep(emptyBonus(),makeCost()),makeStep(emptyBonus(),makeCost())]};
   state.cards.push(card);
   save(); renderCards();
-  openCellEditor(card.id,'name');
 }
 function duplicateCard(id){
-  const card = getCard(id); if(!card) return;
+  const idx = state.cards.findIndex(c=>c.id===id);
+  if(idx < 0) return;
+  const card = state.cards[idx];
   const copy = JSON.parse(JSON.stringify(card));
   copy.id = newId();
   copy.name = card.name + ' (copie)';
-  state.cards.push(copy);
+  state.cards.splice(idx+1, 0, copy);
   save(); renderCards();
+  // Focus the new row's name input for immediate rename
+  requestAnimationFrame(()=>{
+    const input = document.querySelector(`.card-row[data-id="${copy.id}"] .inline-input[data-field="name-direct"]`);
+    if(input){ input.focus(); input.select(); }
+  });
 }
-function moveCard(id, delta){
-  const i = state.cards.findIndex(c=>c.id===id);
-  const j = i + delta;
-  if(i<0 || j<0 || j>=state.cards.length) return;
-  const [card] = state.cards.splice(i,1);
-  state.cards.splice(j,0,card);
-  save(); renderCards();
-  focusCard(id);
-}
+
 function confirmDelete(id){
   const card = getCard(id); if(!card) return;
   document.getElementById('confirm-msg').textContent = `Supprimer « ${card.name} » ?`;
@@ -1418,66 +1232,45 @@ function showStatus(msg){
   clearTimeout(showStatus._t);
   showStatus._t = setTimeout(()=>{ el.textContent=''; }, 2000);
 }
-function cssAttrValue(value){ return String(value).replace(/\\/g,'\\\\').replace(/"/g,'\\"'); }
-function focusCard(id){
-  if(state.viewMode==='table') setViewMode('list');
-  requestAnimationFrame(()=>{
-    const el = document.querySelector(`[data-id="${cssAttrValue(id)}"]`);
-    if(el){
-      el.scrollIntoView({behavior:'smooth',block:'center'});
-      el.classList.add('focus-pulse');
-      setTimeout(()=>el.classList.remove('focus-pulse'),900);
-      const target = el.querySelector('[data-field="name"],.inline-input,[tabindex="0"]');
-      if(target) target.focus();
-    }
-  });
-}
-function downloadText(filename, text, type='application/json'){
-  const blob = new Blob([text], {type});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),500);
-}
-function backupFilename(){
-  return `kingdom-reforged-${new Date().toISOString().slice(0,10)}.json`;
-}
-function downloadBackup(){
-  downloadText(backupFilename(), JSON.stringify(state.cards,null,2));
-  showStatus('Backup téléchargé');
-}
-function csvCell(v){ return `"${String(v??'').replace(/"/g,'""')}"`; }
-function downloadCsv(){
-  const rows = [['Nom','Type','Étapes','Coût total','Gain total','Production','PV','Ouvriers','Actions','Pioche','Explorateurs','Boucliers','Chaînes','Score','Notes']];
-  state.cards.forEach(card=>{
-    const s = cardStats(card);
-    const notes = card.steps.map((step,i)=>step.bonus?.note ? `${STAGE_NUMS[i]}: ${step.bonus.note}` : '').filter(Boolean).join(' | ');
-    rows.push([card.name,TYPE_META[card.type]?.label||card.type,card.steps.length,s.totalCost,s.totalGain,s.totalProd,s.pv,s.workers,s.actions,s.draw,s.explorers,s.shields,s.chains,s.score,notes]);
-  });
-  const csv = rows.map(r=>r.map(csvCell).join(',')).join('\r\n');
-  downloadText(`kingdom-reforged-${new Date().toISOString().slice(0,10)}.csv`, csv, 'text/csv;charset=utf-8');
-  showStatus('CSV téléchargé');
-}
-function printCards(){
-  if(state.viewMode==='table') setViewMode('grid');
-  requestAnimationFrame(()=>window.print());
-}
 
 // ═══════════════════════════════════
 // IMPORT / EXPORT
 // ═══════════════════════════════════
+function updateCopiesDisplay(card){
+  const el = document.querySelector(`[data-copies-value="${card.id}"]`);
+  if(el) el.textContent = card.copies != null ? card.copies : 1;
+  const row = document.querySelector(`.card-row[data-id="${card.id}"]`);
+  if(row){
+    const minus = row.querySelector('[data-action="copies-minus"]');
+    if(minus) minus.disabled = (card.copies||1) <= 1;
+  }
+}
+
+function exportToPDF(){
+  const cards = filteredCards();
+  if(!cards.length){ showStatus('Aucune carte à exporter'); return; }
+  const area = document.getElementById('print-area');
+  area.innerHTML = '';
+  let total = 0;
+  cards.forEach(card=>{
+    const copies = Math.max(1, card.copies != null ? card.copies : 1);
+    for(let i=0;i<copies;i++){
+      const wrap = document.createElement('div');
+      wrap.className = 'print-card';
+      wrap.innerHTML = renderCardHtml(card,'print',false) + `<div class="print-label">${escapeHtml(card.name)}</div>`;
+      area.appendChild(wrap);
+      total++;
+    }
+  });
+  showStatus(`Impression: ${total} carte${total>1?'s':''}`);
+  // Slight delay so layout settles before the print dialog snapshots the page
+  setTimeout(()=>{ window.print(); }, 60);
+}
+
 function openExport(){
   const modal=document.getElementById('io-modal');
   document.getElementById('io-modal-title').firstChild.nodeValue='Export JSON';
   document.getElementById('io-textarea').value=JSON.stringify(state.cards,null,2);
-  const secondary = document.getElementById('io-secondary');
-  secondary.style.display = '';
-  secondary.textContent = 'Télécharger';
-  secondary.onclick = ()=>downloadBackup();
   document.getElementById('io-action').textContent='Copier';
   document.getElementById('io-action').onclick=()=>{ navigator.clipboard.writeText(document.getElementById('io-textarea').value).then(()=>showStatus('Copié !')); };
   modal.classList.add('open');
@@ -1486,14 +1279,12 @@ function openImport(){
   const modal=document.getElementById('io-modal');
   document.getElementById('io-modal-title').firstChild.nodeValue='Import JSON';
   document.getElementById('io-textarea').value='';
-  const secondary = document.getElementById('io-secondary');
-  secondary.style.display = 'none';
-  secondary.onclick = null;
   document.getElementById('io-action').textContent='Importer';
   document.getElementById('io-action').onclick=()=>{
     try{
-      const parsed=JSON.parse(document.getElementById('io-textarea').value);
-      const cards=normalizeCards(Array.isArray(parsed) ? parsed : parsed.cards);
+      const cards=JSON.parse(document.getElementById('io-textarea').value);
+      if(!Array.isArray(cards)) throw new Error('Format invalide');
+      cards.forEach(c=>c.steps?.forEach(s=>{ s.bonus=migrateBonus(s.bonus); }));
       state.cards=cards;
       save(); renderCards();
       modal.classList.remove('open');
@@ -1576,13 +1367,9 @@ function setViewMode(mode){
 function bindEvents(){
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
   document.getElementById('btn-new-card').addEventListener('click', addNewCard);
-  document.getElementById('btn-undo').addEventListener('click', undo);
-  document.getElementById('btn-redo').addEventListener('click', redo);
   document.getElementById('btn-import').addEventListener('click', openImport);
   document.getElementById('btn-export').addEventListener('click', openExport);
-  document.getElementById('btn-backup').addEventListener('click', downloadBackup);
-  document.getElementById('btn-csv').addEventListener('click', downloadCsv);
-  document.getElementById('btn-print').addEventListener('click', printCards);
+  document.getElementById('btn-pdf').addEventListener('click', exportToPDF);
   document.getElementById('io-close').addEventListener('click', ()=>document.getElementById('io-modal').classList.remove('open'));
   document.getElementById('io-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
   document.getElementById('confirm-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
@@ -1594,6 +1381,11 @@ function bindEvents(){
 
   // Search
   document.getElementById('search-input').addEventListener('input', e=>{ state.searchQ=e.target.value; renderCards(); });
+  const sortSel = document.getElementById('sort-select');
+  if(sortSel){
+    sortSel.value = state.sortBy;
+    sortSel.addEventListener('change', e=>{ state.sortBy = e.target.value; renderCards(); });
+  }
 
   // Type filter
   document.getElementById('type-filter').addEventListener('click', e=>{
@@ -1623,10 +1415,6 @@ function bindEvents(){
 
   // View toggle
   document.querySelectorAll('.vt-btn').forEach(b=>b.addEventListener('click', ()=>setViewMode(b.dataset.mode)));
-  document.getElementById('balance-panel').addEventListener('click', e=>{
-    const action = e.target.closest('[data-action="jump"]');
-    if(action) focusCard(action.dataset.card);
-  });
 
   // Delegated clicks on cards container
   const container = document.getElementById('cards-container');
@@ -1642,31 +1430,35 @@ function bindEvents(){
       const a = action.dataset.action;
       if(a==='duplicate'){ duplicateCard(cardId); return; }
       if(a==='delete'){ confirmDelete(cardId); return; }
-      if(a==='jump'){ focusCard(cardId); return; }
-      if(a==='move-up'){ moveCard(cardId,-1); return; }
-      if(a==='move-down'){ moveCard(cardId,1); return; }
       if(a==='steps'){ openCellEditor(cardId,'steps',undefined,e); return; }
       if(a==='image'){ openCellEditor(cardId,'image',undefined,e); return; }
-      if(a==='steps-minus'){
-        if(card && card.steps.length>1){
-          card.steps.pop();
-          state.stageByCard[cardId]=Math.min(getStage(cardId),card.steps.length-1);
-          save(); renderCards();
-          requestAnimationFrame(()=>{
-            const btn = document.querySelector(`.card-row[data-id="${cardId}"] [data-action="steps-minus"]`);
-            if(btn) btn.focus();
-          });
-        }
-        return;
-      }
-      if(a==='steps-plus'){
+      if(a==='stage-add'){
         if(card && card.steps.length<4){
           card.steps.push(makeStep(emptyBonus(),makeCost()));
           save(); renderCards();
-          requestAnimationFrame(()=>{
-            const btn = document.querySelector(`.card-row[data-id="${cardId}"] [data-action="steps-plus"]`);
-            if(btn) btn.focus();
-          });
+        }
+        return;
+      }
+      if(a==='stage-delete'){
+        const st = action.dataset.stage != null ? +action.dataset.stage : -1;
+        if(card && st>=0 && card.steps.length>1){
+          card.steps.splice(st,1);
+          state.stageByCard[cardId]=Math.min(getStage(cardId),card.steps.length-1);
+          save(); renderCards();
+        }
+        return;
+      }
+      if(a==='copies-minus'){
+        if(card){
+          const cur = card.copies != null ? card.copies : 1;
+          if(cur > 1){ card.copies = cur - 1; updateCopiesDisplay(card); saveDebounced(); }
+        }
+        return;
+      }
+      if(a==='copies-plus'){
+        if(card){
+          const cur = card.copies != null ? card.copies : 1;
+          card.copies = Math.min(99, cur + 1); updateCopiesDisplay(card); saveDebounced();
         }
         return;
       }
@@ -1779,9 +1571,6 @@ function bindEvents(){
     }
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
     if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){ e.preventDefault(); save(); showStatus('✓ sauvegardé'); }
-    if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!e.shiftKey){ e.preventDefault(); undo(); }
-    if((e.metaKey||e.ctrlKey)&&(e.key.toLowerCase()==='y'||(e.key.toLowerCase()==='z'&&e.shiftKey))){ e.preventDefault(); redo(); }
-    if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='p'){ e.preventDefault(); printCards(); }
   });
 }
 
