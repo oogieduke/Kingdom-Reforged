@@ -25,6 +25,8 @@
   --t-fast:120ms;--t-med:220ms;--t-slow:380ms;
   --ease:cubic-bezier(.4,0,.2,1);
   --header-h:92px;
+  --grid-card-size:286px;
+  --grid-col-size:306px;
 }
 :root[data-theme="dark"]{
   --paper:#1c1a16;--paper-2:#26231d;--paper-3:#322d25;
@@ -153,6 +155,10 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .toolbar{display:flex;gap:10px;padding:8px 0 0;border-bottom:none;flex-wrap:nowrap;align-items:center;background:var(--paper);overflow-x:auto;scrollbar-width:none}
 .toolbar::-webkit-scrollbar{display:none}
 .tb-group{display:flex;gap:8px;align-items:center;flex-wrap:nowrap;flex-shrink:0}
+.new-card-wrap{position:relative;display:inline-flex}
+.new-card-menu{position:fixed;z-index:150;display:none;min-width:180px;background:var(--paper);border:2px solid var(--line);border-radius:8px;box-shadow:var(--shadow-lg);padding:6px}
+.new-card-menu.open{display:flex;flex-direction:column;gap:4px}
+.new-card-menu button{width:100%;justify-content:flex-start;box-shadow:none}
 .tb-sep{width:1.5px;align-self:stretch;background:var(--line);opacity:.35;margin:2px 4px}
 .search{display:flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:20px;padding:4px 12px;background:var(--paper-2);min-width:180px;max-width:260px}
 .search input{border:none;outline:none;background:transparent;flex:1;font-family:'Patrick Hand';font-size:15px;color:var(--ink);min-width:80px}
@@ -160,11 +166,7 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .sort-ctrl{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:10px;background:var(--paper);padding:2px 10px;box-shadow:var(--shadow-sm);font-family:'Kalam';font-weight:700;font-size:13px;color:var(--ink-soft)}
 .sort-ctrl .sort-ico{font-size:15px;color:var(--ink)}
 .sort-ctrl select{border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;padding:4px 2px;outline:none}
-.view-toggle{display:inline-flex;border:2px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-sm);margin-left:auto}
-.vt-btn{border:none;background:var(--paper);padding:6px 14px;cursor:pointer;font-family:'Kalam';font-weight:700;font-size:13px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:4px}
-.vt-btn.on{background:var(--ink);color:var(--paper)}
-.vt-btn:not(.on):hover{background:var(--paper-2)}
-.zoom-ctrl{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:8px;background:var(--paper);padding:3px 6px;box-shadow:var(--shadow-sm);font-family:'Kalam';font-weight:700;color:var(--ink)}
+.zoom-ctrl{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:8px;background:var(--paper);padding:3px 6px;box-shadow:var(--shadow-sm);font-family:'Kalam';font-weight:700;color:var(--ink);margin-left:auto}
 .zoom-ctrl button{width:26px;height:26px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);font-family:'Kalam';font-weight:700;cursor:pointer;color:var(--ink);display:grid;place-items:center}
 .zoom-ctrl button:hover:not(:disabled){background:var(--paper-2)}
 .zoom-ctrl button:disabled{opacity:.4;cursor:not-allowed}
@@ -280,15 +282,14 @@ main{min-height:50vh}
 .stage-cell.empty{opacity:.55;font-family:'Caveat';font-size:14px;color:var(--ink-ghost);font-style:italic}
 
 /* ── GRID MODE ── */
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px;padding:20px;max-width:1400px;margin:0 auto}
-.grid-item{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
-.grid-item .gi-name{font-family:'Kalam';font-weight:700;font-size:14px;text-align:center;color:var(--ink);cursor:pointer;padding:3px 6px;border-radius:6px;border:1.5px dashed transparent}
-.grid-item .gi-name:hover{border-color:var(--line);background:var(--focus-bg)}
-.grid-item .gi-meta{font-family:'Caveat';color:var(--ink-soft);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:4px}
-.grid-item .gi-meta:hover{background:var(--focus-bg)}
-.grid-item .gi-actions{display:flex;gap:3px;margin-top:2px;opacity:.6;transition:opacity var(--t-fast) var(--ease)}
-.grid-item:hover .gi-actions,.grid-item:focus-within .gi-actions{opacity:1}
-.gi-actions .btn{padding:2px 6px;font-size:11px;box-shadow:none}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--grid-col-size),1fr));gap:12px 18px;padding:16px 18px;max-width:1800px;margin:0 auto;align-items:start}
+.cards-grid .kcard.md{--sz:var(--grid-card-size)}
+.grid-item{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-width:0}
+.grid-item .gi-name-input{width:min(var(--grid-card-size),100%);border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:center;padding:2px 6px;outline:none}
+.grid-item .gi-name-input:hover,.grid-item .gi-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
+.grid-card-actions{position:absolute;top:6px;right:calc(50% - (var(--grid-card-size) / 2) + 6px);display:flex;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20}
+.grid-item:hover .grid-card-actions,.grid-item:focus-within .grid-card-actions{opacity:1;pointer-events:auto}
+.grid-card-actions .btn{width:30px;height:30px;padding:0;display:grid;place-items:center;box-shadow:var(--shadow-sm);background:var(--paper);font-size:13px}
 
 /* ── MODALS ── */
 .modal-overlay{position:fixed;inset:0;background:var(--overlay);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
@@ -369,7 +370,6 @@ main{min-height:50vh}
 .btn{transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
 .btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--line)}
 .chip{transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
-.vt-btn{transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
 .card-row{transition:box-shadow var(--t-med) var(--ease),transform var(--t-med) var(--ease)}
 .card-row:hover{box-shadow:var(--shadow-md),var(--shadow-soft)}
 .grid-item .kcard{transition:transform var(--t-med) var(--ease),box-shadow var(--t-med) var(--ease)}
@@ -433,7 +433,6 @@ main{min-height:50vh}
   .brand h1{font-size:18px}
   .toolbar{padding-top:7px;gap:8px}
   .toolbar .search{min-width:140px}
-  .view-toggle{margin-left:0}
   .cards-list{padding:10px;gap:8px}
   .card-row{grid-template-columns:1fr;grid-template-rows:none;gap:8px;padding:10px}
   .card-row .row-preview,.card-row .row-info,.card-row .stage-col{grid-column:auto;grid-row:auto}
@@ -443,7 +442,7 @@ main{min-height:50vh}
   .stage-col .stage-cell{flex:1;min-height:28px;text-align:left;justify-content:flex-start}
   .stage-col.empty{justify-content:center;min-height:38px}
   .stage-col.empty.disabled{display:none}
-  .cards-grid{padding:14px;gap:16px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+  .cards-grid{padding:12px;gap:10px 14px}
   .modal{padding:16px}
 }
 @media (max-width:480px){
@@ -458,10 +457,8 @@ main{min-height:50vh}
   .stage-col{flex-direction:column;align-items:stretch;gap:6px;padding:8px}
   .stage-col .stage-num{align-self:center}
   .stage-col .stage-cell{text-align:center;justify-content:center}
-  .cards-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
-  .kcard{--sz:140px}
+  .cards-grid{gap:10px}
   .kcard.sm{--sz:130px}
-  .kcard.md{--sz:min(70vw,240px)}
   .kcard.lg{--sz:min(80vw,300px)}
   .modal,.confirm-box{padding:14px}
 }
@@ -508,7 +505,14 @@ main{min-height:50vh}
   </div>
 <div class="toolbar">
   <div class="tb-group">
-    <button class="btn primary" id="btn-new-card">＋ Nouvelle carte</button>
+    <div class="new-card-wrap">
+      <button class="btn primary" id="btn-new-card" aria-haspopup="menu" aria-expanded="false">＋ Nouvelle carte</button>
+      <div class="new-card-menu" id="new-card-menu" role="menu" aria-label="Créer une carte">
+        <button class="btn ghost" type="button" role="menuitem" data-new-type="building">🏗️ Bâtiment</button>
+        <button class="btn ghost" type="button" role="menuitem" data-new-type="exploration">🏞️ Exploration</button>
+        <button class="btn ghost" type="button" role="menuitem" data-new-type="treasure">💰 Trésor</button>
+      </div>
+    </div>
     <div class="search"><span aria-hidden="true">🔍</span><input type="text" id="search-input" placeholder="chercher…" aria-label="Rechercher une carte"/></div>
   </div>
   <div class="tb-sep" aria-hidden="true"></div>
@@ -528,10 +532,6 @@ main{min-height:50vh}
     <span class="chip" data-res="water" tabindex="0" role="button"><span class="res water sm" aria-hidden="true">E</span><span class="chip-text">Eau</span></span>
   </div>
   <div class="tb-sep" aria-hidden="true"></div>
-  <div class="view-toggle" role="group" aria-label="Mode d'affichage">
-    <button class="vt-btn on" data-mode="list" aria-pressed="true"><span aria-hidden="true">☰</span> Liste</button>
-    <button class="vt-btn" data-mode="grid" aria-pressed="false"><span aria-hidden="true">⊞</span> Grille</button>
-  </div>
   <div class="zoom-ctrl" role="group" aria-label="Zoom de l'interface">
     <button type="button" id="zoom-minus" aria-label="Réduire le zoom">−</button>
     <span id="zoom-value">100%</span>
@@ -540,7 +540,7 @@ main{min-height:50vh}
 </div>
 </header>
 
-<main id="cards-container" class="cards-list" aria-label="Cartes"></main>
+<main id="cards-container" class="cards-grid" aria-label="Cartes"></main>
 <div id="print-area" aria-hidden="true"></div>
 
 <!-- Cell-edit modal -->
@@ -583,6 +583,7 @@ main{min-height:50vh}
     <h3 id="image-modal-title">Bibliothèque d'images<button class="modal-close" id="image-close" aria-label="Fermer">✕</button></h3>
     <div class="library-tools">
       <input type="file" id="image-library-input" accept="image/*" multiple aria-label="Ajouter des images à la bibliothèque"/>
+      <button class="btn ghost" id="image-clear-current" type="button" style="color:var(--danger);display:none">Effacer l'image</button>
       <span class="hint" id="image-target-hint"></span>
     </div>
     <div id="image-library-grid" class="image-grid"></div>
@@ -758,10 +759,9 @@ const state = {
   typeFilter: 'all',
   resFilter: null,
   searchQ: '',
-  viewMode: 'list',
   editing: null,
   imageLibraryTarget: null,
-  uiZoom: 100,
+  uiZoom: 130,
 };
 
 // ═══════════════════════════════════
@@ -806,10 +806,8 @@ function load(){
   } else {
     state.cards = JSON.parse(JSON.stringify(DEFAULT_CARDS));
   }
-  const mode = localStorage.getItem('kr-view-mode');
-  if(mode==='grid'||mode==='list') state.viewMode = mode;
-  const zoom = Number(localStorage.getItem('kr-ui-zoom'));
-  if([100,110,120,130,150].includes(zoom)) state.uiZoom = zoom;
+  const zoom = Number(localStorage.getItem('kr-grid-zoom'));
+  if(UI_ZOOMS.includes(zoom)) state.uiZoom = zoom;
 }
 function getCard(id){ return state.cards.find(c=>c.id===id)||null; }
 function getStage(cardId){ return state.stageByCard[cardId]||0; }
@@ -1068,13 +1066,13 @@ function updateCounts(){
 function renderCards(){
   updateCounts();
   const container = document.getElementById('cards-container');
-  container.className = state.viewMode==='grid' ? 'cards-grid' : 'cards-list';
+  container.className = 'cards-grid';
   const cards = filteredCards();
   if(!cards.length){
     container.innerHTML = `<div class="empty-state"><div class="icon" aria-hidden="true">🏰</div><div>Aucune carte ne correspond aux filtres.</div></div>`;
     return;
   }
-  container.innerHTML = cards.map(c=> state.viewMode==='grid' ? renderCardGridItem(c) : renderCardRow(c)).join('');
+  container.innerHTML = cards.map(renderCardGridItem).join('');
 }
 
 function renderCardRow(card){
@@ -1156,16 +1154,13 @@ function renderCardRow(card){
 }
 
 function renderCardGridItem(card){
-  const meta = TYPE_META[card.type];
   return `
     <div class="grid-item" data-id="${card.id}">
       ${renderCardHtml(card,'md',true)}
-      <div class="gi-name" data-card="${card.id}" data-field="name" role="button" tabindex="0" aria-label="Éditer le nom">${escapeHtml(card.name)}</div>
-      <div class="gi-meta" data-card="${card.id}" data-field="type" role="button" tabindex="0" aria-label="Éditer le type">${meta.icon} ${meta.label} · ${card.steps.length} étape${card.steps.length>1?'s':''}</div>
-      <div class="gi-actions">
-        <button class="btn ghost" data-card="${card.id}" data-action="steps" aria-label="Nombre d'étapes">#</button>
-        <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer">⎘</button>
-        <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer">🗑</button>
+      <input class="gi-name-input" data-card="${card.id}" data-field="name-grid" value="${escapeHtml(card.name)}" aria-label="Nom de la carte"/>
+      <div class="grid-card-actions">
+        <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer ${escapeHtml(card.name)}" title="Dupliquer">⎘</button>
+        <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer ${escapeHtml(card.name)}" title="Supprimer">🗑</button>
       </div>
     </div>
   `;
@@ -1174,9 +1169,6 @@ function renderCardGridItem(card){
 // ═══════════════════════════════════
 // CELL EDITORS
 // ═══════════════════════════════════
-function currentUiScale(){
-  return (UI_ZOOMS.includes(state.uiZoom) ? state.uiZoom : 100) / 100;
-}
 function placeAnchoredModal(modal, clickEvent){
   const panel = modal.querySelector('.modal');
   if(!panel) return null;
@@ -1192,14 +1184,13 @@ function placeAnchoredModal(modal, clickEvent){
   const update = ()=>{
     const rect = panel.getBoundingClientRect();
     const vw = window.innerWidth, vh = window.innerHeight;
-    const scale = currentUiScale();
     let x = clickEvent.clientX + 10;
     let y = clickEvent.clientY + 10;
     if(x + rect.width + 8 > vw) x = Math.max(8, clickEvent.clientX - rect.width - 10);
     if(y + rect.height + 8 > vh) y = Math.max(8, vh - rect.height - 8);
     if(x < 8) x = 8; if(y < 8) y = 8;
-    panel.style.left = (x / scale) + 'px';
-    panel.style.top = (y / scale) + 'px';
+    panel.style.left = x + 'px';
+    panel.style.top = y + 'px';
   };
   requestAnimationFrame(update);
   return update;
@@ -1396,11 +1387,22 @@ function bindEditorEvents(card, field, stage){
 // ═══════════════════════════════════
 // CARD ACTIONS
 // ═══════════════════════════════════
-function addNewCard(){
-  const card = {id:newId(),name:'Nouvelle carte',type:'building',image:null,copies:1,
-    steps:[makeStep(emptyBonus(),makeCost()),makeStep(emptyBonus(),makeCost())]};
+function makeNewCard(type='building'){
+  const names = {building:'Nouveau bâtiment', exploration:'Nouvelle exploration', treasure:'Nouveau trésor'};
+  const steps = type === 'treasure'
+    ? [makeStep(emptyBonus(),makeCost())]
+    : [makeStep(emptyBonus(),makeCost()),makeStep(emptyBonus(),makeCost())];
+  return {id:newId(),name:names[type] || 'Nouvelle carte',type,image:null,copies:1,steps};
+}
+function addNewCard(type='building'){
+  const card = makeNewCard(type);
   state.cards.push(card);
   save(); renderCards();
+  closeNewCardMenu();
+  requestAnimationFrame(()=>{
+    const input = document.querySelector(`.grid-item[data-id="${card.id}"] .gi-name-input`);
+    if(input){ input.focus(); input.select(); }
+  });
 }
 function duplicateCard(id){
   const idx = state.cards.findIndex(c=>c.id===id);
@@ -1408,12 +1410,11 @@ function duplicateCard(id){
   const card = state.cards[idx];
   const copy = JSON.parse(JSON.stringify(card));
   copy.id = newId();
-  copy.name = card.name + ' (copie)';
+  copy.name = card.name + ' copy';
   state.cards.splice(idx+1, 0, copy);
   save(); renderCards();
-  // Focus the new row's name input for immediate rename
   requestAnimationFrame(()=>{
-    const input = document.querySelector(`.card-row[data-id="${copy.id}"] .inline-input[data-field="name-direct"]`);
+    const input = document.querySelector(`.grid-item[data-id="${copy.id}"] .gi-name-input`);
     if(input){ input.focus(); input.select(); }
   });
 }
@@ -1435,6 +1436,26 @@ function showStatus(msg){
   el.textContent = msg;
   clearTimeout(showStatus._t);
   showStatus._t = setTimeout(()=>{ el.textContent=''; }, 2000);
+}
+function openNewCardMenu(){
+  const menu = document.getElementById('new-card-menu');
+  const btn = document.getElementById('btn-new-card');
+  const rect = btn.getBoundingClientRect();
+  menu.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 188)) + 'px';
+  menu.style.top = (rect.bottom + 6) + 'px';
+  menu.classList.add('open');
+  btn.setAttribute('aria-expanded','true');
+}
+function closeNewCardMenu(){
+  const menu = document.getElementById('new-card-menu');
+  const btn = document.getElementById('btn-new-card');
+  if(menu) menu.classList.remove('open');
+  if(btn) btn.setAttribute('aria-expanded','false');
+}
+function toggleNewCardMenu(){
+  const menu = document.getElementById('new-card-menu');
+  if(menu.classList.contains('open')) closeNewCardMenu();
+  else openNewCardMenu();
 }
 
 // ═══════════════════════════════════
@@ -1551,7 +1572,9 @@ async function openImageLibrary(cardId=null, clickEvent=null){
   state.imageLibraryTarget = cardId;
   const card = cardId ? getCard(cardId) : null;
   const hint = document.getElementById('image-target-hint');
+  const clearBtn = document.getElementById('image-clear-current');
   hint.textContent = card ? `Sélection pour: ${card.name}` : 'Ajoute des images ou gère la bibliothèque.';
+  if(clearBtn) clearBtn.style.display = card && (card.image || card.imageName) ? 'inline-flex' : 'none';
   const modal = document.getElementById('image-modal');
   modal.classList.add('open');
   const reposition = placeAnchoredModal(modal, clickEvent);
@@ -1626,6 +1649,15 @@ async function deleteImageFromLibrary(id){
   await deleteLibraryItem('images', id);
   showStatus('Image supprimée');
   await renderImageLibrary();
+}
+function clearImageFromLibraryTarget(){
+  const card = getCard(state.imageLibraryTarget);
+  if(!card) return;
+  clearCardImage(card);
+  closeImageLibrary();
+  renderCards();
+  save();
+  showStatus(`Image effacée pour ${card.name}`);
 }
 
 function exportToPDF(){
@@ -1731,20 +1763,12 @@ function trapFocus(e){
 // ═══════════════════════════════════
 // VIEW MODE
 // ═══════════════════════════════════
-function setViewMode(mode){
-  state.viewMode = mode;
-  localStorage.setItem('kr-view-mode', mode);
-  document.querySelectorAll('.vt-btn').forEach(b=>{
-    const on = b.dataset.mode===mode;
-    b.classList.toggle('on', on);
-    b.setAttribute('aria-pressed', on?'true':'false');
-  });
-  renderCards();
-}
-const UI_ZOOMS = [100,110,120,130,150];
+const UI_ZOOMS = [100,110,120,130,140,150,160,170,180,190,200];
 function applyUiZoom(){
-  const value = UI_ZOOMS.includes(state.uiZoom) ? state.uiZoom : 100;
-  document.body.style.zoom = value === 100 ? '' : `${value}%`;
+  const value = UI_ZOOMS.includes(state.uiZoom) ? state.uiZoom : 130;
+  const cardSize = Math.round(220 * value / 100);
+  document.documentElement.style.setProperty('--grid-card-size', `${cardSize}px`);
+  document.documentElement.style.setProperty('--grid-col-size', `${cardSize + 20}px`);
   const label = document.getElementById('zoom-value');
   if(label) label.textContent = `${value}%`;
   const i = UI_ZOOMS.indexOf(value);
@@ -1757,7 +1781,7 @@ function changeUiZoom(delta){
   const current = UI_ZOOMS.includes(state.uiZoom) ? UI_ZOOMS.indexOf(state.uiZoom) : 0;
   const next = Math.max(0, Math.min(UI_ZOOMS.length-1, current + delta));
   state.uiZoom = UI_ZOOMS[next];
-  localStorage.setItem('kr-ui-zoom', String(state.uiZoom));
+  localStorage.setItem('kr-grid-zoom', String(state.uiZoom));
   applyUiZoom();
 }
 
@@ -1766,7 +1790,15 @@ function changeUiZoom(delta){
 // ═══════════════════════════════════
 function bindEvents(){
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
-  document.getElementById('btn-new-card').addEventListener('click', addNewCard);
+  document.getElementById('btn-new-card').addEventListener('click', e=>{ e.stopPropagation(); toggleNewCardMenu(); });
+  document.getElementById('new-card-menu').addEventListener('click', e=>{
+    const btn = e.target.closest('[data-new-type]');
+    if(!btn) return;
+    addNewCard(btn.dataset.newType);
+  });
+  document.addEventListener('click', e=>{
+    if(!e.target.closest('.new-card-wrap')) closeNewCardMenu();
+  });
   document.getElementById('btn-decks').addEventListener('click', openDeckLibrary);
   document.getElementById('btn-images').addEventListener('click', ()=>openImageLibrary());
   document.getElementById('btn-import').addEventListener('click', openImport);
@@ -1789,6 +1821,7 @@ function bindEvents(){
   });
   document.getElementById('image-close').addEventListener('click', closeImageLibrary);
   document.getElementById('image-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeImageLibrary(); });
+  document.getElementById('image-clear-current').addEventListener('click', clearImageFromLibraryTarget);
   document.getElementById('image-library-input').addEventListener('change', e=>addImagesToLibrary(e.target.files).then(()=>{ e.target.value=''; }));
   document.getElementById('image-library-grid').addEventListener('click', e=>{
     const action = e.target.closest('[data-action]');
@@ -1837,14 +1870,11 @@ function bindEvents(){
     e.preventDefault(); c.click();
   });
 
-  // View toggle
-  document.querySelectorAll('.vt-btn').forEach(b=>b.addEventListener('click', ()=>setViewMode(b.dataset.mode)));
-
   // Delegated clicks on cards container
   const container = document.getElementById('cards-container');
   container.addEventListener('click', e=>{
     // Let inline inputs / selects / file inputs receive native events
-    if(e.target.matches('.inline-input,.inline-select,input[type=file],input[type=text],select')) return;
+    if(e.target.matches('.inline-input,.inline-select,.gi-name-input,input[type=file],input[type=text],select')) return;
     // Action buttons
     const action = e.target.closest('[data-action]');
     if(action){
@@ -1928,6 +1958,15 @@ function bindEvents(){
       const giN = document.querySelector(`.grid-item[data-id="${cardId}"] .gi-name`);
       if(giN) giN.textContent = card.name;
     }
+    if(t.matches('.gi-name-input[data-field="name-grid"]')){
+      const cardId = t.dataset.card;
+      const card = getCard(cardId);
+      if(!card) return;
+      card.name = t.value;
+      saveDebounced();
+      const gridK = document.querySelector(`.grid-item[data-id="${cardId}"] .kcenter`);
+      if(gridK && !isEmbeddedImage(card.image)) gridK.textContent = card.name;
+    }
   });
   container.addEventListener('change', e=>{
     const t = e.target;
@@ -1952,6 +1991,7 @@ function bindEvents(){
   document.addEventListener('keydown', trapFocus);
   document.addEventListener('keydown', e=>{
     if(e.key==='Escape'){
+      closeNewCardMenu();
       const cell = document.getElementById('cell-modal');
       if(cell.classList.contains('open')){ closeCellModal(); e.preventDefault(); return; }
       const io = document.getElementById('io-modal');
@@ -1976,7 +2016,7 @@ load();
 bindEvents();
 trackHeaderHeight();
 applyUiZoom();
-setViewMode(state.viewMode);
+renderCards();
 hydrateImportedImages(state.cards).then(()=>{
   renderCards();
   save();
