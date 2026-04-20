@@ -1,22 +1,39 @@
 # Kingdom Reforged Card Editor
 
-Éditeur statique pour prototyper, équilibrer et imprimer les cartes de **Kingdom Reforged**.
+Editeur statique pour prototyper, equilibrer et imprimer les cartes de **Kingdom Reforged**.
 
-## Utiliser l'éditeur
+## Utiliser l'editeur
 
-Ouvre `index.html` dans un navigateur, ou utilise la version publiée avec GitHub Pages.
+Ouvre `index.html` dans un navigateur, ou utilise la version publiee avec GitHub Pages.
 
-Les données sont sauvegardées dans le navigateur avec `localStorage`. Pour changer de machine, partager un deck, ou garder une sauvegarde durable, utilise les boutons **Backup**, **Export JSON** ou **CSV** dans l'éditeur.
+Les donnees sont sauvegardees dans le navigateur avec `localStorage` et IndexedDB. Le mode **Cloud** permet aussi de synchroniser les cartes, decks, images, ressources et bonus avec Supabase.
 
 ## Fonctions principales
 
-- Création de cartes par modèles: bâtiment, exploration, trésor, action ou carte vide.
-- Édition des étapes, coûts, bonus, boucliers et illustrations.
-- Vue liste, grille et tableau d'équilibrage.
-- Analyse rapide des coûts, gains, PV, production et points à vérifier.
-- Import/export JSON, export CSV et impression print-and-play.
-- Undo/redo local pendant l'édition.
+- Creation de cartes par types: batiment, exploration, tresor et action.
+- Edition des etapes, couts, bonus, boucliers et illustrations.
+- Vue grille avec panneau lateral de navigation.
+- Bibliotheques d'images, de ressources et de bonus.
+- Import/export JSON et impression print-and-play.
+- Undo/redo local pendant l'edition.
+- Cadenas d'edition: les menus Decks, Images, Ressources et Bonus demandent un mot de passe avant modification.
+
+## Supabase
+
+Le site reste statique sur GitHub Pages. Supabase sert seulement de sauvegarde partagee.
+
+1. Cree un projet Supabase.
+2. Colle `supabase/schema.sql` dans le SQL Editor Supabase et execute-le.
+3. Deploie l'Edge Function `supabase/functions/kingdom-sync` avec `supabase functions deploy kingdom-sync`.
+4. Ajoute le secret avec `supabase secrets set KINGDOM_EDIT_PASSWORD=ton-mot-de-passe`.
+5. Dans l'editeur, clique sur **Cloud** et renseigne:
+   - Project URL: `https://xxxx.supabase.co`
+   - Anon public key
+   - Projet: `main` par defaut
+   - Mot de passe d'edition
+
+Ne mets jamais la cle `service_role` dans l'editeur ou dans GitHub Pages.
 
 ## Publication
 
-Ce projet est un site statique: aucun backend, aucune base de données, aucune installation.
+Ce projet est un site statique. La partie cloud est optionnelle et passe par Supabase.

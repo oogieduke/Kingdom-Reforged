@@ -76,6 +76,10 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .btn.pdf:hover{background:#991b1b;filter:brightness(1.05)}
 .btn.decks{background:#eab308;color:#3a2608;border-color:#854d0e}
 .btn.decks:hover{background:#ca9a06;filter:brightness(1.05)}
+.btn.cloud{background:#d7f3ee;color:#134e4a;border-color:#0f766e}
+.btn.cloud.on{background:#0f766e;color:#fff;border-color:#0b4f4a}
+.btn.cloud.syncing{filter:saturate(.7);opacity:.75}
+.btn.locked::before{content:'\1F512';font-size:.9em}
 .btn.history{padding:5px 9px;min-width:34px;justify-content:center}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 
@@ -423,6 +427,17 @@ body.sidebar-open .cards-grid{padding-left:36px}
 .deck-save-row .btn{flex-shrink:0;padding:5px 10px;font-size:13px}
 .library-tools input[type=text]{flex:1;min-width:170px;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);padding:6px 10px;font-family:'Patrick Hand';font-size:15px;color:var(--ink)}
 .library-tools input[type=file]{font-family:'Patrick Hand';font-size:14px;color:var(--ink-soft);max-width:260px}
+.cloud-status{display:flex;align-items:center;gap:8px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper-2);padding:7px 9px;margin-bottom:10px;font-family:'Caveat';font-size:15px;color:var(--ink-soft)}
+.cloud-status .dot{width:10px;height:10px;border-radius:50%;background:var(--ink-ghost);box-shadow:0 0 0 2px rgba(0,0,0,.04)}
+.cloud-status.ready .dot{background:#0f766e}
+.cloud-status.warn .dot{background:#d97706}
+.cloud-status.error .dot{background:#b91c1c}
+.cloud-form{display:grid;gap:10px}
+.cloud-form label{display:grid;gap:4px;font-family:'Kalam';font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.3px}
+.cloud-form input{width:100%;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);padding:7px 10px;font-family:'Patrick Hand';font-size:15px;color:var(--ink)}
+.cloud-form input:focus{background:var(--focus-bg)}
+.cloud-form .hint{font-family:'Caveat';font-size:15px;color:var(--ink-soft);text-transform:none;letter-spacing:0}
+.cloud-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:10px}
 .library-list{display:flex;flex-direction:column;gap:8px;max-height:48vh;overflow:auto;padding-right:4px}
 .library-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1.5px solid var(--line);border-radius:8px;background:var(--paper-2);padding:8px}
 .library-row strong{font-family:'Kalam';font-size:15px;color:var(--ink)}
@@ -634,6 +649,7 @@ body.sidebar-open .cards-grid{padding-left:36px}
     </div>
     <div class="chrome-actions">
       <span class="autosave" id="autosave-status" role="status" aria-live="polite"></span>
+      <button class="btn cloud" id="btn-cloud" type="button" aria-label="Configurer la sauvegarde cloud">Cloud</button>
       <button class="btn ghost history" id="btn-undo" type="button" aria-label="Annuler" title="Annuler" disabled>↶</button>
       <button class="btn ghost history" id="btn-redo" type="button" aria-label="Rétablir" title="Rétablir" disabled>↷</button>
       <div class="columns-ctrl" role="group" aria-label="Cartes affichées en largeur">
@@ -644,11 +660,11 @@ body.sidebar-open .cards-grid{padding-left:36px}
       </div>
       <button class="theme-toggle" id="theme-toggle" aria-label="Basculer thème sombre" title="Thème sombre"><span aria-hidden="true">🌙</span></button>
       <div class="btn-group-uploads" role="group" aria-label="Bibliothèques">
-        <button class="btn ghost" id="btn-images" aria-label="Ouvrir la bibliothèque d'images">Images</button>
-        <button class="btn ghost" id="btn-resources" aria-label="Ouvrir les icônes de ressources">Ressources</button>
-        <button class="btn ghost" id="btn-icons" aria-label="Ouvrir la bibliothèque de bonus">Bonus</button>
+        <button class="btn ghost" id="btn-images" data-requires-edit="true" aria-label="Ouvrir la bibliothèque d'images">Images</button>
+        <button class="btn ghost" id="btn-resources" data-requires-edit="true" aria-label="Ouvrir les icônes de ressources">Ressources</button>
+        <button class="btn ghost" id="btn-icons" data-requires-edit="true" aria-label="Ouvrir la bibliothèque de bonus">Bonus</button>
       </div>
-      <button class="btn decks" id="btn-decks" aria-label="Ouvrir les decks sauvegardés">Decks</button>
+      <button class="btn decks" id="btn-decks" data-requires-edit="true" aria-label="Ouvrir les decks sauvegardés">Decks</button>
       <button class="btn pdf" id="btn-pdf" aria-label="Exporter PDF (A4)">🖨 PDF</button>
     </div>
   </div>
@@ -672,6 +688,34 @@ body.sidebar-open .cards-grid{padding-left:36px}
     <div class="modal-actions">
       <button class="btn ghost" id="cell-modal-clear" type="button" style="color:var(--danger);display:none">Reset</button>
       <button class="btn primary" id="cell-modal-done">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cloud / lock modal -->
+<div class="modal-overlay" id="cloud-modal" role="dialog" aria-modal="true" aria-labelledby="cloud-modal-title">
+  <div class="modal">
+    <h3 id="cloud-modal-title">Cloud & cadenas<button class="modal-close" id="cloud-close" aria-label="Fermer">×</button></h3>
+    <div class="cloud-status warn" id="cloud-status-box"><span class="dot" aria-hidden="true"></span><span id="cloud-status-text">Configure Supabase, puis déverrouille l'édition.</span></div>
+    <div class="cloud-form">
+      <label>Project URL
+        <input type="url" id="cloud-url" placeholder="https://xxxx.supabase.co" autocomplete="off"/>
+      </label>
+      <label>Anon public key
+        <input type="password" id="cloud-anon" placeholder="eyJ..." autocomplete="off"/>
+      </label>
+      <label>Projet
+        <input type="text" id="cloud-project" placeholder="main"/>
+      </label>
+      <label>Mot de passe edition
+        <input type="password" id="cloud-password" placeholder="Mot de passe"/>
+      </label>
+      <div class="hint">Le mot de passe est vérifié par Supabase. La clé anon est publique; ne mets jamais la clé service_role ici.</div>
+    </div>
+    <div class="cloud-actions">
+      <button class="btn ghost" id="cloud-load" type="button">Charger cloud</button>
+      <button class="btn ghost" id="cloud-save" type="button">Sauver maintenant</button>
+      <button class="btn primary" id="cloud-unlock" type="button">Déverrouiller</button>
     </div>
   </div>
 </div>
@@ -742,6 +786,7 @@ body.sidebar-open .cards-grid{padding-left:36px}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ═══════════════════════════════════
 // DATA DEFINITIONS
@@ -753,6 +798,8 @@ const BONUS_ICON_LABELS = {pv:'PV',workers:'Ouvriers',actions:'Actions',draw:'Pi
 const ICON_ASSIGN_STORAGE = 'kr-icon-assignments';
 const MODIFIED_STORAGE = 'kr-modified-card-ids';
 const ASSET_REF_STORAGE = 'kr-asset-refs';
+const CLOUD_CONFIG_STORAGE = 'kr-cloud-config';
+const CLOUD_PASSWORD_SESSION = 'kr-cloud-password';
 const STAGE_NUMS = ['I','II','III','IV'];
 const STAGE_POSITIONS = ['top','right','bottom','left'];
 const RIBBON_POSITIONS = ['tr','br','bl','tl'];
@@ -911,6 +958,16 @@ const state = {
   modifiedCardIds: new Set(),
   sessionCardHashes: {},
   history: {past:[], future:[], last:'', ready:false, restoring:false},
+  cloud: {
+    config: {url:'', anonKey:'', projectId:'main'},
+    password: '',
+    unlocked: false,
+    client: null,
+    saveTimer: null,
+    saving: false,
+    loading: false,
+    lastSyncAt: null,
+  },
 };
 
 // ═══════════════════════════════════
@@ -1022,12 +1079,304 @@ function save(){
   el.textContent = '✓ sauvegardé';
   clearTimeout(save._t);
   save._t = setTimeout(()=>{ el.textContent=''; }, 2000);
+  queueCloudSave();
   return true;
 }
 let _saveDebounceT;
 function saveDebounced(delay=400){
   clearTimeout(_saveDebounceT);
   _saveDebounceT = setTimeout(()=>{ if(save()) syncModifiedUi(); }, delay);
+}
+function normalizeSupabaseUrl(value){
+  return String(value||'').trim().replace(/\/+$/,'');
+}
+function loadCloudConfig(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(CLOUD_CONFIG_STORAGE) || '{}');
+    state.cloud.config = {
+      url: normalizeSupabaseUrl(raw.url),
+      anonKey: String(raw.anonKey || ''),
+      projectId: String(raw.projectId || 'main').trim() || 'main',
+    };
+  }catch{
+    state.cloud.config = {url:'', anonKey:'', projectId:'main'};
+  }
+  try{ state.cloud.password = sessionStorage.getItem(CLOUD_PASSWORD_SESSION) || ''; }catch{}
+}
+function saveCloudConfig(){
+  localStorage.setItem(CLOUD_CONFIG_STORAGE, JSON.stringify(state.cloud.config));
+}
+function readCloudForm(){
+  const url = normalizeSupabaseUrl(document.getElementById('cloud-url')?.value);
+  const anonKey = String(document.getElementById('cloud-anon')?.value || '').trim();
+  const projectId = String(document.getElementById('cloud-project')?.value || 'main').trim() || 'main';
+  const password = String(document.getElementById('cloud-password')?.value || '');
+  state.cloud.config = {url, anonKey, projectId};
+  state.cloud.password = password;
+  saveCloudConfig();
+  try{
+    if(password) sessionStorage.setItem(CLOUD_PASSWORD_SESSION, password);
+    else sessionStorage.removeItem(CLOUD_PASSWORD_SESSION);
+  }catch{}
+  state.cloud.client = null;
+}
+function fillCloudForm(){
+  const {url, anonKey, projectId} = state.cloud.config;
+  const fields = {
+    'cloud-url': url,
+    'cloud-anon': anonKey,
+    'cloud-project': projectId || 'main',
+    'cloud-password': state.cloud.password || '',
+  };
+  Object.entries(fields).forEach(([id,value])=>{
+    const el = document.getElementById(id);
+    if(el) el.value = value;
+  });
+}
+function hasCloudConfig(){
+  const {url, anonKey} = state.cloud.config;
+  return Boolean(url && anonKey);
+}
+function cloudFunctionUrl(){
+  return `${state.cloud.config.url}/functions/v1/kingdom-sync`;
+}
+function getCloudClient(){
+  if(state.cloud.client) return state.cloud.client;
+  if(!hasCloudConfig()) throw new Error('Configuration Supabase manquante');
+  if(!window.supabase?.createClient) throw new Error('Client Supabase indisponible');
+  state.cloud.client = window.supabase.createClient(state.cloud.config.url, state.cloud.config.anonKey, {
+    auth: {persistSession:false},
+  });
+  return state.cloud.client;
+}
+function setCloudStatus(message, tone='warn'){
+  const box = document.getElementById('cloud-status-box');
+  const text = document.getElementById('cloud-status-text');
+  if(box){
+    box.classList.remove('ready','warn','error');
+    box.classList.add(tone);
+  }
+  if(text) text.textContent = message;
+  const btn = document.getElementById('btn-cloud');
+  if(btn){
+    btn.classList.toggle('on', state.cloud.unlocked);
+    btn.classList.toggle('syncing', state.cloud.saving || state.cloud.loading);
+    btn.textContent = state.cloud.unlocked ? 'Cloud OK' : 'Cloud';
+  }
+}
+function updateEditLockUi(){
+  document.querySelectorAll('[data-requires-edit]').forEach(btn=>{
+    btn.classList.toggle('locked', !state.cloud.unlocked);
+    btn.setAttribute('aria-pressed', state.cloud.unlocked ? 'true' : 'false');
+  });
+  setCloudStatus(
+    state.cloud.unlocked ? 'Edition cloud déverrouillée.' : (hasCloudConfig() ? 'Cloud configuré, édition verrouillée.' : "Configure Supabase, puis déverrouille l'édition."),
+    state.cloud.unlocked ? 'ready' : 'warn'
+  );
+}
+function openCloudModal(){
+  fillCloudForm();
+  updateEditLockUi();
+  document.getElementById('cloud-modal').classList.add('open');
+  setTimeout(()=>document.getElementById(state.cloud.password ? 'cloud-unlock' : 'cloud-password')?.focus(), 0);
+}
+function closeCloudModal(){
+  document.getElementById('cloud-modal').classList.remove('open');
+}
+async function verifyCloudUnlock(){
+  readCloudForm();
+  if(!hasCloudConfig()){ setCloudStatus("Ajoute l'URL Supabase et la clé anon.", 'error'); return false; }
+  if(!state.cloud.password){ setCloudStatus('Mot de passe manquant.', 'error'); return false; }
+  try{
+    setCloudStatus('Vérification du mot de passe...', 'warn');
+    const res = await fetch(cloudFunctionUrl(), {
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':state.cloud.config.anonKey},
+      body: JSON.stringify({action:'verify', password:state.cloud.password}),
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok || !data.ok) throw new Error(data.error || 'Mot de passe refusé');
+    state.cloud.unlocked = true;
+    updateEditLockUi();
+    showStatus('Edition déverrouillée');
+    return true;
+  }catch(e){
+    state.cloud.unlocked = false;
+    updateEditLockUi();
+    setCloudStatus(e.message || 'Déverrouillage impossible', 'error');
+    return false;
+  }
+}
+async function ensureEditUnlocked(){
+  if(state.cloud.unlocked) return true;
+  openCloudModal();
+  return false;
+}
+async function collectCloudAssets(){
+  const [images, icons] = await Promise.all([
+    getAllLibraryItems('images').catch(()=>[]),
+    getAllLibraryItems('icons').catch(()=>[]),
+  ]);
+  return [
+    ...images.filter(item=>item?.dataUrl).map(item=>({
+      kind:'image',
+      id:item.id,
+      name:item.name,
+      dataUrl:item.dataUrl,
+    })),
+    ...icons.filter(item=>item?.dataUrl).map(item=>({
+      kind:'icon',
+      id:item.id,
+      name:item.name,
+      category:item.category || 'bonus',
+      dataUrl:item.dataUrl,
+    })),
+  ];
+}
+async function cloudProjectPayload(){
+  const decks = await getAllLibraryItems('decks').catch(()=>[]);
+  return {
+    ...exportPayload(),
+    decks: decks.map(deck=>({
+      ...deck,
+      cards: Array.isArray(deck.cards) ? cloneCards(deck.cards).map(compactCardForStorage) : [],
+    })),
+  };
+}
+async function cloudSaveNow({silent=false}={}){
+  if(!state.cloud.unlocked || state.cloud.saving) return false;
+  if(!hasCloudConfig()) return false;
+  state.cloud.saving = true;
+  setCloudStatus('Sauvegarde cloud...', 'warn');
+  try{
+    const [assets, payload] = await Promise.all([collectCloudAssets(), cloudProjectPayload()]);
+    const res = await fetch(cloudFunctionUrl(), {
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':state.cloud.config.anonKey},
+      body: JSON.stringify({
+        action:'save-project',
+        password:state.cloud.password,
+        projectId:state.cloud.config.projectId || 'main',
+        name: localStorage.getItem('kr-current-deck-name') || 'Kingdom Reforged',
+        payload,
+        assets,
+      }),
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok || !data.ok) throw new Error(data.error || 'Sauvegarde cloud refusée');
+    state.cloud.lastSyncAt = data.updatedAt || new Date().toISOString();
+    setCloudStatus(`Cloud synchronisé (${assets.length} assets).`, 'ready');
+    if(!silent) showStatus('Cloud synchronisé');
+    return true;
+  }catch(e){
+    setCloudStatus(e.message || 'Sauvegarde cloud impossible', 'error');
+    if(!silent) showStatus('Erreur cloud');
+    return false;
+  }finally{
+    state.cloud.saving = false;
+    document.getElementById('btn-cloud')?.classList.remove('syncing');
+  }
+}
+function queueCloudSave(){
+  if(!state.cloud.unlocked || state.history.restoring) return;
+  clearTimeout(state.cloud.saveTimer);
+  state.cloud.saveTimer = setTimeout(()=>cloudSaveNow({silent:true}), 1800);
+}
+async function urlToDataUrl(url){
+  const res = await fetch(url, {mode:'cors'});
+  if(!res.ok) throw new Error('Asset introuvable');
+  const blob = await res.blob();
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = ev=>resolve(ev.target.result);
+    reader.onerror = ()=>reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+async function loadCloudAssets(projectId){
+  const client = getCloudClient();
+  const {data, error} = await client
+    .from('kr_assets')
+    .select('*')
+    .eq('project_id', projectId);
+  if(error) throw error;
+  for(const asset of data || []){
+    if(!asset.public_url) continue;
+    const dataUrl = await urlToDataUrl(asset.public_url).catch(()=>null);
+    if(!dataUrl) continue;
+    if(asset.kind === 'image'){
+      await putLibraryItem('images',{
+        id: asset.asset_id,
+        name: asset.name,
+        type: asset.mime_type || 'image/png',
+        size: asset.size_bytes || 0,
+        createdAt: Date.now(),
+        dataUrl,
+      });
+      rememberImageRef(asset.name,{id:asset.asset_id});
+    }
+    if(asset.kind === 'icon'){
+      await putLibraryItem('icons',{
+        id: asset.asset_id,
+        name: asset.name,
+        category: asset.category || 'bonus',
+        type: asset.mime_type || 'image/png',
+        size: asset.size_bytes || 0,
+        createdAt: Date.now(),
+        dataUrl,
+      });
+      rememberIconRef(asset.asset_id,{name:asset.name,category:asset.category || 'bonus'});
+    }
+  }
+  invalidateImageLibraryCache();
+  await refreshIconCache();
+}
+async function restoreCloudDecks(decks){
+  if(!Array.isArray(decks)) return;
+  for(const deck of decks){
+    if(!deck?.id || !deck?.name || !Array.isArray(deck.cards)) continue;
+    await putLibraryItem('decks',{
+      ...deck,
+      cards: normalizeImportedCards(cloneCards(deck.cards)),
+      cardCount: deck.cardCount || deck.cards.length,
+      createdAt: deck.createdAt || Date.now(),
+      updatedAt: deck.updatedAt || Date.now(),
+    });
+  }
+}
+async function cloudLoadProject(){
+  readCloudForm();
+  if(!hasCloudConfig()){ setCloudStatus('Configuration Supabase manquante.', 'error'); return; }
+  state.cloud.loading = true;
+  setCloudStatus('Chargement du cloud...', 'warn');
+  try{
+    const projectId = state.cloud.config.projectId || 'main';
+    const client = getCloudClient();
+    const {data, error} = await client
+      .from('kr_projects')
+      .select('payload,updated_at')
+      .eq('id', projectId)
+      .maybeSingle();
+    if(error) throw error;
+    if(!data?.payload){ setCloudStatus('Aucune sauvegarde cloud pour ce projet.', 'warn'); return; }
+    rememberImportedAssetManifest(data.payload.assets);
+    await loadCloudAssets(projectId);
+    await restoreCloudDecks(data.payload.decks);
+    state.cards = normalizeImportedCards(cloneCards(data.payload.cards || []));
+    await hydrateImportedImages(state.cards);
+    state.history.restoring = true;
+    save();
+    state.history.restoring = false;
+    markHistoryReady(true);
+    renderCards();
+    setCloudStatus('Projet cloud chargé.', 'ready');
+    showStatus('Projet cloud chargé');
+  }catch(e){
+    setCloudStatus(e.message || 'Chargement cloud impossible', 'error');
+  }finally{
+    state.cloud.loading = false;
+    document.getElementById('btn-cloud')?.classList.remove('syncing');
+  }
 }
 function loadIconAssignments(){
   try{
@@ -1068,6 +1417,7 @@ function migrateBonus(b){
   return {...emptyBonus(), note: b==='—'?'':b};
 }
 function load(){
+  loadCloudConfig();
   loadIconAssignments();
   loadAssetRefs();
   const raw = localStorage.getItem('kr-cards');
@@ -2200,6 +2550,7 @@ async function saveDeckToLibrary(){
     await putLibraryItem('decks', deck);
     localStorage.setItem('kr-current-deck-name', name);
     showStatus(existing ? 'Deck mis à jour' : 'Deck sauvegardé');
+    queueCloudSave();
     await renderDeckLibrary();
     input.value = await suggestedDeckName().catch(()=>incrementDeckName(name));
   }catch(e){ alert('Sauvegarde impossible : '+e.message); }
@@ -2220,6 +2571,7 @@ async function deleteDeckFromLibrary(id){
   if(!deck) return;
   await deleteLibraryItem('decks', id);
   showStatus('Deck supprimé');
+  queueCloudSave();
   await renderDeckLibrary();
 }
 async function replaceDeckInLibrary(id){
@@ -2232,6 +2584,7 @@ async function replaceDeckInLibrary(id){
   localStorage.setItem('kr-current-deck-name', deck.name);
   document.getElementById('deck-name-input').value = deck.name;
   showStatus('Deck remplacé');
+  queueCloudSave();
   await renderDeckLibrary();
 }
 async function openImageLibrary(cardId=null, clickEvent=null){
@@ -2768,6 +3121,15 @@ function setGridColumns(value){
 // ═══════════════════════════════════
 function bindEvents(){
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+  document.getElementById('btn-cloud').addEventListener('click', openCloudModal);
+  document.getElementById('cloud-close').addEventListener('click', closeCloudModal);
+  document.getElementById('cloud-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeCloudModal(); });
+  document.getElementById('cloud-unlock').addEventListener('click', async ()=>{ if(await verifyCloudUnlock()) closeCloudModal(); });
+  document.getElementById('cloud-save').addEventListener('click', async ()=>{
+    if(!state.cloud.unlocked && !(await verifyCloudUnlock())) return;
+    await cloudSaveNow();
+  });
+  document.getElementById('cloud-load').addEventListener('click', cloudLoadProject);
   document.getElementById('btn-undo').addEventListener('click', undoHistory);
   document.getElementById('btn-redo').addEventListener('click', redoHistory);
   document.getElementById('btn-sidebar').addEventListener('click', ()=>setSidebarOpen(!state.sidebarOpen));
@@ -2804,10 +3166,10 @@ function bindEvents(){
     const g = document.querySelector(`.grid-item[data-id="${item.dataset.sidebarCard}"]`);
     if(g) g.classList.remove('highlight');
   });
-  document.getElementById('btn-decks').addEventListener('click', e=>openDeckLibrary(e));
-  document.getElementById('btn-images').addEventListener('click', ()=>openImageLibrary());
-  document.getElementById('btn-resources').addEventListener('click', e=>openIconLibrary('resource', e));
-  document.getElementById('btn-icons').addEventListener('click', e=>openIconLibrary('bonus', e));
+  document.getElementById('btn-decks').addEventListener('click', async e=>{ if(await ensureEditUnlocked()) openDeckLibrary(e); });
+  document.getElementById('btn-images').addEventListener('click', async e=>{ if(await ensureEditUnlocked()) openImageLibrary(null, e); });
+  document.getElementById('btn-resources').addEventListener('click', async e=>{ if(await ensureEditUnlocked()) openIconLibrary('resource', e); });
+  document.getElementById('btn-icons').addEventListener('click', async e=>{ if(await ensureEditUnlocked()) openIconLibrary('bonus', e); });
   document.getElementById('btn-import-in-deck').addEventListener('click', ()=>{ closeDeckLibrary(); openImport(); });
   document.getElementById('btn-export-in-deck').addEventListener('click', ()=>{ closeDeckLibrary(); openExport(); });
   document.getElementById('btn-pdf').addEventListener('click', openPdfMenu);
@@ -2896,6 +3258,7 @@ function bindEvents(){
       return true;
     };
     if(closeIfOutside('cell-modal', closeCellModal)) return;
+    if(closeIfOutside('cloud-modal', closeCloudModal)) return;
     if(closeIfOutside('io-modal', ()=>document.getElementById('io-modal').classList.remove('open'))) return;
     if(closeIfOutside('deck-modal', closeDeckLibrary)) return;
     if(closeIfOutside('pdf-modal', closePdfMenu)) return;
@@ -3072,6 +3435,8 @@ function bindEvents(){
     if(e.key==='Escape'){
       const cell = document.getElementById('cell-modal');
       if(cell.classList.contains('open')){ closeCellModal(); e.preventDefault(); return; }
+      const cloud = document.getElementById('cloud-modal');
+      if(cloud.classList.contains('open')){ closeCloudModal(); e.preventDefault(); return; }
       const io = document.getElementById('io-modal');
       if(io.classList.contains('open')){ io.classList.remove('open'); e.preventDefault(); return; }
       const deck = document.getElementById('deck-modal');
@@ -3102,6 +3467,7 @@ initTheme();
 load();
 markHistoryReady(true);
 bindEvents();
+updateEditLockUi();
 trackHeaderHeight();
 setSidebarOpen(state.sidebarOpen);
 applyGridColumns();
