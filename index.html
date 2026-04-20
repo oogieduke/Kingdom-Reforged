@@ -204,8 +204,10 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .danger-center,.treasure-center{position:absolute;inset:28%;border:calc(var(--sz,220px) * .014) solid var(--line);border-radius:50%;background:var(--paper);display:grid;place-items:center;text-align:center;font-family:'Kalam';font-weight:700;color:var(--ink);z-index:5;cursor:pointer}
 .danger-center{background:radial-gradient(circle,#f5e8c8,#d6aa58);font-size:calc(var(--sz,220px) * .052)}
 .danger-center b{font-size:calc(var(--sz,220px) * .18);line-height:.9}
-.flame-stack{display:flex;align-items:center;justify-content:center;gap:calc(var(--sz,220px) * .006);font-size:calc(var(--sz,220px) * .125);line-height:1;filter:drop-shadow(0 1px 0 rgba(0,0,0,.18))}
-.flame-stack .no-flame{font-family:'Kalam';font-size:calc(var(--sz,220px) * .16);color:#5d3c00}
+.flame-stack{display:flex;align-items:center;justify-content:center;gap:calc(var(--sz,220px) * .002);font-size:calc(var(--sz,220px) * .11);line-height:1;filter:drop-shadow(0 1px 0 rgba(0,0,0,.18))}
+.flame-stack.flames-0{min-width:1em;min-height:1em}
+.flame-stack.flames-3{display:grid;grid-template-columns:repeat(2,1em);grid-template-rows:repeat(2,.9em);gap:0 .02em;font-size:calc(var(--sz,220px) * .096)}
+.flame-stack.flames-3 span:first-child{grid-column:1 / 3;justify-self:center}
 .treasure-center{inset:24%;border-radius:18%;background:linear-gradient(135deg,#f6e8c3 0%,#e8c66f 100%);font-size:calc(var(--sz,220px) * .075);padding:calc(var(--sz,220px) * .04)}
 .treasure-center .bonus{position:static;transform:none;max-width:none;font-size:calc(var(--sz,220px) * .08);padding:calc(var(--sz,220px) * .025) calc(var(--sz,220px) * .04)}
 .treasure-center .custom-icon-stack{gap:calc(var(--sz,220px) * .022)}
@@ -369,7 +371,7 @@ body[data-theme="dark"] .grid-item.session-modified .kcard{outline-color:#facc15
 .stage-cell.empty{opacity:.55;font-family:'Caveat';font-size:14px;color:var(--ink-ghost);font-style:italic}
 
 /* ── GRID MODE ── */
-.cards-grid{display:grid;grid-template-columns:repeat(var(--grid-columns),var(--grid-card-size));gap:12px var(--grid-gap-x);padding:16px 72px;justify-content:center;align-items:start}
+.cards-grid{display:grid;grid-template-columns:repeat(var(--grid-columns),var(--grid-card-size));gap:12px var(--grid-gap-x);padding:16px 48px;justify-content:center;align-items:start}
 .cards-grid .kcard.md{--sz:var(--grid-card-size)}
 .grid-item{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-width:0;transition:opacity var(--t-med) var(--ease),filter var(--t-med) var(--ease)}
 .grid-item::after{content:'';position:absolute;top:0;left:calc(50% + (var(--grid-card-size) / 2));width:48px;height:var(--grid-card-size);z-index:10;pointer-events:auto}
@@ -390,8 +392,9 @@ body[data-theme="dark"] .grid-item.session-modified .kcard{outline-color:#facc15
 .modal-overlay.anchored{background:rgba(27,26,23,.25);align-items:stretch;justify-content:stretch;padding:0;pointer-events:none}
 .modal-overlay.anchored .modal{position:fixed;margin:0;max-width:min(350px,92vw);pointer-events:auto}
 .modal-overlay.anchored.open{display:block}
-#image-modal.anchored .modal{max-width:min(640px,94vw)}
+#image-modal.anchored .modal,#icon-modal.anchored .modal{max-width:min(760px,94vw)}
 .modal{background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:20px;box-shadow:6px 6px 0 var(--line);max-width:520px;width:100%;max-height:85vh;overflow-y:auto}
+.modal.library-modal{max-width:760px}
 .modal h3{font-size:20px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .modal textarea{width:100%;height:200px;border:2px solid var(--line);border-radius:8px;padding:8px;font-family:'Architects Daughter';font-size:12px;background:var(--paper-2);outline:none;resize:vertical;color:var(--ink)}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
@@ -423,7 +426,7 @@ body[data-theme="dark"] .grid-item.session-modified .kcard{outline-color:#facc15
 .image-name-input:hover,.image-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
 .image-delete-btn{position:absolute;top:8px;right:8px;width:24px;height:24px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);color:var(--danger);font-family:'Kalam';font-weight:700;display:grid;place-items:center;opacity:0;pointer-events:none;cursor:pointer;box-shadow:var(--shadow-sm)}
 .image-tile:hover .image-delete-btn,.image-tile:focus-within .image-delete-btn{opacity:1;pointer-events:auto}
-.icon-grid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}
+.icon-grid{grid-template-columns:repeat(auto-fill,minmax(94px,1fr))}
 .icon-tile img{object-fit:contain}
 .icon-slot-select,.icon-category-select{width:100%;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);font-family:'Patrick Hand';font-size:12px;color:var(--ink);padding:2px 4px}
 .library-empty{font-family:'Caveat';font-size:17px;color:var(--ink-ghost);text-align:center;padding:24px 12px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper-2)}
@@ -559,7 +562,7 @@ body[data-theme="dark"] .grid-item.session-modified .kcard{outline-color:#facc15
   .stage-col .stage-cell{flex:1;min-height:28px;text-align:left;justify-content:flex-start}
   .stage-col.empty{justify-content:center;min-height:38px}
   .stage-col.empty.disabled{display:none}
-  .cards-grid{padding:12px 58px;gap:10px 14px}
+  .cards-grid{padding:12px 42px;gap:10px 14px}
   .modal{padding:16px}
 }
 @media (max-width:480px){
@@ -613,14 +616,14 @@ body[data-theme="dark"] .grid-item.session-modified .kcard{outline-color:#facc15
     </div>
     <div class="chrome-actions">
       <span class="autosave" id="autosave-status" role="status" aria-live="polite"></span>
+      <button class="btn ghost history" id="btn-undo" type="button" aria-label="Annuler" title="Annuler" disabled>↶</button>
+      <button class="btn ghost history" id="btn-redo" type="button" aria-label="Rétablir" title="Rétablir" disabled>↷</button>
       <div class="columns-ctrl" role="group" aria-label="Cartes affichées en largeur">
         <label for="grid-columns">Largeur</label>
         <input type="range" id="grid-columns" min="3" max="6" step="1" list="grid-columns-marks" aria-label="Nombre de cartes par ligne"/>
         <datalist id="grid-columns-marks"><option value="3"></option><option value="4"></option><option value="5"></option><option value="6"></option></datalist>
         <span id="grid-columns-value">4 cartes</span>
       </div>
-      <button class="btn ghost history" id="btn-undo" type="button" aria-label="Annuler" title="Annuler" disabled>↶</button>
-      <button class="btn ghost history" id="btn-redo" type="button" aria-label="Rétablir" title="Rétablir" disabled>↷</button>
       <button class="theme-toggle" id="theme-toggle" aria-label="Basculer thème sombre" title="Thème sombre"><span aria-hidden="true">🌙</span></button>
       <div class="btn-group-uploads" role="group" aria-label="Bibliothèques">
         <button class="btn ghost" id="btn-images" aria-label="Ouvrir la bibliothèque d'images">Images</button>
@@ -689,15 +692,15 @@ body[data-theme="dark"] .grid-item.session-modified .kcard{outline-color:#facc15
     <div class="pdf-menu-actions">
       <button class="btn pdf" id="pdf-export-all" type="button">Tout exporter</button>
       <button class="btn ghost" id="pdf-export-modified" type="button">Exporter les modifiées <span id="pdf-modified-count"></span></button>
-      <button class="btn ghost" id="pdf-clear-modified" type="button">Clear les modifiées</button>
-      <div class="hint">Les cartes marquées “modifié” sont celles changées depuis le dernier clear.</div>
+      <button class="btn ghost" id="pdf-clear-modified" type="button">Reset</button>
+      <div class="hint">Les cartes marquées “modifié” sont celles changées depuis le dernier reset.</div>
     </div>
   </div>
 </div>
 
 <!-- Image library modal -->
 <div class="modal-overlay" id="image-modal" role="dialog" aria-modal="true" aria-labelledby="image-modal-title">
-  <div class="modal">
+  <div class="modal library-modal">
     <h3 id="image-modal-title">Bibliothèque d'images<button class="modal-close" id="image-close" aria-label="Fermer">✕</button></h3>
     <div class="library-tools">
       <input type="file" id="image-library-input" accept="image/*" multiple aria-label="Ajouter des images à la bibliothèque"/>
@@ -710,7 +713,7 @@ body[data-theme="dark"] .grid-item.session-modified .kcard{outline-color:#facc15
 
 <!-- Icon library modal -->
 <div class="modal-overlay" id="icon-modal" role="dialog" aria-modal="true" aria-labelledby="icon-modal-title">
-  <div class="modal">
+  <div class="modal library-modal">
     <h3 id="icon-modal-title">Bibliothèque d'icônes<button class="modal-close" id="icon-close" aria-label="Fermer">✕</button></h3>
     <div class="library-tools">
       <input type="file" id="icon-library-input" accept="image/*" multiple aria-label="Ajouter des icônes"/>
@@ -1352,7 +1355,7 @@ function inferDanger(card){
 }
 function dangerFlamesHtml(card){
   const danger = inferDanger(card);
-  if(!danger) return '<span class="no-flame">0</span>';
+  if(!danger) return '';
   return Array.from({length:danger},()=>'<span aria-hidden="true">&#128293;</span>').join('');
 }
 function renderExplorationCardHtml(card, sizeClass='', interactive=false){
@@ -1371,7 +1374,7 @@ function renderExplorationCardHtml(card, sizeClass='', interactive=false){
   const attrs = interactive ? `data-field="danger" data-card="${card.id}" role="button" tabindex="0" aria-label="Niveau de danger"` : '';
   return `<div class="kcard ${sizeClass} ${bg}" data-id="${card.id}">
     ${bonuses}
-    <div class="danger-center${interactive?' editable':''}" ${attrs}><div class="flame-stack" aria-label="${inferDanger(card)} flamme${inferDanger(card)>1?'s':''}">${dangerFlamesHtml(card)}</div></div>
+    <div class="danger-center${interactive?' editable':''}" ${attrs}><div class="flame-stack flames-${inferDanger(card)}" aria-label="${inferDanger(card)} flamme${inferDanger(card)>1?'s':''}">${dangerFlamesHtml(card)}</div></div>
   </div>`;
 }
 function renderTreasureCardHtml(card, sizeClass='', interactive=false){
