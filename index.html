@@ -45,12 +45,22 @@ body{background-image:radial-gradient(circle at 20% 10%,var(--grain),transparent
 h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 
 /* ── HEADER ── */
-.chrome{position:sticky;top:0;z-index:100;background:var(--paper);border-bottom:2px dashed var(--line);padding:8px 18px 10px}
-.chrome-top{display:flex;align-items:center;gap:12px;flex-wrap:nowrap;min-width:0}
+.chrome{position:sticky;top:0;z-index:150;background:var(--paper);border-bottom:2px dashed var(--line);padding:8px 16px;backdrop-filter:blur(4px);isolation:isolate}
+.chrome-top{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;min-width:0}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
-.brand-mark{width:34px;height:34px;border:2px solid var(--line);border-radius:8px;display:grid;place-items:center;background:var(--paper-2);transform:rotate(-6deg);font-family:'Kalam';font-weight:700;font-size:17px;box-shadow:3px 3px 0 var(--line);flex-shrink:0}
+.brand-mark{width:34px;height:34px;border:2px solid var(--line);border-radius:8px;display:grid;place-items:center;background:var(--paper-2);transform:rotate(-6deg);font-family:'Kalam';font-weight:700;font-size:17px;box-shadow:3px 3px 0 var(--line);flex-shrink:0;transition:transform var(--t-med) var(--ease)}
+.brand-mark:hover{transform:rotate(0deg) scale(1.05)}
 .brand h1{font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chrome-actions{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:nowrap;min-width:0}
+.btn-group-uploads{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1.5px dashed var(--line);border-radius:10px;background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(240,230,210,.35));box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+:root[data-theme="dark"] .btn-group-uploads{background:linear-gradient(135deg,rgba(18,16,13,.55),rgba(32,28,22,.4));box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.menu-toggle{width:36px;height:36px;border:2px solid var(--line);background:var(--paper);border-radius:9px;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-shadow:var(--shadow-sm);flex-shrink:0;padding:0;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
+.menu-toggle span{display:block;width:18px;height:2.5px;background:var(--ink);border-radius:2px;transition:transform var(--t-med) var(--ease),opacity var(--t-med) var(--ease),width var(--t-med) var(--ease)}
+.menu-toggle:hover{background:var(--paper-2)}
+.menu-toggle:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--line)}
+.menu-toggle.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.menu-toggle.open span:nth-child(2){opacity:0;width:0}
+.menu-toggle.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
 
 /* ── BUTTONS ── */
 .btn{font-family:'Kalam';font-weight:700;font-size:13px;border:2px solid var(--line);background:var(--paper);padding:5px 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:2px 2px 0 var(--line);white-space:nowrap;color:var(--ink)}
@@ -61,11 +71,11 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .btn.ghost{background:transparent;box-shadow:none;border-style:dashed}
 .btn.danger{background:var(--danger);color:#fff;border-color:var(--danger)}
 .btn.danger:hover{background:#991b1b}
+.btn.pdf{background:#b91c1c;color:#fff;border-color:#7f1212}
+.btn.pdf:hover{background:#991b1b;filter:brightness(1.05)}
+.btn.decks{background:#eab308;color:#3a2608;border-color:#854d0e}
+.btn.decks:hover{background:#ca9a06;filter:brightness(1.05)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
-.chip{display:inline-flex;align-items:center;gap:4px;font-family:'Kalam';font-size:12px;font-weight:700;border:1.5px solid var(--line);padding:3px 10px;border-radius:14px;background:var(--paper);cursor:pointer;color:var(--ink)}
-.chip.on{background:var(--ink);color:var(--paper)}
-.chip:hover:not(.on){background:var(--paper-2)}
-.chip .c{opacity:.7;font-family:'Caveat';margin-left:2px}
 
 /* ── RESOURCE TOKENS ── */
 .res{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);font-family:'Kalam';font-weight:700;font-size:10px;flex-shrink:0}
@@ -126,6 +136,11 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .bonus.right{right:20%;top:50%;transform:translate(50%,-50%) rotate(90deg);max-width:calc(var(--sz,220px) * .34);overflow:hidden}
 .bonus.bottom{bottom:20%;left:50%;transform:translate(-50%,50%) rotate(180deg)}
 .bonus.left{left:20%;top:50%;transform:translate(-50%,-50%) rotate(-90deg);max-width:calc(var(--sz,220px) * .34);overflow:hidden}
+.kcard.exploration .bonus,.kcard.action .bonus{font-size:calc(var(--sz,220px) * .085);padding:calc(var(--sz,220px) * .022) calc(var(--sz,220px) * .05);gap:calc(var(--sz,220px) * .02);border-width:calc(var(--sz,220px) * .01);border-radius:calc(var(--sz,220px) * .045)}
+.kcard.exploration .bonus.top,.kcard.action .bonus.top{top:12%}
+.kcard.exploration .bonus.bottom,.kcard.action .bonus.bottom{bottom:12%}
+.kcard.exploration .bonus.left,.kcard.action .bonus.left{left:12%;max-width:calc(var(--sz,220px) * .4)}
+.kcard.exploration .bonus.right,.kcard.action .bonus.right{right:12%;max-width:calc(var(--sz,220px) * .4)}
 .bonus.editable{cursor:pointer}.bonus.editable:hover{background:var(--focus-bg)}
 /* bonus icons */
 .bpv{display:inline-flex;align-items:center;gap:1px;font-family:'Kalam';font-weight:700}
@@ -185,29 +200,15 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .treasure-center .res,.treasure-center .res.sm{width:calc(var(--sz,220px) * .18);height:calc(var(--sz,220px) * .18)}
 .treasure-center .bpv,.treasure-center .bworker,.treasure-center .baction,.treasure-center .bdraw,.treasure-center .bexplorers{font-size:calc(var(--sz,220px) * .14)}
 
-/* ── TOOLBAR ── */
-.toolbar{display:flex;gap:10px;padding:8px 0 0;border-bottom:none;flex-wrap:nowrap;align-items:center;background:var(--paper);overflow-x:auto;scrollbar-width:none}
-.toolbar::-webkit-scrollbar{display:none}
-.tb-group{display:flex;gap:8px;align-items:center;flex-wrap:nowrap;flex-shrink:0}
-.new-card-wrap{position:relative;display:inline-flex;padding:0 4px 4px 0}
-.new-card-menu{position:fixed;z-index:150;display:flex;flex-direction:column;gap:4px;min-width:180px;background:var(--paper);border:2px solid var(--line);border-radius:8px;box-shadow:var(--shadow-lg);padding:6px;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-6px) scale(.98);transition:opacity var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),visibility 0s linear var(--t-fast)}
-.new-card-menu.open{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0) scale(1);transition-delay:0s}
-.new-card-menu button{width:100%;justify-content:flex-start;box-shadow:none;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
-.new-card-menu button:hover,.new-card-menu button:focus-visible{background:var(--focus-bg);transform:translateX(2px)}
-.chrome-actions #btn-decks{background:#f5e8c3;border-color:#8b6a2f;color:#3a2608}
+/* ── HEADER CONTROLS ── */
 .chrome-actions #btn-images{background:#d9edf8;border-color:#4a7ba0;color:#123d5a}
 .chrome-actions #btn-resources{background:#e5f4d3;border-color:#719c35;color:#2d4f12}
 .chrome-actions #btn-icons{background:#f0def8;border-color:#8d5aa8;color:#44215b}
-.chrome-actions #btn-decks:hover,.chrome-actions #btn-images:hover,.chrome-actions #btn-resources:hover,.chrome-actions #btn-icons:hover{filter:brightness(1.04);transform:translateY(-1px)}
-.chrome-actions #btn-sidebar{background:#ece7df;border-color:#7b6e5d;color:#2e261b}
-.tb-sep{width:1.5px;align-self:stretch;background:var(--line);opacity:.35;margin:2px 4px}
-.search{display:flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:20px;padding:4px 12px;background:var(--paper-2);min-width:180px;max-width:260px}
-.search input{border:none;outline:none;background:transparent;flex:1;font-family:'Patrick Hand';font-size:15px;color:var(--ink);min-width:80px}
-.chip-group{display:flex;gap:6px;flex-wrap:nowrap;align-items:center;flex-shrink:0}
-.sort-ctrl{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:10px;background:var(--paper);padding:2px 10px;box-shadow:var(--shadow-sm);font-family:'Kalam';font-weight:700;font-size:13px;color:var(--ink-soft)}
-.sort-ctrl .sort-ico{font-size:15px;color:var(--ink)}
-.sort-ctrl select{border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;padding:4px 2px;outline:none}
-.zoom-ctrl{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:8px;background:var(--paper);padding:3px 6px;box-shadow:var(--shadow-sm);font-family:'Kalam';font-weight:700;color:var(--ink);margin-left:auto}
+.chrome-actions #btn-images:hover,.chrome-actions #btn-resources:hover,.chrome-actions #btn-icons:hover{filter:brightness(1.04);transform:translateY(-1px)}
+.sidebar-search{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:18px;padding:4px 12px;background:var(--paper-2);margin:8px 10px 4px;transition:box-shadow var(--t-fast) var(--ease),background var(--t-fast) var(--ease)}
+.sidebar-search:focus-within{background:var(--paper);box-shadow:0 0 0 3px rgba(194,65,12,.2)}
+.sidebar-search input{border:none;outline:none;background:transparent;flex:1;font-family:'Patrick Hand';font-size:15px;color:var(--ink);min-width:40px}
+.zoom-ctrl{display:inline-flex;align-items:center;gap:4px;border:2px solid var(--line);border-radius:8px;background:var(--paper);padding:2px 4px;box-shadow:var(--shadow-sm);font-family:'Kalam';font-weight:700;color:var(--ink)}
 .zoom-ctrl button{width:26px;height:26px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);font-family:'Kalam';font-weight:700;cursor:pointer;color:var(--ink);display:grid;place-items:center}
 .zoom-ctrl button:hover:not(:disabled){background:var(--paper-2)}
 .zoom-ctrl button:disabled{opacity:.4;cursor:not-allowed}
@@ -220,18 +221,30 @@ body.sidebar-open main{margin-left:260px}
 .card-sidebar.open{transform:translateX(0)}
 .sidebar-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1.5px dashed var(--line)}
 .sidebar-head strong{font-family:'Kalam';font-size:17px;color:var(--ink)}
-.sidebar-close{width:28px;height:28px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);font-family:'Kalam';font-weight:700;color:var(--ink);cursor:pointer}
 .sidebar-list{overflow:auto;padding:10px;display:flex;flex-direction:column;gap:10px}
-.sidebar-section{border:1.5px solid var(--line);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:5px}
-.sidebar-section h4{font-size:14px;margin:0 0 2px;display:flex;align-items:center;justify-content:space-between;color:#1b1a17}
-.sidebar-section h4 span{font-family:'Patrick Hand';font-size:12px;opacity:.7}
+.sidebar-section{border:1.5px solid var(--line);border-radius:10px;display:flex;flex-direction:column;overflow:hidden;transition:opacity var(--t-med) var(--ease)}
 .sidebar-section.building{background:#f1d4a3}
 .sidebar-section.exploration{background:#d8e5bd}
 .sidebar-section.treasure{background:#ead083}
 .sidebar-section.action{background:#d6c4ef}
-.sidebar-card{border:1.5px solid rgba(42,39,34,.65);border-radius:6px;background:rgba(255,255,255,.48);padding:4px 6px;text-align:left;font-family:'Patrick Hand';font-size:14px;color:#1b1a17;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sidebar-card:hover,.sidebar-card:focus-visible{background:rgba(255,255,255,.78);transform:translateX(2px)}
+.sidebar-section-head{display:flex;align-items:stretch;width:100%}
+.sidebar-section-toggle{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:7px 10px;background:transparent;border:none;font-family:'Kalam';font-weight:700;font-size:14px;color:#1b1a17;cursor:pointer;text-align:left;transition:background var(--t-fast) var(--ease)}
+.sidebar-section-toggle:hover,.sidebar-section-toggle:focus-visible{background:rgba(255,255,255,.35)}
+.sidebar-section-toggle .head-label{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-section-toggle .count{font-family:'Patrick Hand';font-size:12px;opacity:.65;margin-left:6px;flex-shrink:0}
+.sidebar-section-add{width:34px;flex-shrink:0;border:none;border-left:1.5px solid rgba(0,0,0,.18);background:transparent;cursor:pointer;font-family:'Kalam';font-weight:700;font-size:20px;line-height:1;color:#1b1a17;display:grid;place-items:center;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
+.sidebar-section-add:hover,.sidebar-section-add:focus-visible{background:rgba(255,255,255,.55);transform:scale(1.08)}
+.sidebar-section-body{display:flex;flex-direction:column;gap:4px;padding:4px 8px 8px;max-height:2000px;transition:max-height var(--t-med) var(--ease),padding var(--t-med) var(--ease),opacity var(--t-fast) var(--ease)}
+.sidebar-section.dim-type{opacity:.4}
+.sidebar-section.solo-type{box-shadow:0 0 0 3px var(--accent),3px 3px 0 rgba(0,0,0,.12);transform:translateX(2px)}
+.sidebar-section.solo-type .sidebar-section-toggle .head-label{text-shadow:0 0 1px rgba(0,0,0,.3)}
+.sidebar-section.empty-type .sidebar-section-body{display:none}
+.sidebar-card{border:1.5px solid rgba(42,39,34,.5);border-radius:6px;background:rgba(255,255,255,.5);padding:5px 8px;text-align:left;font-family:'Kalam';font-weight:700;font-size:14px;color:#1b1a17;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
+.sidebar-card:hover,.sidebar-card:focus-visible{background:rgba(255,255,255,.85);transform:translateX(3px);box-shadow:2px 2px 0 rgba(0,0,0,.08)}
+.sidebar-card.matches-search{background:rgba(255,235,150,.92);border-color:var(--accent);box-shadow:2px 2px 0 rgba(194,65,12,.25);font-weight:700}
+.sidebar-card.dim-search{opacity:.35}
 .grid-item.flash .kcard{box-shadow:0 0 0 4px var(--accent),4px 4px 0 rgba(0,0,0,.14)}
+.grid-item.highlight .kcard{box-shadow:0 0 0 3px var(--accent-2),4px 4px 0 rgba(0,0,0,.14);transform:translateY(-3px)}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:60px 20px;color:var(--ink-ghost);font-family:'Caveat';font-size:18px;text-align:center}
 .empty-state .icon{font-size:48px}
 
@@ -340,7 +353,7 @@ body.sidebar-open main{margin-left:260px}
 .stage-cell.empty{opacity:.55;font-family:'Caveat';font-size:14px;color:var(--ink-ghost);font-style:italic}
 
 /* ── GRID MODE ── */
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--grid-col-size),1fr));gap:12px 18px;padding:16px 18px;max-width:1800px;margin:0 auto;align-items:start}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,var(--grid-col-size));gap:12px 18px;padding:16px 18px;justify-content:center;align-items:start}
 .cards-grid .kcard.md{--sz:var(--grid-card-size)}
 .grid-item{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-width:0}
 .grid-item .gi-name-input{width:min(var(--grid-card-size),100%);border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:center;padding:2px 6px;outline:none}
@@ -368,6 +381,11 @@ body.sidebar-open main{margin-left:260px}
 .modal-close{background:none;border:none;font-family:'Kalam';font-size:22px;line-height:1;cursor:pointer;color:var(--ink-soft);padding:0 4px}
 .modal-close:hover{color:var(--ink)}
 .library-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1.5px dashed var(--line)}
+.deck-menu-actions{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.deck-menu-actions .btn{flex:1;justify-content:center}
+.deck-save-row{display:flex;gap:6px;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1.5px dashed var(--line)}
+.deck-save-row input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);padding:5px 9px;font-family:'Patrick Hand';font-size:14px;color:var(--ink)}
+.deck-save-row .btn{flex-shrink:0;padding:5px 10px;font-size:13px}
 .library-tools input[type=text]{flex:1;min-width:170px;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);padding:6px 10px;font-family:'Patrick Hand';font-size:15px;color:var(--ink)}
 .library-tools input[type=file]{font-family:'Patrick Hand';font-size:14px;color:var(--ink-soft);max-width:260px}
 .library-list{display:flex;flex-direction:column;gap:8px;max-height:48vh;overflow:auto;padding-right:4px}
@@ -494,9 +512,8 @@ body.sidebar-open main{margin-left:260px}
 
 /* ── RESPONSIVE ── */
 @media (max-width:1250px){
-  .toolbar .tb-sep{display:none}
-  .toolbar .chip-text,.toolbar .chip .c{display:none}
-  .toolbar .chip{padding:4px 8px;min-width:30px;justify-content:center}
+  .chrome-actions .btn.ghost{padding:4px 8px;font-size:12px}
+  .search{min-width:140px;max-width:180px}
 }
 @media (max-width:1100px){
   .card-row{grid-template-columns:180px 180px repeat(4, minmax(90px, 1fr));gap:6px;padding:8px}
@@ -516,10 +533,9 @@ body.sidebar-open main{margin-left:260px}
   .stage-col .stage-num.shielded{width:32px;height:42px;font-size:14px}
 }
 @media (max-width:768px){
-  .chrome{padding:8px 12px 9px}
+  .chrome{padding:8px 12px}
   .brand h1{font-size:18px}
-  .toolbar{padding-top:7px;gap:8px}
-  .toolbar .search{min-width:140px}
+  .search{min-width:120px;max-width:160px}
   .cards-list{padding:10px;gap:8px}
   .card-row{grid-template-columns:1fr;grid-template-rows:none;gap:8px;padding:10px}
   .card-row .row-preview,.card-row .row-info,.card-row .stage-col{grid-column:auto;grid-row:auto}
@@ -574,59 +590,38 @@ body.sidebar-open main{margin-left:260px}
 
 <header class="chrome">
   <div class="chrome-top">
+    <button type="button" class="menu-toggle" id="btn-sidebar" aria-label="Afficher ou masquer la liste des cartes" aria-pressed="false"><span></span><span></span><span></span></button>
     <div class="brand">
       <div class="brand-mark" aria-hidden="true">KR</div>
       <div>
-        <h1>Kingdom Reforged <span style="font-weight:400;opacity:.6">· Card Editor</span></h1>
+        <h1>Kingdom Reforged</h1>
       </div>
     </div>
     <div class="chrome-actions">
       <span class="autosave" id="autosave-status" role="status" aria-live="polite"></span>
-      <button class="theme-toggle" id="theme-toggle" aria-label="Basculer thème sombre" title="Thème sombre"><span aria-hidden="true">🌙</span></button>
-      <button class="btn ghost" id="btn-sidebar" aria-label="Ouvrir ou fermer la liste des cartes">Liste</button>
-      <button class="btn ghost" id="btn-decks" aria-label="Ouvrir les decks sauvegardés">Decks</button>
-      <button class="btn ghost" id="btn-images" aria-label="Ouvrir la bibliothèque d'images">Images</button>
-      <button class="btn ghost" id="btn-resources" aria-label="Ouvrir les icônes de ressources">Ressources</button>
-      <button class="btn ghost" id="btn-icons" aria-label="Ouvrir la bibliothèque de bonus">Bonus</button>
-      <button class="btn ghost" id="btn-import" aria-label="Importer JSON">↓ Import</button>
-      <button class="btn ghost" id="btn-export" aria-label="Exporter JSON">↑ Export</button>
-      <button class="btn" id="btn-pdf" aria-label="Exporter PDF (A4)">🖨 PDF</button>
-    </div>
-  </div>
-<div class="toolbar">
-  <div class="tb-group">
-    <div class="new-card-wrap">
-      <button class="btn primary" id="btn-new-card" aria-haspopup="menu" aria-expanded="false">＋ Nouvelle carte</button>
-      <div class="new-card-menu" id="new-card-menu" role="menu" aria-label="Créer une carte">
-        <button class="btn ghost" type="button" role="menuitem" data-new-type="building">🏗️ Bâtiment</button>
-        <button class="btn ghost" type="button" role="menuitem" data-new-type="exploration">🏞️ Exploration</button>
-        <button class="btn ghost" type="button" role="menuitem" data-new-type="treasure">💰 Trésor</button>
+      <div class="zoom-ctrl" role="group" aria-label="Zoom de l'interface">
+        <button type="button" id="zoom-minus" aria-label="Réduire le zoom">−</button>
+        <span id="zoom-value">100%</span>
+        <button type="button" id="zoom-plus" aria-label="Augmenter le zoom">+</button>
       </div>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Basculer thème sombre" title="Thème sombre"><span aria-hidden="true">🌙</span></button>
+      <div class="btn-group-uploads" role="group" aria-label="Bibliothèques">
+        <button class="btn ghost" id="btn-images" aria-label="Ouvrir la bibliothèque d'images">Images</button>
+        <button class="btn ghost" id="btn-resources" aria-label="Ouvrir les icônes de ressources">Ressources</button>
+        <button class="btn ghost" id="btn-icons" aria-label="Ouvrir la bibliothèque de bonus">Bonus</button>
+      </div>
+      <button class="btn ghost" id="btn-export" aria-label="Exporter JSON">↑ Export</button>
+      <button class="btn decks" id="btn-decks" aria-label="Ouvrir les decks sauvegardés">Decks</button>
+      <button class="btn pdf" id="btn-pdf" aria-label="Exporter PDF (A4)">🖨 PDF</button>
     </div>
-    <div class="search"><span aria-hidden="true">🔍</span><input type="text" id="search-input" placeholder="chercher…" aria-label="Rechercher une carte"/></div>
   </div>
-  <div class="tb-sep" aria-hidden="true"></div>
-  <div class="chip-group" id="type-filter" role="group" aria-label="Filtrer par type">
-    <span class="chip on" data-type="all" tabindex="0" role="button"><span class="chip-icon" aria-hidden="true">✦</span><span class="chip-text">Toutes</span> <span class="c" id="cnt-all">0</span></span>
-    <span class="chip" data-type="building" tabindex="0" role="button"><span class="chip-icon" aria-hidden="true">🏗️</span><span class="chip-text">Bâtiments</span> <span class="c" id="cnt-building">0</span></span>
-    <span class="chip" data-type="exploration" tabindex="0" role="button"><span class="chip-icon" aria-hidden="true">🏞️</span><span class="chip-text">Exploration</span> <span class="c" id="cnt-exploration">0</span></span>
-    <span class="chip" data-type="treasure" tabindex="0" role="button"><span class="chip-icon" aria-hidden="true">💰</span><span class="chip-text">Trésors</span> <span class="c" id="cnt-treasure">0</span></span>
-    <span class="chip" data-type="action" tabindex="0" role="button"><span class="chip-icon" aria-hidden="true">🃏</span><span class="chip-text">Actions</span> <span class="c" id="cnt-action">0</span></span>
-  </div>
-  <div class="tb-sep" aria-hidden="true"></div>
-  <div class="zoom-ctrl" role="group" aria-label="Zoom de l'interface">
-    <button type="button" id="zoom-minus" aria-label="Réduire le zoom">−</button>
-    <span id="zoom-value">100%</span>
-    <button type="button" id="zoom-plus" aria-label="Augmenter le zoom">+</button>
-  </div>
-</div>
 </header>
 
 <aside class="card-sidebar" id="card-sidebar" aria-label="Liste des cartes">
   <div class="sidebar-head">
     <strong>Cartes</strong>
-    <button class="sidebar-close" id="sidebar-close" aria-label="Fermer la liste">×</button>
   </div>
+  <div class="sidebar-search"><span aria-hidden="true">🔍</span><input type="text" id="search-input" placeholder="chercher…" aria-label="Rechercher une carte"/></div>
   <div class="sidebar-list" id="sidebar-list"></div>
 </aside>
 
@@ -659,10 +654,13 @@ body.sidebar-open main{margin-left:260px}
 <!-- Deck library modal -->
 <div class="modal-overlay" id="deck-modal" role="dialog" aria-modal="true" aria-labelledby="deck-modal-title">
   <div class="modal">
-    <h3 id="deck-modal-title">Decks sauvegardés<button class="modal-close" id="deck-close" aria-label="Fermer">✕</button></h3>
-    <div class="library-tools">
+    <h3 id="deck-modal-title">Decks<button class="modal-close" id="deck-close" aria-label="Fermer">✕</button></h3>
+    <div class="deck-menu-actions">
+      <button class="btn ghost" id="btn-import-in-deck" type="button" aria-label="Importer JSON">↓ Import</button>
+    </div>
+    <div class="deck-save-row">
       <input type="text" id="deck-name-input" placeholder="Nom du deck…" aria-label="Nom du deck à sauvegarder"/>
-      <button class="btn primary" id="deck-save">Sauvegarder le deck</button>
+      <button class="btn primary" id="deck-save" type="button">Sauvegarder</button>
     </div>
     <div id="deck-list" class="library-list"></div>
   </div>
@@ -859,14 +857,14 @@ const DEFAULT_CARDS = [
 const state = {
   cards: [],
   stageByCard: {},
-  typeFilter: 'all',
-  resFilter: null,
+  soloType: null,
   searchQ: '',
   editing: null,
   imageLibraryTarget: null,
   iconAssignments: {resource:{}, bonus:{}},
   iconLibraryCategory: 'bonus',
   iconCache: {resource:[], bonus:[], byId:{}},
+  imageLibraryCache: null,
   sidebarOpen: true,
   uiZoom: 130,
 };
@@ -928,6 +926,12 @@ function load(){
   const zoom = Number(localStorage.getItem('kr-grid-zoom'));
   if(UI_ZOOMS.includes(zoom)) state.uiZoom = zoom;
   state.sidebarOpen = localStorage.getItem('kr-sidebar-open') !== 'false';
+  const solo = localStorage.getItem('kr-solo-type');
+  state.soloType = (solo && TYPE_META[solo]) ? solo : null;
+}
+function saveSoloType(){
+  if(state.soloType) localStorage.setItem('kr-solo-type', state.soloType);
+  else localStorage.removeItem('kr-solo-type');
 }
 function getCard(id){ return state.cards.find(c=>c.id===id)||null; }
 function getStage(cardId){ return state.stageByCard[cardId]||0; }
@@ -1014,12 +1018,20 @@ function formatBytes(n){
 function cloneCards(cards){ return JSON.parse(JSON.stringify(cards)); }
 function normalizeImportedCards(cards){
   if(!Array.isArray(cards)) throw new Error('Format invalide');
-  cards.forEach(c=>c.steps?.forEach(s=>{
-    s.bonus=migrateBonus(s.bonus);
-    s.bonus.icons = {...(s.bonus.icons||{})};
-    s.cost={...makeCost(),...(s.cost||{})};
-    s.costIcons = {...(s.costIcons||{})};
-  }));
+  cards.forEach(c=>{
+    c.steps?.forEach(s=>{
+      s.bonus=migrateBonus(s.bonus);
+      s.bonus.icons = {...(s.bonus.icons||{})};
+      s.cost={...makeCost(),...(s.cost||{})};
+      s.costIcons = {...(s.costIcons||{})};
+    });
+    if(c.type === 'action' || c.type === 'exploration'){
+      c.steps = c.steps || [];
+      while(c.steps.length < 4) c.steps.push(makeStep(emptyBonus(),makeCost()));
+      if(c.steps.length > 4) c.steps.length = 4;
+      if(c.type === 'action') c.loopCost = false;
+    }
+  });
   return cards;
 }
 function isEmbeddedImage(value){
@@ -1219,28 +1231,35 @@ function renderTreasureCardHtml(card, sizeClass='', interactive=false){
 function renderCardHtml(card, sizeClass='', interactive=false){
   if(card.type === 'exploration') return renderExplorationCardHtml(card, sizeClass, interactive);
   if(card.type === 'treasure') return renderTreasureCardHtml(card, sizeClass, interactive);
-  const stage = getStage(card.id);
+  const isAction = card.type === 'action';
+  const stage = isAction ? 0 : getStage(card.id);
   const n = card.steps.length;
   const bg = typeColor(card.type);
-  const rot = -stage * 90;
+  const rot = isAction ? 0 : -stage * 90;
 
   let corners='', ribbons='', bonuses='';
   for(let i=0;i<4;i++){
     if(i>=n) continue;
     const step = card.steps[i];
-    const shieldCls = step.shield ? ' shielded' : '';
+    const shieldCls = (!isAction && step.shield) ? ' shielded' : '';
     const editCls = interactive ? ' editable' : '';
-    corners += `<div class="corner${shieldCls} ${STAGE_POSITIONS[i]}${editCls}" data-field="shield" data-stage="${i}"${interactive?' role="button" tabindex="0"':''} aria-label="Étape ${STAGE_NUMS[i]}${step.shield?' protégée':''}">${STAGE_NUMS[i]}</div>`;
-    const isNormalTransition = i < n - 1;
-    const isLoopTransition = i === 3 && n === 4 && !!card.loopCost;
-    if(isNormalTransition || isLoopTransition){
-      const nextIdx = isLoopTransition ? 0 : i + 1;
-      const nextStep = card.steps[nextIdx];
-      const loopCls = isLoopTransition ? ' loop-ribbon' : '';
-      if(nextStep && hasStepCost(nextStep)){
-        ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${loopCls}${editCls}" data-stage="${nextIdx}" data-field="cost"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">${stepCostHtml(nextStep,'sm')}</div>`;
-      } else if(interactive && nextStep){
-        ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${loopCls} editable empty-ribbon" data-stage="${nextIdx}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">＋</div>`;
+    if(isAction){
+      corners += `<div class="corner ${STAGE_POSITIONS[i]}" aria-label="Étape ${STAGE_NUMS[i]}">${STAGE_NUMS[i]}</div>`;
+    } else {
+      corners += `<div class="corner${shieldCls} ${STAGE_POSITIONS[i]}${editCls}" data-field="shield" data-stage="${i}"${interactive?' role="button" tabindex="0"':''} aria-label="Étape ${STAGE_NUMS[i]}${step.shield?' protégée':''}">${STAGE_NUMS[i]}</div>`;
+    }
+    if(!isAction){
+      const isNormalTransition = i < n - 1;
+      const isLoopTransition = i === 3 && n === 4 && !!card.loopCost;
+      if(isNormalTransition || isLoopTransition){
+        const nextIdx = isLoopTransition ? 0 : i + 1;
+        const nextStep = card.steps[nextIdx];
+        const loopCls = isLoopTransition ? ' loop-ribbon' : '';
+        if(nextStep && hasStepCost(nextStep)){
+          ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${loopCls}${editCls}" data-stage="${nextIdx}" data-field="cost"${interactive?' role="button" tabindex="0"':''} aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">${stepCostHtml(nextStep,'sm')}</div>`;
+        } else if(interactive && nextStep){
+          ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${loopCls} editable empty-ribbon" data-stage="${nextIdx}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">＋</div>`;
+        }
       }
     }
     const bHtml = renderBonusHtml(step.bonus);
@@ -1266,9 +1285,7 @@ function renderCardHtml(card, sizeClass='', interactive=false){
 // CARDS CONTAINER (list + grid)
 // ═══════════════════════════════════
 function filteredCards(){
-  let cards = state.cards;
-  if(state.typeFilter!=='all') cards = cards.filter(c=>c.type===state.typeFilter);
-  if(state.resFilter) cards = cards.filter(c=>c.steps.some(s=>s.cost[state.resFilter]>0)||c.steps.some(s=>s.bonus[state.resFilter]>0));
+  let cards = state.soloType ? state.cards.filter(c=>c.type===state.soloType) : state.cards.slice();
   if(state.searchQ){
     const q = state.searchQ.toLowerCase();
     cards = cards.filter(c=>c.name.toLowerCase().includes(q));
@@ -1281,15 +1298,7 @@ function filteredCards(){
   });
 }
 
-function updateCounts(){
-  ['all','building','exploration','treasure','action'].forEach(t=>{
-    const el=document.getElementById('cnt-'+t);
-    if(el) el.textContent = t==='all' ? state.cards.length : state.cards.filter(c=>c.type===t).length;
-  });
-}
-
 function renderCards(){
-  updateCounts();
   renderCardSidebar();
   const container = document.getElementById('cards-container');
   container.className = 'cards-grid';
@@ -1306,16 +1315,38 @@ function renderCardSidebar(){
   if(!list) return;
   const coll = new Intl.Collator('fr', {sensitivity:'base', numeric:true});
   const order = ['building','exploration','treasure','action'];
-  const sections = order.map(type=>{
+  const q = (state.searchQ||'').trim().toLowerCase();
+  list.innerHTML = order.map(type=>{
     const cards = state.cards.filter(c=>c.type===type).sort((a,b)=>coll.compare(a.name,b.name));
-    if(!cards.length) return '';
     const meta = TYPE_META[type];
-    return `<section class="sidebar-section ${type}">
-      <h4>${meta.icon} ${meta.label}<span>${cards.length}</span></h4>
-      ${cards.map(card=>`<button class="sidebar-card" data-sidebar-card="${card.id}" title="${escapeHtml(card.name)}">${escapeHtml(card.name)}</button>`).join('')}
+    const isSolo = state.soloType === type;
+    const isDimmed = state.soloType && !isSolo;
+    const isEmpty = cards.length === 0;
+    const soloLabel = isSolo ? 'Afficher toutes les cartes' : `Afficher seulement les cartes ${meta.label.toLowerCase()}`;
+    const classes = ['sidebar-section', type];
+    if(isSolo) classes.push('solo-type');
+    if(isDimmed) classes.push('dim-type');
+    if(isEmpty) classes.push('empty-type');
+    return `<section class="${classes.join(' ')}">
+      <div class="sidebar-section-head">
+        <button type="button" class="sidebar-section-toggle" data-toggle-type="${type}" aria-pressed="${isSolo?'true':'false'}" title="${soloLabel}">
+          <span class="head-label">${meta.icon} ${meta.label}</span>
+          <span class="count">${cards.length}</span>
+        </button>
+        <button type="button" class="sidebar-section-add" data-add-type="${type}" aria-label="Nouvelle carte ${meta.label.toLowerCase()}" title="Nouvelle carte ${meta.label.toLowerCase()}">＋</button>
+      </div>
+      <div class="sidebar-section-body">
+        ${cards.map(card=>{
+          const classes = ['sidebar-card'];
+          if(q){
+            if(card.name.toLowerCase().includes(q)) classes.push('matches-search');
+            else classes.push('dim-search');
+          }
+          return `<button class="${classes.join(' ')}" data-sidebar-card="${card.id}" title="${escapeHtml(card.name)}">${escapeHtml(card.name)}</button>`;
+        }).join('')}
+      </div>
     </section>`;
   }).join('');
-  list.innerHTML = sections || `<div class="library-empty">Aucune carte.</div>`;
 }
 
 function setSidebarOpen(open){
@@ -1324,8 +1355,18 @@ function setSidebarOpen(open){
   const panel = document.getElementById('card-sidebar');
   if(panel) panel.classList.toggle('open', state.sidebarOpen);
   const btn = document.getElementById('btn-sidebar');
-  if(btn) btn.setAttribute('aria-pressed', state.sidebarOpen ? 'true' : 'false');
+  if(btn){
+    btn.setAttribute('aria-pressed', state.sidebarOpen ? 'true' : 'false');
+    btn.classList.toggle('open', state.sidebarOpen);
+  }
   localStorage.setItem('kr-sidebar-open', state.sidebarOpen ? 'true' : 'false');
+}
+
+function toggleHiddenType(type){
+  if(!TYPE_META[type]) return;
+  state.soloType = state.soloType === type ? null : type;
+  saveSoloType();
+  renderCards();
 }
 
 function focusCardFromSidebar(cardId){
@@ -1333,9 +1374,7 @@ function focusCardFromSidebar(cardId){
   if(!item) return;
   item.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
   item.classList.add('flash');
-  const input = item.querySelector('.gi-name-input');
   setTimeout(()=>item.classList.remove('flash'), 1200);
-  if(input) setTimeout(()=>input.focus(), 220);
 }
 
 function renderCardRow(card){
@@ -1350,7 +1389,7 @@ function renderCardRow(card){
   const stageCols = [];
   for(let i=0;i<4;i++){
     if(i >= numSteps){
-      const canAdd = (i === numSteps) && numSteps < 4;
+      const canAdd = (i === numSteps) && numSteps < 4 && card.type !== 'action' && card.type !== 'exploration';
       if(canAdd){
         stageCols.push(`<div class="stage-col empty" data-card="${card.id}" data-action="stage-add" role="button" tabindex="0" aria-label="Ajouter l'étape ${STAGE_NUMS[i]}"><span class="add-stage-ico" aria-hidden="true">+</span></div>`);
       } else {
@@ -1359,19 +1398,25 @@ function renderCardRow(card){
       continue;
     }
     const step = card.steps[i];
-    const shieldCls = step.shield ? ' shielded' : '';
-    // Cost under stage i = cost to build/reach stage i (stage I is usually empty — cycle IV→I)
+    const isActionOrExpl = card.type === 'action' || card.type === 'exploration';
+    const shieldCls = (!isActionOrExpl && step.shield) ? ' shielded' : '';
     const costHas = hasCost(step.cost);
     const bonusHtml = renderBonusHtml(step.bonus);
-    const canDelete = numSteps > 1;
-    stageCols.push(`
-      <div class="stage-col" data-stage="${i}">
-        ${canDelete?`<button type="button" class="stage-del" data-card="${card.id}" data-action="stage-delete" data-stage="${i}" aria-label="Supprimer l'étape ${STAGE_NUMS[i]}">✕</button>`:''}
-        <div class="stage-num${shieldCls}" data-card="${card.id}" data-field="shield-num" data-stage="${i}" role="button" tabindex="0" aria-pressed="${step.shield?'true':'false'}" aria-label="Étape ${STAGE_NUMS[i]} ${step.shield?'protégée — cliquer pour désactiver':'non protégée — cliquer pour activer'}">${STAGE_NUMS[i]}</div>
+    const canDelete = !isActionOrExpl && numSteps > 1;
+    const shieldable = !isActionOrExpl;
+    const numAttrs = shieldable
+      ? `data-card="${card.id}" data-field="shield-num" data-stage="${i}" role="button" tabindex="0" aria-pressed="${step.shield?'true':'false'}" aria-label="Étape ${STAGE_NUMS[i]} ${step.shield?'protégée — cliquer pour désactiver':'non protégée — cliquer pour activer'}"`
+      : `aria-label="Étape ${STAGE_NUMS[i]}"`;
+    const costBox = card.type === 'action' ? '' : `
         <div class="stage-box cost" data-card="${card.id}" data-field="cost" data-stage="${i}" role="button" tabindex="0" aria-label="Éditer coût de l'étape ${STAGE_NUMS[i]}">
           <div class="stage-box-label">Coût${i===0?' (cycle)':''}</div>
           <div class="stage-box-content${costHas?'':' empty'}">${costHas?costHtml(step.cost,'sm'):'—'}</div>
-        </div>
+        </div>`;
+    stageCols.push(`
+      <div class="stage-col" data-stage="${i}">
+        ${canDelete?`<button type="button" class="stage-del" data-card="${card.id}" data-action="stage-delete" data-stage="${i}" aria-label="Supprimer l'étape ${STAGE_NUMS[i]}">✕</button>`:''}
+        <div class="stage-num${shieldCls}" ${numAttrs}>${STAGE_NUMS[i]}</div>
+        ${costBox}
         <div class="stage-box bonus-box" data-card="${card.id}" data-field="bonus" data-stage="${i}" role="button" tabindex="0" aria-label="Éditer bonus étape ${STAGE_NUMS[i]}">
           <div class="stage-box-label">Bonus</div>
           <div class="stage-box-content${bonusHtml?'':' empty'}">${bonusHtml||'—'}</div>
@@ -1417,7 +1462,7 @@ function renderCardRow(card){
 }
 
 function renderCardGridItem(card){
-  const canEditStages = !['exploration','treasure'].includes(card.type);
+  const canEditStages = !['exploration','treasure','action'].includes(card.type);
   const canAddStageOrLoop = canEditStages && (card.steps.length < 4 || !card.loopCost);
   const addLoop = canEditStages && card.steps.length >= 4 && !card.loopCost;
   const addStageTitle = card.steps.length >= 4 ? 'Ajouter la transition IV vers I' : 'Ajouter une étape';
@@ -1444,10 +1489,12 @@ function renderCardGridItem(card){
 // ═══════════════════════════════════
 // CELL EDITORS
 // ═══════════════════════════════════
-function placeAnchoredModal(modal, clickEvent){
+function placeAnchoredModal(modal, clickEvent, opts={}){
   const panel = modal.querySelector('.modal');
   if(!panel) return null;
-  if(!(clickEvent && clickEvent.clientX != null)){
+  const anchorEl = opts.anchorEl || null;
+  const hasCursor = clickEvent && clickEvent.clientX != null;
+  if(!anchorEl && !hasCursor){
     modal.classList.remove('anchored');
     panel.style.left=''; panel.style.top='';
     return null;
@@ -1459,14 +1506,23 @@ function placeAnchoredModal(modal, clickEvent){
   const update = ()=>{
     const rect = panel.getBoundingClientRect();
     const vw = window.innerWidth, vh = window.innerHeight;
-    let x = clickEvent.clientX + 10;
-    let y = clickEvent.clientY + 10;
-    if(x + rect.width + 8 > vw) x = Math.max(8, clickEvent.clientX - rect.width - 10);
+    let x, y;
+    if(anchorEl){
+      const ar = anchorEl.getBoundingClientRect();
+      x = ar.right - rect.width;
+      y = ar.bottom + 6;
+      if(x < 8) x = ar.left;
+    } else {
+      x = clickEvent.clientX + 10;
+      y = clickEvent.clientY + 10;
+    }
+    if(x + rect.width + 8 > vw) x = Math.max(8, vw - rect.width - 8);
     if(y + rect.height + 8 > vh) y = Math.max(8, vh - rect.height - 8);
     if(x < 8) x = 8; if(y < 8) y = 8;
     panel.style.left = x + 'px';
     panel.style.top = y + 'px';
   };
+  update();
   requestAnimationFrame(update);
   return update;
 }
@@ -1517,6 +1573,7 @@ function closeCellModal(){
 }
 function removeStep(card, stage){
   if(!card || card.steps.length <= 1 || stage <= 0) return false;
+  if(card.type === 'action' || card.type === 'exploration') return false;
   card.steps.splice(stage, 1);
   state.stageByCard[card.id] = Math.min(getStage(card.id), card.steps.length - 1);
   return true;
@@ -1716,8 +1773,8 @@ function bindEditorEvents(card, field, stage){
 // CARD ACTIONS
 // ═══════════════════════════════════
 function makeNewCard(type='building'){
-  const names = {building:'Nouveau bâtiment', exploration:'Nouvelle exploration', treasure:'Nouveau trésor'};
-  const steps = type === 'exploration'
+  const names = {building:'Nouveau bâtiment', exploration:'Nouvelle exploration', treasure:'Nouveau trésor', action:'Nouvelle action'};
+  const steps = (type === 'exploration' || type === 'action')
     ? [makeStep(emptyBonus(),makeCost()),makeStep(emptyBonus(),makeCost()),makeStep(emptyBonus(),makeCost()),makeStep(emptyBonus(),makeCost())]
     : [makeStep(emptyBonus(),makeCost())];
   const card = {id:newId(),name:names[type] || 'Nouvelle carte',type,image:null,copies:1,steps};
@@ -1727,9 +1784,14 @@ function makeNewCard(type='building'){
 function addNewCard(type='building'){
   const card = makeNewCard(type);
   state.cards.push(card);
+  if(state.soloType && state.soloType !== type){
+    state.soloType = type;
+    saveSoloType();
+  }
   save(); renderCards();
-  closeNewCardMenu();
   requestAnimationFrame(()=>{
+    const item = document.querySelector(`.grid-item[data-id="${card.id}"]`);
+    if(item) item.scrollIntoView({behavior:'smooth',block:'center'});
     const input = document.querySelector(`.grid-item[data-id="${card.id}"] .gi-name-input`);
     if(input){ input.focus(); input.select(); }
   });
@@ -1767,26 +1829,6 @@ function showStatus(msg){
   clearTimeout(showStatus._t);
   showStatus._t = setTimeout(()=>{ el.textContent=''; }, 2000);
 }
-function openNewCardMenu(){
-  const menu = document.getElementById('new-card-menu');
-  const btn = document.getElementById('btn-new-card');
-  const rect = btn.getBoundingClientRect();
-  menu.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 188)) + 'px';
-  menu.style.top = (rect.bottom + 6) + 'px';
-  menu.classList.add('open');
-  btn.setAttribute('aria-expanded','true');
-}
-function closeNewCardMenu(){
-  const menu = document.getElementById('new-card-menu');
-  const btn = document.getElementById('btn-new-card');
-  if(menu) menu.classList.remove('open');
-  if(btn) btn.setAttribute('aria-expanded','false');
-}
-function toggleNewCardMenu(){
-  const menu = document.getElementById('new-card-menu');
-  if(menu.classList.contains('open')) closeNewCardMenu();
-  else openNewCardMenu();
-}
 
 // ═══════════════════════════════════
 // IMPORT / EXPORT
@@ -1800,7 +1842,13 @@ function updateCopiesDisplay(card){
 // ═══════════════════════════════════
 // DECKS + IMAGE LIBRARY
 // ═══════════════════════════════════
-function closeDeckLibrary(){ document.getElementById('deck-modal').classList.remove('open'); }
+function closeDeckLibrary(){
+  const modal = document.getElementById('deck-modal');
+  modal.classList.remove('open');
+  modal.classList.remove('anchored');
+  const panel = modal.querySelector('.modal');
+  if(panel){ panel.style.left=''; panel.style.top=''; }
+}
 function closeImageLibrary(){
   const modal = document.getElementById('image-modal');
   modal.classList.remove('open');
@@ -1809,12 +1857,14 @@ function closeImageLibrary(){
   if(panel){ panel.style.left=''; panel.style.top=''; }
   state.imageLibraryTarget = null;
 }
-async function openDeckLibrary(){
+async function openDeckLibrary(clickEvent=null){
   const modal = document.getElementById('deck-modal');
   modal.classList.add('open');
+  const anchorEl = document.getElementById('btn-decks');
+  const reposition = placeAnchoredModal(modal, clickEvent, {anchorEl});
   await renderDeckLibrary();
   document.getElementById('deck-name-input').value = await suggestedDeckName().catch(()=>incrementDeckName(localStorage.getItem('kr-current-deck-name')));
-  document.getElementById('deck-name-input').focus();
+  if(reposition) requestAnimationFrame(reposition);
 }
 async function renderDeckLibrary(){
   const list = document.getElementById('deck-list');
@@ -1903,30 +1953,53 @@ async function openImageLibrary(cardId=null, clickEvent=null){
   if(clearBtn) clearBtn.style.display = card && (card.image || card.imageName) ? 'inline-flex' : 'none';
   const modal = document.getElementById('image-modal');
   modal.classList.add('open');
-  const reposition = placeAnchoredModal(modal, clickEvent);
+  const opts = cardId ? {} : {anchorEl: document.getElementById('btn-images')};
+  const reposition = placeAnchoredModal(modal, clickEvent, opts);
   await renderImageLibrary();
   if(reposition) requestAnimationFrame(reposition);
 }
-async function renderImageLibrary(){
+function paintImageLibrary(images){
   const grid = document.getElementById('image-library-grid');
-  grid.innerHTML = `<div class="library-empty">Chargement des images…</div>`;
+  if(!grid) return;
+  if(!images || !images.length){
+    grid.innerHTML = `<div class="library-empty">Aucune image pour l'instant. Ajoute des PNG, JPG ou WebP.</div>`;
+    return;
+  }
+  const canUse = !!state.imageLibraryTarget;
+  grid.innerHTML = images.map(img=>`
+    <div class="image-tile" data-image-id="${img.id}" data-usable="${canUse?'true':'false'}">
+      <img src="${img.dataUrl}" alt="${escapeHtml(img.name)}" loading="lazy"/>
+      <input class="image-name-input" data-image="${img.id}" value="${escapeHtml(img.name)}" title="${escapeHtml(img.name)}" aria-label="Nom de l'image"/>
+      <button class="image-delete-btn" data-action="image-delete" data-image="${img.id}" aria-label="Supprimer ${escapeHtml(img.name)}">×</button>
+    </div>`).join('');
+}
+async function ensureImageLibraryCache(){
+  if(state.imageLibraryCache) return state.imageLibraryCache;
   try{
     const images = (await getAllLibraryItems('images')).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-    if(!images.length){
-      grid.innerHTML = `<div class="library-empty">Aucune image pour l'instant. Ajoute des PNG, JPG ou WebP.</div>`;
-      return;
-    }
-    const canUse = !!state.imageLibraryTarget;
-    grid.innerHTML = images.map(img=>`
-      <div class="image-tile" data-image-id="${img.id}" data-usable="${canUse?'true':'false'}">
-        <img src="${img.dataUrl}" alt="${escapeHtml(img.name)}"/>
-        <input class="image-name-input" data-image="${img.id}" value="${escapeHtml(img.name)}" title="${escapeHtml(img.name)}" aria-label="Nom de l'image"/>
-        <button class="image-delete-btn" data-action="image-delete" data-image="${img.id}" aria-label="Supprimer ${escapeHtml(img.name)}">×</button>
-      </div>`).join('');
+    state.imageLibraryCache = images;
+    return images;
+  }catch(e){
+    state.imageLibraryCache = null;
+    throw e;
+  }
+}
+async function renderImageLibrary(){
+  const grid = document.getElementById('image-library-grid');
+  if(!grid) return;
+  if(state.imageLibraryCache){
+    paintImageLibrary(state.imageLibraryCache);
+  } else {
+    grid.innerHTML = `<div class="library-empty">Chargement des images…</div>`;
+  }
+  try{
+    const images = await ensureImageLibraryCache();
+    paintImageLibrary(images);
   }catch(e){
     grid.innerHTML = `<div class="library-empty">Impossible de lire les images: ${escapeHtml(e.message)}</div>`;
   }
 }
+function invalidateImageLibraryCache(){ state.imageLibraryCache = null; }
 async function addImagesToLibrary(files){
   const images = Array.from(files||[]).filter(f=>f.type.startsWith('image/'));
   if(!images.length) return;
@@ -1941,6 +2014,7 @@ async function addImagesToLibrary(files){
         dataUrl: await fileToDataUrl(file),
       });
     }
+    invalidateImageLibraryCache();
     showStatus(`${images.length} image${images.length>1?'s':''} ajoutée${images.length>1?'s':''}`);
     await renderImageLibrary();
   }catch(e){ alert('Import image impossible : '+e.message); }
@@ -1969,6 +2043,7 @@ async function deleteImageFromLibrary(id){
   if(!image) return;
   if(!confirm(`Supprimer l'image « ${image.name} » ?`)) return;
   await deleteLibraryItem('images', id);
+  invalidateImageLibraryCache();
   showStatus('Image supprimée');
   await renderImageLibrary();
 }
@@ -1979,6 +2054,7 @@ async function renameImageInLibrary(id, name){
   const previousName = image.name;
   image.name = nextName;
   await putLibraryItem('images', image);
+  invalidateImageLibraryCache();
   state.cards.forEach(card=>{
     if(card.imageLibraryId === id || card.imageName === previousName){
       card.imageName = nextName;
@@ -1997,7 +2073,12 @@ function clearImageFromLibraryTarget(){
   save();
   showStatus(`Image effacée pour ${card.name}`);
 }
-function closeIconLibrary(){ document.getElementById('icon-modal').classList.remove('open'); }
+function closeIconLibrary(){
+  const modal = document.getElementById('icon-modal');
+  modal.classList.remove('open','anchored');
+  const panel = modal.querySelector('.modal');
+  if(panel){ panel.style.left=''; panel.style.top=''; }
+}
 function iconSlotOptions(category, selected=''){
   const source = category === 'bonus' ? BONUS_ICON_LABELS : RES_NAMES;
   return `<option value="">Assigner...</option>` + Object.entries(source).map(([key,label])=>`<option value="${key}"${selected===key?' selected':''}>${escapeHtml(label)}</option>`).join('');
@@ -2007,7 +2088,7 @@ function assignedSlotForIcon(icon){
   const src = icon.dataUrl;
   return Object.entries(state.iconAssignments[category] || {}).find(([,value])=>value === src)?.[0] || '';
 }
-async function openIconLibrary(category='bonus'){
+async function openIconLibrary(category='bonus', clickEvent=null){
   state.iconLibraryCategory = category;
   const title = document.getElementById('icon-modal-title');
   if(title) title.firstChild.nodeValue = category === 'resource' ? 'Bibliothèque de ressources' : "Bibliothèque de bonus";
@@ -2019,7 +2100,10 @@ async function openIconLibrary(category='bonus'){
     : 'Importe tes bonus. Ils apparaîtront dans le menu bonus des cartes.';
   const modal = document.getElementById('icon-modal');
   modal.classList.add('open');
+  const anchorEl = document.getElementById(category === 'resource' ? 'btn-resources' : 'btn-icons');
+  const reposition = placeAnchoredModal(modal, clickEvent, {anchorEl});
   await renderIconLibrary();
+  if(reposition) requestAnimationFrame(reposition);
 }
 async function renderIconLibrary(){
   const grid = document.getElementById('icon-library-grid');
@@ -2244,26 +2328,44 @@ function changeUiZoom(delta){
 function bindEvents(){
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
   document.getElementById('btn-sidebar').addEventListener('click', ()=>setSidebarOpen(!state.sidebarOpen));
-  document.getElementById('sidebar-close').addEventListener('click', ()=>setSidebarOpen(false));
-  document.getElementById('sidebar-list').addEventListener('click', e=>{
+  const sidebarList = document.getElementById('sidebar-list');
+  sidebarList.addEventListener('click', e=>{
+    const add = e.target.closest('[data-add-type]');
+    if(add){ addNewCard(add.dataset.addType); return; }
+    const toggle = e.target.closest('[data-toggle-type]');
+    if(toggle){ toggleHiddenType(toggle.dataset.toggleType); return; }
+    const item = e.target.closest('[data-sidebar-card]');
+    if(item) focusCardFromSidebar(item.dataset.sidebarCard);
+  });
+  sidebarList.addEventListener('mouseover', e=>{
     const item = e.target.closest('[data-sidebar-card]');
     if(!item) return;
-    focusCardFromSidebar(item.dataset.sidebarCard);
+    const g = document.querySelector(`.grid-item[data-id="${item.dataset.sidebarCard}"]`);
+    if(g) g.classList.add('highlight');
   });
-  document.getElementById('btn-new-card').addEventListener('click', e=>{ e.stopPropagation(); toggleNewCardMenu(); });
-  document.getElementById('new-card-menu').addEventListener('click', e=>{
-    const btn = e.target.closest('[data-new-type]');
-    if(!btn) return;
-    addNewCard(btn.dataset.newType);
+  sidebarList.addEventListener('mouseout', e=>{
+    const item = e.target.closest('[data-sidebar-card]');
+    if(!item) return;
+    const g = document.querySelector(`.grid-item[data-id="${item.dataset.sidebarCard}"]`);
+    if(g) g.classList.remove('highlight');
   });
-  document.addEventListener('click', e=>{
-    if(!e.target.closest('.new-card-wrap')) closeNewCardMenu();
+  sidebarList.addEventListener('focusin', e=>{
+    const item = e.target.closest('[data-sidebar-card]');
+    if(!item) return;
+    const g = document.querySelector(`.grid-item[data-id="${item.dataset.sidebarCard}"]`);
+    if(g) g.classList.add('highlight');
   });
-  document.getElementById('btn-decks').addEventListener('click', openDeckLibrary);
+  sidebarList.addEventListener('focusout', e=>{
+    const item = e.target.closest('[data-sidebar-card]');
+    if(!item) return;
+    const g = document.querySelector(`.grid-item[data-id="${item.dataset.sidebarCard}"]`);
+    if(g) g.classList.remove('highlight');
+  });
+  document.getElementById('btn-decks').addEventListener('click', e=>openDeckLibrary(e));
   document.getElementById('btn-images').addEventListener('click', ()=>openImageLibrary());
-  document.getElementById('btn-resources').addEventListener('click', ()=>openIconLibrary('resource'));
-  document.getElementById('btn-icons').addEventListener('click', ()=>openIconLibrary('bonus'));
-  document.getElementById('btn-import').addEventListener('click', openImport);
+  document.getElementById('btn-resources').addEventListener('click', e=>openIconLibrary('resource', e));
+  document.getElementById('btn-icons').addEventListener('click', e=>openIconLibrary('bonus', e));
+  document.getElementById('btn-import-in-deck').addEventListener('click', ()=>{ closeDeckLibrary(); openImport(); });
   document.getElementById('btn-export').addEventListener('click', openExport);
   document.getElementById('btn-pdf').addEventListener('click', exportToPDF);
   document.getElementById('zoom-minus').addEventListener('click', ()=>changeUiZoom(-1));
@@ -2338,19 +2440,6 @@ function bindEvents(){
   // Search
   document.getElementById('search-input').addEventListener('input', e=>{ state.searchQ=e.target.value; renderCards(); });
 
-  // Type filter
-  document.getElementById('type-filter').addEventListener('click', e=>{
-    const c = e.target.closest('[data-type]'); if(!c) return;
-    state.typeFilter = c.dataset.type;
-    document.querySelectorAll('#type-filter [data-type]').forEach(x=>x.classList.toggle('on', x.dataset.type===state.typeFilter));
-    renderCards();
-  });
-  document.getElementById('type-filter').addEventListener('keydown', e=>{
-    if(e.key!=='Enter'&&e.key!==' ') return;
-    const c = e.target.closest('[data-type]'); if(!c) return;
-    e.preventDefault(); c.click();
-  });
-
   // Delegated clicks on cards container
   const container = document.getElementById('cards-container');
   container.addEventListener('click', e=>{
@@ -2369,7 +2458,7 @@ function bindEvents(){
       if(a==='image'){ openCellEditor(cardId,'image',undefined,e); return; }
       if(a==='image-library'){ openImageLibrary(cardId, e); return; }
       if(a==='stage-add'){
-        if(card && !['exploration','treasure'].includes(card.type)){
+        if(card && !['exploration','treasure','action'].includes(card.type)){
           if(card.steps.length < 4){
             card.steps.push(makeStep(emptyBonus(),makeCost()));
             if(card.steps.length < 4) card.loopCost = false;
@@ -2392,7 +2481,7 @@ function bindEvents(){
         return;
       }
       if(a==='stage-remove'){
-        if(card && !['exploration','treasure'].includes(card.type)){
+        if(card && !['exploration','treasure','action'].includes(card.type)){
           if(card.loopCost){
             card.loopCost = false;
             save(); renderCards();
@@ -2484,6 +2573,12 @@ function bindEvents(){
       const card = getCard(t.dataset.card);
       if(!card) return;
       card.type = t.value;
+      if(card.type === 'action' || card.type === 'exploration'){
+        while(card.steps.length < 4) card.steps.push(makeStep(emptyBonus(),makeCost()));
+        if(card.steps.length > 4) card.steps.length = 4;
+        if(card.type === 'action') card.loopCost = false;
+      }
+      if(card.type === 'exploration' && card.danger == null) card.danger = 0;
       save(); renderCards();
       return;
     }
@@ -2501,7 +2596,6 @@ function bindEvents(){
   document.addEventListener('keydown', trapFocus);
   document.addEventListener('keydown', e=>{
     if(e.key==='Escape'){
-      closeNewCardMenu();
       const cell = document.getElementById('cell-modal');
       if(cell.classList.contains('open')){ closeCellModal(); e.preventDefault(); return; }
       const io = document.getElementById('io-modal');
@@ -2531,6 +2625,7 @@ applyUiZoom();
 setSidebarOpen(state.sidebarOpen);
 renderCards();
 refreshIconCache().then(()=>renderCards()).catch(()=>{});
+ensureImageLibraryCache().catch(()=>{});
 hydrateImportedImages(state.cards).then(()=>{
   renderCards();
   save();
