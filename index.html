@@ -148,11 +148,11 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .kcard.action .corner.right{right:calc(var(--sz,220px) * .014)}
 .kcard.action .corner.bottom{bottom:calc(var(--sz,220px) * .014)}
 .kcard.action .corner.left{left:calc(var(--sz,220px) * .014)}
-.kcard.action .bonus{font-size:calc(var(--sz,220px) * .066);padding:calc(var(--sz,220px) * .015) calc(var(--sz,220px) * .034);gap:calc(var(--sz,220px) * .014);border-width:calc(var(--sz,220px) * .008);border-radius:calc(var(--sz,220px) * .034)}
-.kcard.action .bonus.top{top:23%}
-.kcard.action .bonus.bottom{bottom:23%}
-.kcard.action .bonus.left{left:18%;max-width:calc(var(--sz,220px) * .32)}
-.kcard.action .bonus.right{right:18%;max-width:calc(var(--sz,220px) * .32)}
+.kcard.action .bonus{font-size:calc(var(--sz,220px) * .058);padding:calc(var(--sz,220px) * .012) calc(var(--sz,220px) * .028);gap:calc(var(--sz,220px) * .012);border-width:calc(var(--sz,220px) * .008);border-radius:calc(var(--sz,220px) * .032)}
+.kcard.action .bonus.top{top:18%}
+.kcard.action .bonus.bottom{bottom:18%}
+.kcard.action .bonus.left{left:18%;max-width:calc(var(--sz,220px) * .28)}
+.kcard.action .bonus.right{right:18%;max-width:calc(var(--sz,220px) * .28)}
 .bonus.editable{cursor:pointer}.bonus.editable:hover{background:var(--focus-bg)}
 /* bonus icons */
 .bpv{display:inline-flex;align-items:center;gap:1px;font-family:'Kalam';font-weight:700}
@@ -204,6 +204,8 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .danger-center,.treasure-center{position:absolute;inset:28%;border:calc(var(--sz,220px) * .014) solid var(--line);border-radius:50%;background:var(--paper);display:grid;place-items:center;text-align:center;font-family:'Kalam';font-weight:700;color:var(--ink);z-index:5;cursor:pointer}
 .danger-center{background:radial-gradient(circle,#f5e8c8,#d6aa58);font-size:calc(var(--sz,220px) * .052)}
 .danger-center b{font-size:calc(var(--sz,220px) * .18);line-height:.9}
+.flame-stack{display:flex;align-items:center;justify-content:center;gap:calc(var(--sz,220px) * .006);font-size:calc(var(--sz,220px) * .125);line-height:1;filter:drop-shadow(0 1px 0 rgba(0,0,0,.18))}
+.flame-stack .no-flame{font-family:'Kalam';font-size:calc(var(--sz,220px) * .16);color:#5d3c00}
 .treasure-center{inset:24%;border-radius:18%;background:linear-gradient(135deg,#f6e8c3 0%,#e8c66f 100%);font-size:calc(var(--sz,220px) * .075);padding:calc(var(--sz,220px) * .04)}
 .treasure-center .bonus{position:static;transform:none;max-width:none;font-size:calc(var(--sz,220px) * .08);padding:calc(var(--sz,220px) * .025) calc(var(--sz,220px) * .04)}
 .treasure-center .custom-icon-stack{gap:calc(var(--sz,220px) * .022)}
@@ -687,7 +689,8 @@ body[data-theme="dark"] .grid-item.session-modified .kcard{outline-color:#facc15
     <div class="pdf-menu-actions">
       <button class="btn pdf" id="pdf-export-all" type="button">Tout exporter</button>
       <button class="btn ghost" id="pdf-export-modified" type="button">Exporter les modifiées <span id="pdf-modified-count"></span></button>
-      <div class="hint">Les cartes marquées “modifié” sont celles changées depuis l'ouverture de cette session.</div>
+      <button class="btn ghost" id="pdf-clear-modified" type="button">Clear les modifiées</button>
+      <div class="hint">Les cartes marquées “modifié” sont celles changées depuis le dernier clear.</div>
     </div>
   </div>
 </div>
@@ -1342,10 +1345,15 @@ function htmlToElement(html){
 }
 
 function inferDanger(card){
-  if(Number.isFinite(Number(card.danger))) return Math.max(0, Math.min(9, Number(card.danger)));
+  if(Number.isFinite(Number(card.danger))) return Math.max(0, Math.min(3, Number(card.danger)));
   const text = (card.steps||[]).map(s=>s.bonus?.note||'').join(' ');
   const m = text.match(/danger\s*(\d+)/i);
-  return m ? Math.max(0, Math.min(9, Number(m[1]))) : 0;
+  return m ? Math.max(0, Math.min(3, Number(m[1]))) : 0;
+}
+function dangerFlamesHtml(card){
+  const danger = inferDanger(card);
+  if(!danger) return '<span class="no-flame">0</span>';
+  return Array.from({length:danger},()=>'<span aria-hidden="true">&#128293;</span>').join('');
 }
 function renderExplorationCardHtml(card, sizeClass='', interactive=false){
   const bg = typeColor(card.type);
@@ -1363,7 +1371,7 @@ function renderExplorationCardHtml(card, sizeClass='', interactive=false){
   const attrs = interactive ? `data-field="danger" data-card="${card.id}" role="button" tabindex="0" aria-label="Niveau de danger"` : '';
   return `<div class="kcard ${sizeClass} ${bg}" data-id="${card.id}">
     ${bonuses}
-    <div class="danger-center${interactive?' editable':''}" ${attrs}>Danger<br><b>${inferDanger(card)}</b></div>
+    <div class="danger-center${interactive?' editable':''}" ${attrs}><div class="flame-stack" aria-label="${inferDanger(card)} flamme${inferDanger(card)>1?'s':''}">${dangerFlamesHtml(card)}</div></div>
   </div>`;
 }
 function renderTreasureCardHtml(card, sizeClass='', interactive=false){
@@ -1633,9 +1641,11 @@ function renderCardRow(card){
 
 function renderCardGridItem(card, renderKey=cardRenderKey(card)){
   const canEditStages = !['exploration','treasure','action'].includes(card.type);
+  const canEditDanger = card.type === 'exploration';
   const canAddStageOrLoop = canEditStages && (card.steps.length < 4 || !card.loopCost);
   const addLoop = canEditStages && card.steps.length >= 4 && !card.loopCost;
   const addStageTitle = card.steps.length >= 4 ? 'Ajouter la transition IV vers I' : 'Ajouter une étape';
+  const danger = inferDanger(card);
   const copies = Math.max(1, card.copies != null ? card.copies : 1);
   const modified = state.modifiedCardIds.has(card.id);
   return `
@@ -1645,6 +1655,8 @@ function renderCardGridItem(card, renderKey=cardRenderKey(card)){
       <div class="grid-card-actions">
         ${canEditStages ? `<button class="btn ghost stage-action${addLoop?' loop-stage':''}" data-card="${card.id}" data-action="stage-add" ${canAddStageOrLoop?'':'disabled'} aria-label="${addStageTitle}" title="${addStageTitle}">+</button>` : ''}
         ${canEditStages ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="stage-remove" ${card.steps.length<=1?'disabled':''} aria-label="Enlever une étape" title="Enlever une étape">−</button>` : ''}
+        ${canEditDanger ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="danger-plus" ${danger>=3?'disabled':''} aria-label="Ajouter une flamme" title="Ajouter une flamme">+</button>` : ''}
+        ${canEditDanger ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="danger-minus" ${danger<=0?'disabled':''} aria-label="Enlever une flamme" title="Enlever une flamme">−</button>` : ''}
         <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer ${escapeHtml(card.name)}" title="Dupliquer">⎘</button>
         <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer ${escapeHtml(card.name)}" title="Supprimer">🗑</button>
       </div>
@@ -1846,12 +1858,12 @@ function editorBonus(card, stage){
 }
 function editorDanger(card){
   return `<div class="cell-field">
-    <label>Niveau de danger</label>
+    <label>Flammes</label>
     <div class="stage-stepper">
-      <button class="btn" id="ed-danger-minus" aria-label="Diminuer le danger">−</button>
+      <button class="btn" id="ed-danger-minus" aria-label="Enlever une flamme">−</button>
       <b id="ed-danger-value">${inferDanger(card)}</b>
-      <button class="btn" id="ed-danger-plus" aria-label="Augmenter le danger">+</button>
-      <span class="hint">(0 à 9)</span>
+      <button class="btn" id="ed-danger-plus" aria-label="Ajouter une flamme">+</button>
+      <span class="hint">(0 à 3)</span>
     </div>
   </div>`;
 }
@@ -1930,7 +1942,7 @@ function bindEditorEvents(card, field, stage){
   }
   if(field==='danger'){
     const update = delta=>{
-      card.danger = Math.max(0, Math.min(9, inferDanger(card) + delta));
+      card.danger = Math.max(0, Math.min(3, inferDanger(card) + delta));
       const el = document.getElementById('ed-danger-value');
       if(el) el.textContent = card.danger;
       save(); renderCards();
@@ -2366,16 +2378,28 @@ function closePdfMenu(){
   const panel = modal.querySelector('.modal');
   if(panel){ panel.style.left=''; panel.style.top=''; }
 }
-function openPdfMenu(clickEvent=null){
-  const modal = document.getElementById('pdf-modal');
+function updatePdfModifiedControls(){
   const modifiedCount = state.cards.filter(card=>state.modifiedCardIds.has(card.id)).length;
   const count = document.getElementById('pdf-modified-count');
   const modifiedBtn = document.getElementById('pdf-export-modified');
+  const clearBtn = document.getElementById('pdf-clear-modified');
   if(count) count.textContent = modifiedCount ? `(${modifiedCount})` : '';
   if(modifiedBtn) modifiedBtn.disabled = modifiedCount === 0;
+  if(clearBtn) clearBtn.disabled = modifiedCount === 0;
+  return modifiedCount;
+}
+function openPdfMenu(clickEvent=null){
+  const modal = document.getElementById('pdf-modal');
+  updatePdfModifiedControls();
   modal.classList.add('open');
   const reposition = placeAnchoredModal(modal, clickEvent, {anchorEl: document.getElementById('btn-pdf')});
   if(reposition) requestAnimationFrame(reposition);
+}
+function clearModifiedCards(){
+  resetSessionModifiedBaseline();
+  renderCards();
+  updatePdfModifiedControls();
+  showStatus('Cartes modifiées vidées');
 }
 function exportToPDF(scope='all'){
   const cards = scope === 'modified'
@@ -2563,6 +2587,7 @@ function bindEvents(){
   document.getElementById('pdf-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closePdfMenu(); });
   document.getElementById('pdf-export-all').addEventListener('click', ()=>exportToPDF('all'));
   document.getElementById('pdf-export-modified').addEventListener('click', ()=>exportToPDF('modified'));
+  document.getElementById('pdf-clear-modified').addEventListener('click', clearModifiedCards);
   document.getElementById('io-close').addEventListener('click', ()=>document.getElementById('io-modal').classList.remove('open'));
   document.getElementById('io-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
   document.getElementById('deck-close').addEventListener('click', closeDeckLibrary);
@@ -2684,6 +2709,14 @@ function bindEvents(){
             save(); renderCards();
             showStatus('Étape retirée');
           }
+        }
+        return;
+      }
+      if(a==='danger-plus' || a==='danger-minus'){
+        if(card && card.type === 'exploration'){
+          const delta = a === 'danger-plus' ? 1 : -1;
+          card.danger = Math.max(0, Math.min(3, inferDanger(card) + delta));
+          save(); renderCards();
         }
         return;
       }
