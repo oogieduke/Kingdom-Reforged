@@ -968,6 +968,9 @@ const state = {
     loading: false,
     loaded: false,
     lastSyncAt: null,
+    lastSeenAt: null,
+    pollTimer: null,
+    pollInFlight: false,
   },
 };
 
@@ -1195,6 +1198,7 @@ async function verifyCloudUnlock(){
   }catch(e){
     state.cloud.unlocked = false;
     state.cloud.loaded = false;
+    stopCloudWatch();
     updateEditLockUi();
     setCloudStatus(e.message || 'Déverrouillage impossible', 'error');
     return false;
@@ -1258,7 +1262,9 @@ async function cloudSaveNow({silent=false}={}){
     const data = await res.json().catch(()=>({}));
     if(!res.ok || !data.ok) throw new Error(data.error || 'Sauvegarde cloud refusée');
     state.cloud.lastSyncAt = data.updatedAt || new Date().toISOString();
+    state.cloud.lastSeenAt = state.cloud.lastSyncAt;
     state.cloud.loaded = true;
+    startCloudWatch();
     setCloudStatus(`Cloud synchronisé (${assets.length} assets).`, 'ready');
     if(silent) showAutosaveStatus('✓ cloud', 1600);
     else showStatus('Cloud synchronisé');
@@ -1276,6 +1282,45 @@ function queueCloudSave(){
   if(!state.cloud.unlocked || state.history.restoring) return;
   clearTimeout(state.cloud.saveTimer);
   state.cloud.saveTimer = setTimeout(()=>cloudSaveNow({silent:true}), 1800);
+}
+async function cloudFetchProject(){
+  const projectId = state.cloud.config.projectId || 'main';
+  const res = await fetch(cloudFunctionUrl(), {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      action:'load-project',
+      password:state.cloud.password,
+      projectId,
+    }),
+  });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok || !data.ok) throw new Error(data.error || 'Chargement cloud refusé');
+  return data;
+}
+function startCloudWatch(){
+  if(state.cloud.pollTimer || !state.cloud.unlocked || !state.cloud.loaded) return;
+  state.cloud.pollTimer = setInterval(checkCloudForUpdates, 3500);
+}
+function stopCloudWatch(){
+  if(state.cloud.pollTimer) clearInterval(state.cloud.pollTimer);
+  state.cloud.pollTimer = null;
+}
+async function checkCloudForUpdates(){
+  if(!state.cloud.unlocked || !state.cloud.loaded || state.cloud.loading || state.cloud.saving || state.cloud.pollInFlight) return;
+  if(state.cloud.saveTimer) return;
+  state.cloud.pollInFlight = true;
+  try{
+    const data = await cloudFetchProject();
+    const remoteUpdatedAt = data.updatedAt || null;
+    if(!remoteUpdatedAt || remoteUpdatedAt === state.cloud.lastSeenAt) return;
+    await applyCloudProject(data, {remote:true});
+    showStatus('Mis à jour depuis le cloud');
+  }catch(e){
+    console.warn('Cloud watch failed', e);
+  }finally{
+    state.cloud.pollInFlight = false;
+  }
 }
 async function urlToDataUrl(url){
   const res = await fetch(url, {mode:'cors'});
@@ -1333,48 +1378,50 @@ async function restoreCloudDecks(decks){
     });
   }
 }
+async function applyCloudProject(data, options={}){
+  const {remote=false} = options;
+  if(!data?.payload) return false;
+  rememberImportedAssetManifest(data.payload.assets);
+  await loadCloudAssets(data.assets || []);
+  await restoreCloudDecks(data.payload.decks);
+  state.cards = normalizeImportedCards(cloneCards(data.payload.cards || []));
+  await hydrateImportedImages(state.cards);
+  state.history.restoring = true;
+  save();
+  state.history.restoring = false;
+  markHistoryReady(true);
+  renderCards();
+  state.cloud.loaded = true;
+  state.cloud.lastSeenAt = data.updatedAt || state.cloud.lastSeenAt;
+  state.cloud.lastSyncAt = state.cloud.lastSeenAt;
+  setCloudStatus(remote ? 'Projet mis à jour en temps réel.' : 'Projet cloud chargé.', 'ready');
+  startCloudWatch();
+  return true;
+}
 async function cloudLoadProject(options={}){
   const {skipRead=false, afterUnlock=false} = options;
   if(!skipRead) readCloudForm();
   if(!hasCloudConfig()){ setCloudStatus('Configuration Supabase manquante.', 'error'); return; }
   if(!state.cloud.password){ setCloudStatus('Mot de passe manquant.', 'error'); return false; }
   state.cloud.loading = true;
+  stopCloudWatch();
   setCloudStatus('Chargement du cloud...', 'warn');
   try{
-    const projectId = state.cloud.config.projectId || 'main';
-    const res = await fetch(cloudFunctionUrl(), {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        action:'load-project',
-        password:state.cloud.password,
-        projectId,
-      }),
-    });
-    const data = await res.json().catch(()=>({}));
-    if(!res.ok || !data.ok) throw new Error(data.error || 'Chargement cloud refusé');
+    const data = await cloudFetchProject();
     if(!data?.payload){
       state.cloud.loaded = true;
+      state.cloud.lastSeenAt = null;
       setCloudStatus('Aucune sauvegarde cloud pour ce projet. La prochaine sauvegarde créera le projet.', 'warn');
+      startCloudWatch();
       if(afterUnlock) showStatus('Cloud prêt');
       return true;
     }
-    rememberImportedAssetManifest(data.payload.assets);
-    await loadCloudAssets(data.assets || []);
-    await restoreCloudDecks(data.payload.decks);
-    state.cards = normalizeImportedCards(cloneCards(data.payload.cards || []));
-    await hydrateImportedImages(state.cards);
-    state.history.restoring = true;
-    save();
-    state.history.restoring = false;
-    markHistoryReady(true);
-    renderCards();
-    state.cloud.loaded = true;
-    setCloudStatus('Projet cloud chargé.', 'ready');
+    await applyCloudProject(data);
     showStatus('Projet cloud chargé');
     return true;
   }catch(e){
     state.cloud.loaded = false;
+    stopCloudWatch();
     setCloudStatus(e.message || 'Chargement cloud impossible', 'error');
     return false;
   }finally{
