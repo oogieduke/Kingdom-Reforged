@@ -710,7 +710,7 @@ body.sidebar-open .cards-grid{padding-left:36px}
       <div class="hint">Le site connait deja Supabase. Sur un nouveau navigateur, il suffit d'entrer le mot de passe.</div>
     </div>
     <div class="cloud-actions">
-      <button class="btn ghost" id="cloud-load" type="button">Charger cloud</button>
+      <button class="btn ghost" id="cloud-load" type="button">Recharger cloud</button>
       <button class="btn ghost" id="cloud-save" type="button">Sauver maintenant</button>
       <button class="btn primary" id="cloud-unlock" type="button">Déverrouiller</button>
     </div>
@@ -966,6 +966,7 @@ const state = {
     saveTimer: null,
     saving: false,
     loading: false,
+    loaded: false,
     lastSyncAt: null,
   },
 };
@@ -1075,12 +1076,16 @@ function save(){
     if(el) el.textContent = 'sauvegarde locale trop lourde';
     return false;
   }
-  const el = document.getElementById('autosave-status');
-  el.textContent = '✓ sauvegardé';
-  clearTimeout(save._t);
-  save._t = setTimeout(()=>{ el.textContent=''; }, 2000);
+  showAutosaveStatus(state.cloud.unlocked ? '↥ cloud...' : '✓ sauvegardé');
   queueCloudSave();
   return true;
+}
+function showAutosaveStatus(message, delay=2000){
+  const el = document.getElementById('autosave-status');
+  if(!el) return;
+  el.textContent = message;
+  clearTimeout(save._t);
+  save._t = setTimeout(()=>{ el.textContent=''; }, delay);
 }
 let _saveDebounceT;
 function saveDebounced(delay=400){
@@ -1148,7 +1153,7 @@ function setCloudStatus(message, tone='warn'){
   if(btn){
     btn.classList.toggle('on', state.cloud.unlocked);
     btn.classList.toggle('syncing', state.cloud.saving || state.cloud.loading);
-    btn.textContent = state.cloud.unlocked ? 'Cloud OK' : 'Cloud';
+    btn.textContent = state.cloud.unlocked ? (state.cloud.loaded ? 'Cloud OK' : 'Cloud...') : 'Cloud';
   }
 }
 function updateEditLockUi(){
@@ -1157,7 +1162,7 @@ function updateEditLockUi(){
     btn.setAttribute('aria-pressed', state.cloud.unlocked ? 'true' : 'false');
   });
   setCloudStatus(
-    state.cloud.unlocked ? 'Edition cloud déverrouillée.' : (hasCloudConfig() ? 'Cloud configuré, édition verrouillée.' : "Configure Supabase, puis déverrouille l'édition."),
+    state.cloud.unlocked ? (state.cloud.loaded ? 'Projet cloud chargé. Les modifications partent en ligne.' : 'Mot de passe validé, chargement du cloud...') : (hasCloudConfig() ? 'Cloud configuré, édition verrouillée.' : "Configure Supabase, puis déverrouille l'édition."),
     state.cloud.unlocked ? 'ready' : 'warn'
   );
 }
@@ -1184,11 +1189,12 @@ async function verifyCloudUnlock(){
     const data = await res.json().catch(()=>({}));
     if(!res.ok || !data.ok) throw new Error(data.error || 'Mot de passe refusé');
     state.cloud.unlocked = true;
+    state.cloud.loaded = false;
     updateEditLockUi();
-    showStatus('Edition déverrouillée');
-    return true;
+    return await cloudLoadProject({skipRead:true, afterUnlock:true});
   }catch(e){
     state.cloud.unlocked = false;
+    state.cloud.loaded = false;
     updateEditLockUi();
     setCloudStatus(e.message || 'Déverrouillage impossible', 'error');
     return false;
@@ -1252,8 +1258,10 @@ async function cloudSaveNow({silent=false}={}){
     const data = await res.json().catch(()=>({}));
     if(!res.ok || !data.ok) throw new Error(data.error || 'Sauvegarde cloud refusée');
     state.cloud.lastSyncAt = data.updatedAt || new Date().toISOString();
+    state.cloud.loaded = true;
     setCloudStatus(`Cloud synchronisé (${assets.length} assets).`, 'ready');
-    if(!silent) showStatus('Cloud synchronisé');
+    if(silent) showAutosaveStatus('✓ cloud', 1600);
+    else showStatus('Cloud synchronisé');
     return true;
   }catch(e){
     setCloudStatus(e.message || 'Sauvegarde cloud impossible', 'error');
@@ -1325,9 +1333,11 @@ async function restoreCloudDecks(decks){
     });
   }
 }
-async function cloudLoadProject(){
-  readCloudForm();
+async function cloudLoadProject(options={}){
+  const {skipRead=false, afterUnlock=false} = options;
+  if(!skipRead) readCloudForm();
   if(!hasCloudConfig()){ setCloudStatus('Configuration Supabase manquante.', 'error'); return; }
+  if(!state.cloud.password){ setCloudStatus('Mot de passe manquant.', 'error'); return false; }
   state.cloud.loading = true;
   setCloudStatus('Chargement du cloud...', 'warn');
   try{
@@ -1343,7 +1353,12 @@ async function cloudLoadProject(){
     });
     const data = await res.json().catch(()=>({}));
     if(!res.ok || !data.ok) throw new Error(data.error || 'Chargement cloud refusé');
-    if(!data?.payload){ setCloudStatus('Aucune sauvegarde cloud pour ce projet.', 'warn'); return; }
+    if(!data?.payload){
+      state.cloud.loaded = true;
+      setCloudStatus('Aucune sauvegarde cloud pour ce projet. La prochaine sauvegarde créera le projet.', 'warn');
+      if(afterUnlock) showStatus('Cloud prêt');
+      return true;
+    }
     rememberImportedAssetManifest(data.payload.assets);
     await loadCloudAssets(data.assets || []);
     await restoreCloudDecks(data.payload.decks);
@@ -1354,10 +1369,14 @@ async function cloudLoadProject(){
     state.history.restoring = false;
     markHistoryReady(true);
     renderCards();
+    state.cloud.loaded = true;
     setCloudStatus('Projet cloud chargé.', 'ready');
     showStatus('Projet cloud chargé');
+    return true;
   }catch(e){
+    state.cloud.loaded = false;
     setCloudStatus(e.message || 'Chargement cloud impossible', 'error');
+    return false;
   }finally{
     state.cloud.loading = false;
     document.getElementById('btn-cloud')?.classList.remove('syncing');
@@ -2861,6 +2880,7 @@ async function addIconsToLibrary(files){
     }
     showStatus(`${icons.length} icône${icons.length>1?'s':''} ajoutée${icons.length>1?'s':''}`);
     await refreshIconCache();
+    queueCloudSave();
     renderCards();
     await renderIconLibrary();
   }catch(e){ alert('Import icône impossible : '+e.message); }
@@ -2894,11 +2914,13 @@ async function renameIconInLibrary(id, name){
   await putLibraryItem('icons', icon);
   rememberIconRef(id,{name:icon.name,category:icon.category || 'bonus'});
   await refreshIconCache();
+  queueCloudSave();
   renderCards();
   showStatus('Icône renommée');
 }
 function renameMissingIconRef(id, name){
   rememberIconRef(id,{name:name.trim() || state.assetRefs.icons[id]?.name || id,category:state.assetRefs.icons[id]?.category || state.iconLibraryCategory || 'bonus'});
+  queueCloudSave();
   renderCards();
   renderIconLibrary();
   showStatus('Référence icône renommée');
@@ -2909,6 +2931,7 @@ async function setIconCategory(id, category){
   icon.category = category;
   await putLibraryItem('icons', icon);
   await refreshIconCache();
+  queueCloudSave();
   renderCards();
   await renderIconLibrary();
 }
@@ -2922,6 +2945,7 @@ async function assignIconToSlot(id, category, slot){
   });
   if(slot) state.iconAssignments[category][slot] = icon.dataUrl;
   saveIconAssignments();
+  queueCloudSave();
   renderCards();
   showStatus(slot ? 'Icône assignée' : 'Icône dissociée');
 }
@@ -3441,7 +3465,7 @@ function bindEvents(){
       return;
     }
     if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='y'){ e.preventDefault(); redoHistory(); return; }
-    if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){ e.preventDefault(); save(); showStatus('✓ sauvegardé'); }
+    if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){ e.preventDefault(); save(); showStatus(state.cloud.unlocked ? 'Sauvegarde cloud lancée' : '✓ sauvegardé'); }
   });
 }
 
@@ -3465,6 +3489,7 @@ hydrateImportedImages(state.cards).then(()=>{
   save();
   state.history.restoring = false;
   markHistoryReady(true);
+  if(state.cloud.password) verifyCloudUnlock().catch(()=>{});
 }).catch(()=>{});
 </script>
 </body>
