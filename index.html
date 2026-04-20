@@ -868,14 +868,26 @@ const state = {
 // ═══════════════════════════════════
 // PERSISTENCE
 // ═══════════════════════════════════
+function compactCardForStorage(card){
+  const out = {...card};
+  out.steps = (card.steps||[]).map(step=>({
+    ...step,
+    cost:{...(step.cost||{})},
+    costIcons:{...(step.costIcons||{})},
+    bonus:{...emptyBonus(),...(step.bonus||{}),icons:{...(step.bonus?.icons||{})}},
+  }));
+  if(isEmbeddedImage(out.image)) out.image = out.imageName || null;
+  delete out.imageLibraryId;
+  return out;
+}
 function cardsForLocalStorage(){
-  return cloneCards(state.cards).map(card=>{
-    if(isEmbeddedImage(card.image)) card.image = card.imageName || null;
-    return card;
-  });
+  return state.cards.map(compactCardForStorage);
+}
+function persistenceSnapshot(){
+  return JSON.stringify(cardsForLocalStorage());
 }
 function historySnapshot(){
-  return JSON.stringify(cloneCards(state.cards));
+  return persistenceSnapshot();
 }
 function updateHistoryButtons(){
   const undo = document.getElementById('btn-undo');
@@ -890,9 +902,8 @@ function markHistoryReady(){
   state.history.ready = true;
   updateHistoryButtons();
 }
-function commitHistory(){
+function commitHistory(snap=persistenceSnapshot()){
   if(state.history.restoring) return;
-  const snap = historySnapshot();
   if(!state.history.ready){
     state.history.last = snap;
     state.history.ready = true;
@@ -909,12 +920,13 @@ function commitHistory(){
 function restoreHistorySnapshot(snap){
   state.history.restoring = true;
   state.cards = normalizeImportedCards(JSON.parse(snap));
-  localStorage.setItem('kr-cards', JSON.stringify(cardsForLocalStorage()));
+  localStorage.setItem('kr-cards', snap);
   state.history.last = snap;
   renderCards();
   updateHistoryButtons();
   state.history.restoring = false;
   showStatus('Historique restauré');
+  hydrateImportedImages(state.cards).then(()=>renderCards()).catch(()=>{});
 }
 function undoHistory(){
   if(!state.history.past.length) return;
@@ -931,9 +943,10 @@ function redoHistory(){
   restoreHistorySnapshot(next);
 }
 function save(){
-  commitHistory();
+  const payload = persistenceSnapshot();
+  commitHistory(payload);
   try{
-    localStorage.setItem('kr-cards', JSON.stringify(cardsForLocalStorage()));
+    localStorage.setItem('kr-cards', payload);
   }catch(e){
     console.warn(e);
     const el = document.getElementById('autosave-status');
