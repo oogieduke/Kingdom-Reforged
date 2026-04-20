@@ -201,6 +201,10 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .custom-icon-stack{display:inline-flex;align-items:center;gap:calc(var(--sz,220px) * .012)}
 .custom-card-icon{width:calc(var(--sz,220px) * .112);height:calc(var(--sz,220px) * .112);object-fit:contain;display:block}
 .custom-card-icon.bonus-custom{width:1.35em;height:1.35em}
+.missing-asset{display:inline-grid;place-items:center;border:1.5px dashed #b45309;background:#fff3bf;color:#7c2d12;font-family:'Kalam';font-weight:700;line-height:1}
+.custom-card-icon.missing-asset{border-radius:6px;font-size:calc(var(--sz,220px) * .07)}
+.bonus-custom.missing-asset{width:1.35em;height:1.35em;font-size:.95em}
+.kcenter.missing-asset{background:#fff3bf;border-style:dashed;color:#7c2d12;font-size:calc(var(--sz,220px) * .18)}
 .danger-center,.treasure-center{position:absolute;inset:28%;border:calc(var(--sz,220px) * .014) solid var(--line);border-radius:50%;background:var(--paper);display:grid;place-items:center;text-align:center;font-family:'Kalam';font-weight:700;color:var(--ink);z-index:5;cursor:pointer}
 .danger-center{background:radial-gradient(circle,#f5e8c8,#d6aa58);font-size:calc(var(--sz,220px) * .052)}
 .danger-center b{font-size:calc(var(--sz,220px) * .18);line-height:.9}
@@ -426,6 +430,11 @@ body.sidebar-open .cards-grid{padding-left:36px}
 .image-tile[data-usable="true"]{cursor:pointer}
 .image-tile[data-usable="true"]:hover{background:var(--paper);box-shadow:var(--shadow-sm)}
 .image-tile img{width:100%;aspect-ratio:1;border:1.5px solid var(--line);border-radius:6px;object-fit:cover;background:var(--paper)}
+.missing-preview{width:100%;aspect-ratio:1;border:1.5px dashed #b45309;border-radius:6px;background:#fff3bf;color:#7c2d12;display:grid;place-items:center;font-family:'Kalam';font-size:34px;font-weight:700}
+.image-tile.missing{border-style:dashed;background:rgba(255,243,191,.45)}
+.asset-replace-label{display:flex;justify-content:center;align-items:center;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);font-family:'Kalam';font-size:12px;font-weight:700;padding:2px 5px;cursor:pointer;color:var(--ink)}
+.asset-replace-label:hover{background:var(--focus-bg)}
+.asset-replace-input{display:none}
 .image-name-input{width:100%;border:1.5px dashed transparent;border-radius:5px;background:transparent;color:var(--ink);font-family:'Kalam';font-size:12px;text-align:center;padding:1px 3px;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .image-name-input:hover,.image-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
 .image-delete-btn{position:absolute;top:8px;right:8px;width:24px;height:24px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);color:var(--danger);font-family:'Kalam';font-weight:700;display:grid;place-items:center;opacity:0;pointer-events:none;cursor:pointer;box-shadow:var(--shadow-sm)}
@@ -739,6 +748,7 @@ const RES_NAMES  = {wood:'Bois',stone:'Pierre',wheat:'Blé',iron:'Fer',water:'Ea
 const BONUS_ICON_LABELS = {pv:'PV',workers:'Ouvriers',actions:'Actions',draw:'Pioche',explorers:'Explorateurs'};
 const ICON_ASSIGN_STORAGE = 'kr-icon-assignments';
 const MODIFIED_STORAGE = 'kr-modified-card-ids';
+const ASSET_REF_STORAGE = 'kr-asset-refs';
 const STAGE_NUMS = ['I','II','III','IV'];
 const STAGE_POSITIONS = ['top','right','bottom','left'];
 const RIBBON_POSITIONS = ['tr','br','bl','tl'];
@@ -888,6 +898,7 @@ const state = {
   editing: null,
   imageLibraryTarget: null,
   iconAssignments: {resource:{}, bonus:{}},
+  assetRefs: {images:{}, icons:{}},
   iconLibraryCategory: 'bonus',
   iconCache: {resource:[], bonus:[], byId:{}},
   imageLibraryCache: null,
@@ -1025,12 +1036,36 @@ function loadIconAssignments(){
 function saveIconAssignments(){
   localStorage.setItem(ICON_ASSIGN_STORAGE, JSON.stringify(state.iconAssignments));
 }
+function loadAssetRefs(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(ASSET_REF_STORAGE) || '{}');
+    state.assetRefs = {images:{...(raw.images||{})}, icons:{...(raw.icons||{})}};
+  }catch{
+    state.assetRefs = {images:{}, icons:{}};
+  }
+}
+function saveAssetRefs(){
+  try{ localStorage.setItem(ASSET_REF_STORAGE, JSON.stringify(state.assetRefs)); }catch{}
+}
+function rememberImageRef(ref, meta={}){
+  const key = String(ref||'').trim();
+  if(!key) return;
+  state.assetRefs.images[key.toLowerCase()] = {name:key, ...meta};
+  saveAssetRefs();
+}
+function rememberIconRef(id, meta={}){
+  const key = String(id||'').trim();
+  if(!key) return;
+  state.assetRefs.icons[key] = {id:key, name:meta.name || key, category:meta.category || 'bonus', ...meta};
+  saveAssetRefs();
+}
 function migrateBonus(b){
   if(!b || typeof b==='object') return {...emptyBonus(),...(b||{})};
   return {...emptyBonus(), note: b==='—'?'':b};
 }
 function load(){
   loadIconAssignments();
+  loadAssetRefs();
   const raw = localStorage.getItem('kr-cards');
   if(raw){
     try{
@@ -1136,11 +1171,16 @@ function cloneCards(cards){ return JSON.parse(JSON.stringify(cards)); }
 function normalizeImportedCards(cards){
   if(!Array.isArray(cards)) throw new Error('Format invalide');
   cards.forEach(c=>{
+    if(c.imageName || (!isEmbeddedImage(c.image) && c.image)){
+      rememberImageRef(c.imageName || c.image);
+    }
     c.steps?.forEach(s=>{
       s.bonus=migrateBonus(s.bonus);
       s.bonus.icons = {...(s.bonus.icons||{})};
       s.cost={...makeCost(),...(s.cost||{})};
       s.costIcons = {...(s.costIcons||{})};
+      Object.keys(s.costIcons).forEach(id=>rememberIconRef(id,{category:'resource'}));
+      Object.keys(s.bonus.icons).forEach(id=>rememberIconRef(id,{category:state.assetRefs.icons[id]?.category || 'bonus'}));
     });
     if(c.type === 'action' || c.type === 'exploration'){
       c.steps = c.steps || [];
@@ -1169,6 +1209,23 @@ async function suggestedDeckName(){
   while(names.has(candidate.toLowerCase())) candidate = incrementDeckName(candidate);
   return candidate;
 }
+function collectAssetRefs(){
+  const images = new Set();
+  const icons = new Map();
+  state.cards.forEach(card=>{
+    const imageRef = card.imageName || (!isEmbeddedImage(card.image) ? card.image : '');
+    if(imageRef) images.add(imageRef);
+    card.steps?.forEach(step=>{
+      Object.entries(step.costIcons || {}).forEach(([id,qty])=>{
+        if(qty > 0) icons.set(id,{id,category:'resource'});
+      });
+      Object.entries(step.bonus?.icons || {}).forEach(([id,qty])=>{
+        if(qty > 0) icons.set(id,{id,category:icons.get(id)?.category || state.assetRefs.icons[id]?.category || 'bonus'});
+      });
+    });
+  });
+  return {images, icons};
+}
 function exportableCards(){
   return cloneCards(state.cards).map(card=>{
     const imageName = card.imageName || (!isEmbeddedImage(card.image) ? card.image : '');
@@ -1183,6 +1240,38 @@ function exportableCards(){
     return card;
   });
 }
+function assetManifest(){
+  const refs = collectAssetRefs();
+  const images = {};
+  refs.images.forEach(ref=>{
+    const meta = state.assetRefs.images[String(ref).toLowerCase()];
+    images[ref] = {name: meta?.name || ref};
+  });
+  const icons = {};
+  refs.icons.forEach((meta,id)=>{
+    const saved = state.assetRefs.icons[id] || {};
+    const icon = state.iconCache.byId[id] || {};
+    icons[id] = {
+      id,
+      name: icon.name || saved.name || meta.name || id,
+      category: icon.category || saved.category || meta.category || 'bonus',
+    };
+  });
+  return {images, icons};
+}
+function exportPayload(){
+  return {version:2, cards:exportableCards(), assets:assetManifest()};
+}
+function parseImportPayload(payload){
+  if(Array.isArray(payload)) return {cards:payload, assets:null};
+  if(payload && Array.isArray(payload.cards)) return {cards:payload.cards, assets:payload.assets || null};
+  throw new Error('Format invalide');
+}
+function rememberImportedAssetManifest(assets){
+  if(!assets) return;
+  Object.values(assets.images || {}).forEach(img=>rememberImageRef(img.name || img.ref || img));
+  Object.entries(assets.icons || {}).forEach(([id,icon])=>rememberIconRef(icon.id || id, icon));
+}
 async function hydrateImportedImages(cards){
   const images = await getAllLibraryItems('images').catch(()=>[]);
   const byName = new Map(images.map(img=>[String(img.name||'').toLowerCase(), img]));
@@ -1190,11 +1279,13 @@ async function hydrateImportedImages(cards){
     const ref = card.imageName || (!isEmbeddedImage(card.image) ? card.image : '');
     if(!ref) return;
     card.imageName = ref;
+    rememberImageRef(ref);
     if(isEmbeddedImage(card.image)) return;
     const image = byName.get(String(ref).toLowerCase());
     if(image){
       card.image = image.dataUrl;
       card.imageLibraryId = image.id;
+      rememberImageRef(ref,{id:image.id});
     } else {
       card.image = null;
       delete card.imageLibraryId;
@@ -1226,7 +1317,10 @@ function getOrCreateStep(card, stage=0){
 async function refreshIconCache(){
   const icons = await getAllLibraryItems('icons').catch(()=>[]);
   const byId = {};
-  icons.forEach(icon=>{ byId[icon.id] = icon; });
+  icons.forEach(icon=>{
+    byId[icon.id] = icon;
+    rememberIconRef(icon.id,{name:icon.name,category:icon.category || 'resource'});
+  });
   state.iconCache = {
     resource: icons.filter(icon=>(icon.category || 'resource') === 'resource').sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)),
     bonus: icons.filter(icon=>(icon.category || 'resource') === 'bonus').sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)),
@@ -1256,7 +1350,11 @@ function resHtml(type, qty=1, size='sm'){
 function customIconQtyHtml(iconId, qty=1, className='custom-card-icon'){
   const icon = state.iconCache.byId[iconId];
   const n = Math.max(0, Math.min(9, Number(qty)||0));
-  if(!icon || !n) return '';
+  if(!n) return '';
+  if(!icon){
+    const label = state.assetRefs.icons[iconId]?.name || `Icône manquante ${iconId}`;
+    return `<span class="custom-icon-stack missing-stack">${Array(n).fill(`<span class="${className} missing-asset" role="img" aria-label="${escapeHtml(label)}">?</span>`).join('')}</span>`;
+  }
   return `<span class="custom-icon-stack">${Array(n).fill(`<img class="${className}" src="${icon.dataUrl}" alt="${escapeHtml(icon.name)}" loading="lazy" decoding="async"/>`).join('')}</span>`;
 }
 function iconMapHtml(map={}, className='custom-card-icon'){
@@ -1435,9 +1533,12 @@ function renderCardHtml(card, sizeClass='', interactive=false){
     ? `data-action="image-library" data-card="${card.id}" role="button" tabindex="0" aria-label="Choisir une image pour ${escapeHtml(card.name)}"`
     : `data-field="name" aria-label="Nom: ${escapeHtml(card.name)}"`;
   const imageSrc = isEmbeddedImage(card.image) ? card.image : '';
+  const missingImageRef = !imageSrc && !!card.imageName;
   const center = imageSrc
     ? `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}><img src="${imageSrc}" alt="${escapeHtml(card.name)}" loading="lazy" decoding="async"/></div>`
-    : `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}>${escapeHtml(card.name)}</div>`;
+    : missingImageRef
+      ? `<div class="kcenter missing-asset${interactive?' editable':''}" ${centerAttrs} title="Image manquante: ${escapeHtml(card.imageName)}">?</div>`
+      : `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}>${escapeHtml(card.name)}</div>`;
 
   return `<div class="kcard ${sizeClass} ${bg}" data-id="${card.id}" style="transform:rotate(${rot}deg)">
     ${corners}${ribbons}${bonuses}${center}
@@ -2143,20 +2244,33 @@ async function openImageLibrary(cardId=null, clickEvent=null){
   await renderImageLibrary();
   if(reposition) requestAnimationFrame(reposition);
 }
+function missingImageRefs(images=[]){
+  const existing = new Set(images.map(img=>String(img.name||'').toLowerCase()));
+  const refs = collectAssetRefs().images;
+  return Array.from(refs).filter(ref=>ref && !existing.has(String(ref).toLowerCase()));
+}
 function paintImageLibrary(images){
   const grid = document.getElementById('image-library-grid');
   if(!grid) return;
-  if(!images || !images.length){
+  const missingRefs = missingImageRefs(images);
+  if((!images || !images.length) && !missingRefs.length){
     grid.innerHTML = `<div class="library-empty">Aucune image pour l'instant. Ajoute des PNG, JPG ou WebP.</div>`;
     return;
   }
   const canUse = !!state.imageLibraryTarget;
-  grid.innerHTML = images.map(img=>`
+  const realTiles = (images||[]).map(img=>`
     <div class="image-tile" data-image-id="${img.id}" data-usable="${canUse?'true':'false'}">
       <img src="${img.dataUrl}" alt="${escapeHtml(img.name)}" loading="lazy"/>
       <input class="image-name-input" data-image="${img.id}" value="${escapeHtml(img.name)}" title="${escapeHtml(img.name)}" aria-label="Nom de l'image"/>
       <button class="image-delete-btn" data-action="image-delete" data-image="${img.id}" aria-label="Supprimer ${escapeHtml(img.name)}">×</button>
-    </div>`).join('');
+    </div>`);
+  const missingTiles = missingRefs.map(ref=>`
+    <div class="image-tile missing" data-missing-image="${escapeHtml(ref)}">
+      <div class="missing-preview" role="img" aria-label="Image manquante">?</div>
+      <input class="image-name-input" data-missing-image-name="${escapeHtml(ref)}" value="${escapeHtml(ref)}" title="${escapeHtml(ref)}" aria-label="Nom de l'image manquante"/>
+      <label class="asset-replace-label">Remplacer<input class="asset-replace-input" type="file" accept="image/*" data-replace-missing-image="${escapeHtml(ref)}"/></label>
+    </div>`);
+  grid.innerHTML = [...missingTiles, ...realTiles].join('');
 }
 async function ensureImageLibraryCache(){
   if(state.imageLibraryCache) return state.imageLibraryCache;
@@ -2200,9 +2314,33 @@ async function addImagesToLibrary(files){
       });
     }
     invalidateImageLibraryCache();
+    await hydrateImportedImages(state.cards);
+    save();
+    renderCards();
     showStatus(`${images.length} image${images.length>1?'s':''} ajoutée${images.length>1?'s':''}`);
     await renderImageLibrary();
   }catch(e){ alert('Import image impossible : '+e.message); }
+}
+async function replaceMissingImage(ref, file){
+  if(!file || !file.type.startsWith('image/')) return;
+  try{
+    const item = {
+      id: libraryId('img-'),
+      name: ref,
+      type: file.type,
+      size: file.size,
+      createdAt: Date.now(),
+      dataUrl: await fileToDataUrl(file),
+    };
+    await putLibraryItem('images', item);
+    rememberImageRef(ref,{id:item.id});
+    invalidateImageLibraryCache();
+    await hydrateImportedImages(state.cards);
+    save();
+    renderCards();
+    await renderImageLibrary();
+    showStatus(`Image réparée: ${ref}`);
+  }catch(e){ alert('Remplacement impossible : '+e.message); }
 }
 async function useImageFromLibrary(id){
   const cardId = state.imageLibraryTarget;
@@ -2213,6 +2351,7 @@ async function useImageFromLibrary(id){
   card.image = image.dataUrl;
   card.imageName = image.name;
   card.imageLibraryId = image.id;
+  rememberImageRef(image.name,{id:image.id});
   closeImageLibrary();
   try{
     save();
@@ -2227,7 +2366,16 @@ async function deleteImageFromLibrary(id){
   const image = await getLibraryItem('images', id);
   if(!image) return;
   await deleteLibraryItem('images', id);
+  state.cards.forEach(card=>{
+    if(card.imageLibraryId === id || card.imageName === image.name){
+      card.imageName = card.imageName || image.name;
+      card.image = null;
+      delete card.imageLibraryId;
+    }
+  });
   invalidateImageLibraryCache();
+  save();
+  renderCards();
   showStatus('Image supprimée');
   await renderImageLibrary();
 }
@@ -2239,6 +2387,7 @@ async function renameImageInLibrary(id, name){
   image.name = nextName;
   await putLibraryItem('images', image);
   invalidateImageLibraryCache();
+  rememberImageRef(nextName,{id:image.id});
   state.cards.forEach(card=>{
     if(card.imageLibraryId === id || card.imageName === previousName){
       card.imageName = nextName;
@@ -2247,6 +2396,23 @@ async function renameImageInLibrary(id, name){
   save();
   renderCards();
   showStatus('Image renommée');
+}
+function renameMissingImageRef(previousName, nextName){
+  const prev = String(previousName||'').trim();
+  const next = String(nextName||'').trim() || prev;
+  if(!prev || !next) return;
+  state.cards.forEach(card=>{
+    if(card.imageName === prev){
+      card.imageName = next;
+      if(card.image === prev) card.image = next;
+    }
+  });
+  delete state.assetRefs.images[prev.toLowerCase()];
+  rememberImageRef(next);
+  save();
+  renderCards();
+  renderImageLibrary();
+  showStatus('Référence image renommée');
 }
 function clearImageFromLibraryTarget(){
   const card = getCard(state.imageLibraryTarget);
@@ -2297,20 +2463,41 @@ async function renderIconLibrary(){
     const icons = (await getAllLibraryItems('icons'))
       .filter(icon=>(icon.category || 'resource') === categoryFilter)
       .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-    if(!icons.length){
+    const missing = missingIconRefs(categoryFilter, icons);
+    if(!icons.length && !missing.length){
       grid.innerHTML = `<div class="library-empty">Aucune ${categoryFilter === 'resource' ? 'ressource' : 'icône'} pour l'instant. Ajoute des PNG, SVG ou WebP.</div>`;
       return;
     }
-    grid.innerHTML = icons.map(icon=>{
+    const missingTiles = missing.map(icon=>`
+      <div class="image-tile icon-tile missing" data-missing-icon="${icon.id}">
+        <div class="missing-preview" role="img" aria-label="Icône manquante">?</div>
+        <input class="image-name-input" data-missing-icon-name="${icon.id}" value="${escapeHtml(icon.name)}" title="${escapeHtml(icon.name)}" aria-label="Nom de l'icône manquante"/>
+        <label class="asset-replace-label">Remplacer<input class="asset-replace-input" type="file" accept="image/*" data-replace-missing-icon="${icon.id}" data-category="${categoryFilter}"/></label>
+      </div>`);
+    const realTiles = icons.map(icon=>{
       return `<div class="image-tile icon-tile" data-icon-id="${icon.id}">
         <img src="${icon.dataUrl}" alt="${escapeHtml(icon.name)}"/>
         <input class="image-name-input" data-icon-name="${icon.id}" value="${escapeHtml(icon.name)}" title="${escapeHtml(icon.name)}" aria-label="Nom de l'icône"/>
         <button class="image-delete-btn" data-action="icon-delete" data-icon="${icon.id}" aria-label="Supprimer ${escapeHtml(icon.name)}">×</button>
       </div>`;
-    }).join('');
+    });
+    grid.innerHTML = [...missingTiles, ...realTiles].join('');
   }catch(e){
     grid.innerHTML = `<div class="library-empty">Impossible de lire les icônes: ${escapeHtml(e.message)}</div>`;
   }
+}
+function missingIconRefs(categoryFilter, icons=[]){
+  const existing = new Set(icons.map(icon=>icon.id));
+  const refs = collectAssetRefs().icons;
+  const missing = [];
+  refs.forEach((meta,id)=>{
+    if(existing.has(id) || state.iconCache.byId[id]) return;
+    const saved = state.assetRefs.icons[id] || {};
+    const category = saved.category || meta.category || 'bonus';
+    const appearsHere = category === categoryFilter || (categoryFilter === 'resource' && meta.category === 'resource') || (categoryFilter === 'bonus' && meta.category !== 'resource');
+    if(appearsHere) missing.push({id, name:saved.name || meta.name || id, category:categoryFilter});
+  });
+  return missing.sort((a,b)=>a.name.localeCompare(b.name,'fr'));
 }
 async function addIconsToLibrary(files){
   const icons = Array.from(files||[]).filter(f=>f.type.startsWith('image/'));
@@ -2318,7 +2505,7 @@ async function addIconsToLibrary(files){
   const category = document.getElementById('icon-import-category')?.value || 'resource';
   try{
     for(const file of icons){
-      await putLibraryItem('icons',{
+      const item = {
         id: libraryId('ico-'),
         name: file.name,
         type: file.type,
@@ -2326,7 +2513,9 @@ async function addIconsToLibrary(files){
         category,
         createdAt: Date.now(),
         dataUrl: await fileToDataUrl(file),
-      });
+      };
+      await putLibraryItem('icons', item);
+      rememberIconRef(item.id,{name:item.name,category});
     }
     showStatus(`${icons.length} icône${icons.length>1?'s':''} ajoutée${icons.length>1?'s':''}`);
     await refreshIconCache();
@@ -2334,14 +2523,43 @@ async function addIconsToLibrary(files){
     await renderIconLibrary();
   }catch(e){ alert('Import icône impossible : '+e.message); }
 }
+async function replaceMissingIcon(id, category, file){
+  if(!file || !file.type.startsWith('image/')) return;
+  try{
+    const meta = state.assetRefs.icons[id] || {};
+    const item = {
+      id,
+      name: meta.name || file.name,
+      type: file.type,
+      size: file.size,
+      category: category || meta.category || 'bonus',
+      createdAt: Date.now(),
+      dataUrl: await fileToDataUrl(file),
+    };
+    await putLibraryItem('icons', item);
+    rememberIconRef(id,{name:item.name,category:item.category});
+    await refreshIconCache();
+    save();
+    renderCards();
+    await renderIconLibrary();
+    showStatus(`Icône réparée: ${item.name}`);
+  }catch(e){ alert('Remplacement impossible : '+e.message); }
+}
 async function renameIconInLibrary(id, name){
   const icon = await getLibraryItem('icons', id);
   if(!icon) return;
   icon.name = name.trim() || icon.name;
   await putLibraryItem('icons', icon);
+  rememberIconRef(id,{name:icon.name,category:icon.category || 'bonus'});
   await refreshIconCache();
   renderCards();
   showStatus('Icône renommée');
+}
+function renameMissingIconRef(id, name){
+  rememberIconRef(id,{name:name.trim() || state.assetRefs.icons[id]?.name || id,category:state.assetRefs.icons[id]?.category || state.iconLibraryCategory || 'bonus'});
+  renderCards();
+  renderIconLibrary();
+  showStatus('Référence icône renommée');
 }
 async function setIconCategory(id, category){
   const icon = await getLibraryItem('icons', id);
@@ -2369,10 +2587,7 @@ async function deleteIconFromLibrary(id){
   const icon = await getLibraryItem('icons', id);
   if(!icon) return;
   await deleteLibraryItem('icons', id);
-  state.cards.forEach(card=>card.steps?.forEach(step=>{
-    if(step.costIcons) delete step.costIcons[id];
-    if(step.bonus?.icons) delete step.bonus.icons[id];
-  }));
+  rememberIconRef(id,{name:icon.name,category:icon.category || 'bonus'});
   await refreshIconCache();
   save();
   renderCards();
@@ -2436,7 +2651,7 @@ function exportToPDF(scope='all'){
 function openExport(){
   const modal=document.getElementById('io-modal');
   document.getElementById('io-modal-title').firstChild.nodeValue='Export JSON';
-  document.getElementById('io-textarea').value=JSON.stringify(exportableCards(),null,2);
+  document.getElementById('io-textarea').value=JSON.stringify(exportPayload(),null,2);
   document.getElementById('io-action').textContent='Copier';
   document.getElementById('io-action').onclick=()=>{ navigator.clipboard.writeText(document.getElementById('io-textarea').value).then(()=>showStatus('Copié !')); };
   modal.classList.add('open');
@@ -2448,7 +2663,9 @@ function openImport(){
   document.getElementById('io-action').textContent='Importer';
   document.getElementById('io-action').onclick=async ()=>{
     try{
-      const cards=normalizeImportedCards(JSON.parse(document.getElementById('io-textarea').value));
+      const payload = parseImportPayload(JSON.parse(document.getElementById('io-textarea').value));
+      rememberImportedAssetManifest(payload.assets);
+      const cards=normalizeImportedCards(payload.cards);
       await hydrateImportedImages(cards);
       state.cards=cards;
       resetSessionModifiedBaseline();
@@ -2625,6 +2842,16 @@ function bindEvents(){
     if(tile && state.imageLibraryTarget) useImageFromLibrary(tile.dataset.imageId);
   });
   document.getElementById('image-library-grid').addEventListener('change', e=>{
+    const replace = e.target.closest('[data-replace-missing-image]');
+    if(replace){
+      replaceMissingImage(replace.dataset.replaceMissingImage, replace.files?.[0]).then(()=>{ replace.value=''; });
+      return;
+    }
+    const missingName = e.target.closest('[data-missing-image-name]');
+    if(missingName){
+      renameMissingImageRef(missingName.dataset.missingImageName, missingName.value);
+      return;
+    }
     const input = e.target.closest('.image-name-input');
     if(!input) return;
     renameImageInLibrary(input.dataset.image, input.value);
@@ -2638,6 +2865,16 @@ function bindEvents(){
     if(action.dataset.action==='icon-delete') deleteIconFromLibrary(action.dataset.icon);
   });
   document.getElementById('icon-library-grid').addEventListener('change', e=>{
+    const replace = e.target.closest('[data-replace-missing-icon]');
+    if(replace){
+      replaceMissingIcon(replace.dataset.replaceMissingIcon, replace.dataset.category, replace.files?.[0]).then(()=>{ replace.value=''; });
+      return;
+    }
+    const missingName = e.target.closest('[data-missing-icon-name]');
+    if(missingName){
+      renameMissingIconRef(missingName.dataset.missingIconName, missingName.value);
+      return;
+    }
     const name = e.target.closest('[data-icon-name]');
     if(name){ renameIconInLibrary(name.dataset.iconName, name.value); return; }
   });
