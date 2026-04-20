@@ -366,7 +366,7 @@ body.sidebar-open main{margin-left:260px}
 /* ── GRID MODE ── */
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,var(--grid-col-size));gap:12px 18px;padding:16px 18px;justify-content:center;align-items:start}
 .cards-grid .kcard.md{--sz:var(--grid-card-size)}
-.grid-item{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-width:0}
+.grid-item{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-width:0;content-visibility:auto;contain-intrinsic-size:var(--grid-col-size) calc(var(--grid-card-size) + 40px)}
 .grid-item .gi-name-input{width:min(var(--grid-card-size),100%);border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:center;padding:2px 6px;outline:none}
 .grid-item .gi-name-input:hover,.grid-item .gi-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
 .grid-card-actions{position:absolute;top:4px;left:calc(50% + (var(--grid-card-size) / 2) + 8px);display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20}
@@ -1180,6 +1180,7 @@ async function refreshIconCache(){
     resource: icons.filter(icon=>(icon.category || 'resource') === 'resource').sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)),
     bonus: icons.filter(icon=>(icon.category || 'resource') === 'bonus').sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)),
     byId,
+    stamp: Date.now(),
   };
   return state.iconCache;
 }
@@ -1192,7 +1193,7 @@ function assignedIcon(kind, key){
 }
 function iconImg(kind, key, label, className=''){
   const src = assignedIcon(kind, key);
-  return src ? `<img class="${className || 'icon-img'}" src="${src}" alt="${escapeHtml(label)}"/>` : '';
+  return src ? `<img class="${className || 'icon-img'}" src="${src}" alt="${escapeHtml(label)}" loading="lazy" decoding="async"/>` : '';
 }
 function resHtml(type, qty=1, size='sm'){
   if(!qty) return '';
@@ -1205,7 +1206,7 @@ function customIconQtyHtml(iconId, qty=1, className='custom-card-icon'){
   const icon = state.iconCache.byId[iconId];
   const n = Math.max(0, Math.min(9, Number(qty)||0));
   if(!icon || !n) return '';
-  return `<span class="custom-icon-stack">${Array(n).fill(`<img class="${className}" src="${icon.dataUrl}" alt="${escapeHtml(icon.name)}"/>`).join('')}</span>`;
+  return `<span class="custom-icon-stack">${Array(n).fill(`<img class="${className}" src="${icon.dataUrl}" alt="${escapeHtml(icon.name)}" loading="lazy" decoding="async"/>`).join('')}</span>`;
 }
 function iconMapHtml(map={}, className='custom-card-icon'){
   return Object.entries(map||{}).filter(([,qty])=>qty>0).map(([id,qty])=>customIconQtyHtml(id, qty, className)).join('');
@@ -1259,6 +1260,27 @@ function renderBonusDetail(b){
 }
 
 function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function hashString(str){
+  let h = 2166136261;
+  for(let i=0;i<str.length;i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h>>>0).toString(36) + '-' + str.length.toString(36);
+}
+function cardImageRenderKey(card){
+  if(isEmbeddedImage(card.image)) return 'img:' + (card.imageLibraryId || card.imageName || card.image.length);
+  return 'ref:' + (card.image || card.imageName || '');
+}
+function cardRenderKey(card){
+  const source = JSON.stringify(compactCardForStorage(card)) + '|' + getStage(card.id) + '|' + cardImageRenderKey(card) + '|' + (state.iconCache.stamp || 0);
+  return hashString(source);
+}
+function htmlToElement(html){
+  const template = document.createElement('template');
+  template.innerHTML = html.trim();
+  return template.content.firstElementChild;
+}
 
 function inferDanger(card){
   if(Number.isFinite(Number(card.danger))) return Math.max(0, Math.min(9, Number(card.danger)));
@@ -1339,7 +1361,7 @@ function renderCardHtml(card, sizeClass='', interactive=false){
     : `data-field="name" aria-label="Nom: ${escapeHtml(card.name)}"`;
   const imageSrc = isEmbeddedImage(card.image) ? card.image : '';
   const center = imageSrc
-    ? `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}><img src="${imageSrc}" alt="${escapeHtml(card.name)}"/></div>`
+    ? `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}><img src="${imageSrc}" alt="${escapeHtml(card.name)}" loading="lazy" decoding="async"/></div>`
     : `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}>${escapeHtml(card.name)}</div>`;
 
   return `<div class="kcard ${sizeClass} ${bg}" data-id="${card.id}" style="transform:rotate(${rot}deg)">
@@ -1373,7 +1395,18 @@ function renderCards(){
     container.innerHTML = `<div class="empty-state"><div class="icon" aria-hidden="true">🏰</div><div>Aucune carte ne correspond aux filtres.</div></div>`;
     return;
   }
-  container.innerHTML = cards.map(renderCardGridItem).join('');
+  const existing = new Map(Array.from(container.querySelectorAll(':scope > .grid-item[data-id]')).map(el=>[el.dataset.id, el]));
+  const fragment = document.createDocumentFragment();
+  cards.forEach(card=>{
+    const key = cardRenderKey(card);
+    const current = existing.get(card.id);
+    if(current && current.dataset.renderKey === key){
+      fragment.appendChild(current);
+    } else {
+      fragment.appendChild(htmlToElement(renderCardGridItem(card, key)));
+    }
+  });
+  container.replaceChildren(fragment);
 }
 
 function renderCardSidebar(){
@@ -1527,14 +1560,14 @@ function renderCardRow(card){
   `;
 }
 
-function renderCardGridItem(card){
+function renderCardGridItem(card, renderKey=cardRenderKey(card)){
   const canEditStages = !['exploration','treasure','action'].includes(card.type);
   const canAddStageOrLoop = canEditStages && (card.steps.length < 4 || !card.loopCost);
   const addLoop = canEditStages && card.steps.length >= 4 && !card.loopCost;
   const addStageTitle = card.steps.length >= 4 ? 'Ajouter la transition IV vers I' : 'Ajouter une étape';
   const copies = Math.max(1, card.copies != null ? card.copies : 1);
   return `
-    <div class="grid-item" data-id="${card.id}">
+    <div class="grid-item" data-id="${card.id}" data-render-key="${renderKey}">
       ${renderCardHtml(card,'md',true)}
       <input class="gi-name-input" data-card="${card.id}" data-field="name-grid" value="${escapeHtml(card.name)}" aria-label="Nom de la carte"/>
       <div class="grid-card-actions">
