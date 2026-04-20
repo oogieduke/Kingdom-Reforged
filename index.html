@@ -75,6 +75,7 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .btn.pdf:hover{background:#991b1b;filter:brightness(1.05)}
 .btn.decks{background:#eab308;color:#3a2608;border-color:#854d0e}
 .btn.decks:hover{background:#ca9a06;filter:brightness(1.05)}
+.btn.history{padding:5px 9px;min-width:34px;justify-content:center}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 
 /* ── RESOURCE TOKENS ── */
@@ -141,6 +142,16 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .kcard.exploration .bonus.bottom,.kcard.action .bonus.bottom{bottom:12%}
 .kcard.exploration .bonus.left,.kcard.action .bonus.left{left:12%;max-width:calc(var(--sz,220px) * .4)}
 .kcard.exploration .bonus.right,.kcard.action .bonus.right{right:12%;max-width:calc(var(--sz,220px) * .4)}
+.kcard.action .corner{width:calc(var(--sz,220px) * .102);height:calc(var(--sz,220px) * .102);font-size:calc(var(--sz,220px) * .045)}
+.kcard.action .corner.top{top:calc(var(--sz,220px) * .014)}
+.kcard.action .corner.right{right:calc(var(--sz,220px) * .014)}
+.kcard.action .corner.bottom{bottom:calc(var(--sz,220px) * .014)}
+.kcard.action .corner.left{left:calc(var(--sz,220px) * .014)}
+.kcard.action .bonus{font-size:calc(var(--sz,220px) * .066);padding:calc(var(--sz,220px) * .015) calc(var(--sz,220px) * .034);gap:calc(var(--sz,220px) * .014);border-width:calc(var(--sz,220px) * .008);border-radius:calc(var(--sz,220px) * .034)}
+.kcard.action .bonus.top{top:23%}
+.kcard.action .bonus.bottom{bottom:23%}
+.kcard.action .bonus.left{left:18%;max-width:calc(var(--sz,220px) * .32)}
+.kcard.action .bonus.right{right:18%;max-width:calc(var(--sz,220px) * .32)}
 .bonus.editable{cursor:pointer}.bonus.editable:hover{background:var(--focus-bg)}
 /* bonus icons */
 .bpv{display:inline-flex;align-items:center;gap:1px;font-family:'Kalam';font-weight:700}
@@ -429,12 +440,6 @@ body.sidebar-open main{margin-left:260px}
 .stage-stepper b{font-family:'Kalam';font-size:22px;min-width:30px;text-align:center}
 .stage-stepper .hint{font-family:'Caveat';color:var(--ink-ghost);font-size:14px}
 
-.confirm-overlay{position:fixed;inset:0;background:var(--overlay);z-index:210;display:none;align-items:center;justify-content:center;padding:16px}
-.confirm-overlay.open{display:flex}
-.confirm-box{background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:20px;box-shadow:6px 6px 0 var(--line);max-width:360px;width:100%;text-align:center}
-.confirm-box h3{font-size:18px;margin-bottom:8px}
-.confirm-box p{font-family:'Caveat';font-size:16px;color:var(--ink-soft);margin-bottom:14px}
-.confirm-box-actions{display:flex;gap:8px;justify-content:center}
 
 /* ── UTILS ── */
 .autosave{font-family:'Caveat';font-size:14px;color:var(--accent-2);min-width:80px}
@@ -461,10 +466,10 @@ body.sidebar-open main{margin-left:260px}
 .ribbon,.bonus,.kcenter,.corner{transition:background var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
 
 /* ── MODAL ENTER ── */
-.modal-overlay,.confirm-overlay{opacity:0;transition:opacity var(--t-med) var(--ease)}
-.modal-overlay.open,.confirm-overlay.open{opacity:1}
-.modal,.confirm-box{transform:scale(.96);opacity:0;transition:transform var(--t-med) var(--ease),opacity var(--t-med) var(--ease)}
-.modal-overlay.open .modal,.confirm-overlay.open .confirm-box{transform:scale(1);opacity:1}
+.modal-overlay{opacity:0;transition:opacity var(--t-med) var(--ease)}
+.modal-overlay.open{opacity:1}
+.modal{transform:scale(.96);opacity:0;transition:transform var(--t-med) var(--ease),opacity var(--t-med) var(--ease)}
+.modal-overlay.open .modal{transform:scale(1);opacity:1}
 
 /* ── THEME TOGGLE ── */
 .theme-toggle{width:36px;height:36px;border:2px solid var(--line);background:var(--paper);border-radius:50%;cursor:pointer;display:grid;place-items:center;box-shadow:var(--shadow-sm);font-size:16px;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease);color:var(--ink)}
@@ -563,7 +568,7 @@ body.sidebar-open main{margin-left:260px}
   .cards-grid{gap:10px}
   .kcard.sm{--sz:130px}
   .kcard.lg{--sz:min(80vw,300px)}
-  .modal,.confirm-box{padding:14px}
+  .modal{padding:14px}
 }
 
 /* ── PRINT (PDF export) ── */
@@ -604,13 +609,14 @@ body.sidebar-open main{margin-left:260px}
         <span id="zoom-value">100%</span>
         <button type="button" id="zoom-plus" aria-label="Augmenter le zoom">+</button>
       </div>
+      <button class="btn ghost history" id="btn-undo" type="button" aria-label="Annuler" title="Annuler" disabled>↶</button>
+      <button class="btn ghost history" id="btn-redo" type="button" aria-label="Rétablir" title="Rétablir" disabled>↷</button>
       <button class="theme-toggle" id="theme-toggle" aria-label="Basculer thème sombre" title="Thème sombre"><span aria-hidden="true">🌙</span></button>
       <div class="btn-group-uploads" role="group" aria-label="Bibliothèques">
         <button class="btn ghost" id="btn-images" aria-label="Ouvrir la bibliothèque d'images">Images</button>
         <button class="btn ghost" id="btn-resources" aria-label="Ouvrir les icônes de ressources">Ressources</button>
         <button class="btn ghost" id="btn-icons" aria-label="Ouvrir la bibliothèque de bonus">Bonus</button>
       </div>
-      <button class="btn ghost" id="btn-export" aria-label="Exporter JSON">↑ Export</button>
       <button class="btn decks" id="btn-decks" aria-label="Ouvrir les decks sauvegardés">Decks</button>
       <button class="btn pdf" id="btn-pdf" aria-label="Exporter PDF (A4)">🖨 PDF</button>
     </div>
@@ -657,6 +663,7 @@ body.sidebar-open main{margin-left:260px}
     <h3 id="deck-modal-title">Decks<button class="modal-close" id="deck-close" aria-label="Fermer">✕</button></h3>
     <div class="deck-menu-actions">
       <button class="btn ghost" id="btn-import-in-deck" type="button" aria-label="Importer JSON">↓ Import</button>
+      <button class="btn ghost" id="btn-export-in-deck" type="button" aria-label="Exporter JSON">↑ Export</button>
     </div>
     <div class="deck-save-row">
       <input type="text" id="deck-name-input" placeholder="Nom du deck…" aria-label="Nom du deck à sauvegarder"/>
@@ -689,18 +696,6 @@ body.sidebar-open main{margin-left:260px}
       <span class="hint" id="icon-library-hint">Importe une image, puis assigne-la à un symbole.</span>
     </div>
     <div id="icon-library-grid" class="image-grid icon-grid"></div>
-  </div>
-</div>
-
-<!-- Confirm delete -->
-<div class="confirm-overlay" id="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-msg">
-  <div class="confirm-box">
-    <h3 id="confirm-title">Supprimer ?</h3>
-    <p id="confirm-msg">Cette action est irréversible.</p>
-    <div class="confirm-box-actions">
-      <button class="btn ghost" id="confirm-cancel">Annuler</button>
-      <button class="btn danger" id="confirm-ok">Supprimer</button>
-    </div>
   </div>
 </div>
 
@@ -867,6 +862,7 @@ const state = {
   imageLibraryCache: null,
   sidebarOpen: true,
   uiZoom: 130,
+  history: {past:[], future:[], last:'', ready:false, restoring:false},
 };
 
 // ═══════════════════════════════════
@@ -878,7 +874,64 @@ function cardsForLocalStorage(){
     return card;
   });
 }
+function historySnapshot(){
+  return JSON.stringify(cloneCards(state.cards));
+}
+function updateHistoryButtons(){
+  const undo = document.getElementById('btn-undo');
+  const redo = document.getElementById('btn-redo');
+  if(undo) undo.disabled = !state.history.past.length;
+  if(redo) redo.disabled = !state.history.future.length;
+}
+function markHistoryReady(){
+  state.history.past = [];
+  state.history.future = [];
+  state.history.last = historySnapshot();
+  state.history.ready = true;
+  updateHistoryButtons();
+}
+function commitHistory(){
+  if(state.history.restoring) return;
+  const snap = historySnapshot();
+  if(!state.history.ready){
+    state.history.last = snap;
+    state.history.ready = true;
+    updateHistoryButtons();
+    return;
+  }
+  if(snap === state.history.last) return;
+  if(state.history.last) state.history.past.push(state.history.last);
+  if(state.history.past.length > 60) state.history.past.shift();
+  state.history.future = [];
+  state.history.last = snap;
+  updateHistoryButtons();
+}
+function restoreHistorySnapshot(snap){
+  state.history.restoring = true;
+  state.cards = normalizeImportedCards(JSON.parse(snap));
+  localStorage.setItem('kr-cards', JSON.stringify(cardsForLocalStorage()));
+  state.history.last = snap;
+  renderCards();
+  updateHistoryButtons();
+  state.history.restoring = false;
+  showStatus('Historique restauré');
+}
+function undoHistory(){
+  if(!state.history.past.length) return;
+  const current = state.history.last || historySnapshot();
+  const previous = state.history.past.pop();
+  state.history.future.push(current);
+  restoreHistorySnapshot(previous);
+}
+function redoHistory(){
+  if(!state.history.future.length) return;
+  const current = state.history.last || historySnapshot();
+  const next = state.history.future.pop();
+  state.history.past.push(current);
+  restoreHistorySnapshot(next);
+}
 function save(){
+  commitHistory();
   try{
     localStorage.setItem('kr-cards', JSON.stringify(cardsForLocalStorage()));
   }catch(e){
@@ -1811,17 +1864,12 @@ function duplicateCard(id){
   });
 }
 
-function confirmDelete(id){
+function deleteCard(id){
   const card = getCard(id); if(!card) return;
-  document.getElementById('confirm-msg').textContent = `Supprimer « ${card.name} » ?`;
-  const modal = document.getElementById('confirm-modal');
-  modal.classList.add('open');
-  document.getElementById('confirm-ok').onclick = ()=>{
-    state.cards = state.cards.filter(c=>c.id!==id);
-    save(); renderCards();
-    modal.classList.remove('open');
-  };
-  document.getElementById('confirm-cancel').onclick = ()=>modal.classList.remove('open');
+  state.cards = state.cards.filter(c=>c.id!==id);
+  delete state.stageByCard[id];
+  save(); renderCards();
+  showStatus('Carte supprimée');
 }
 function showStatus(msg){
   const el=document.getElementById('autosave-status');
@@ -1926,7 +1974,6 @@ async function loadDeckFromLibrary(id){
 async function deleteDeckFromLibrary(id){
   const deck = await getLibraryItem('decks', id);
   if(!deck) return;
-  if(!confirm(`Supprimer le deck « ${deck.name} » ?`)) return;
   await deleteLibraryItem('decks', id);
   showStatus('Deck supprimé');
   await renderDeckLibrary();
@@ -1934,7 +1981,6 @@ async function deleteDeckFromLibrary(id){
 async function replaceDeckInLibrary(id){
   const deck = await getLibraryItem('decks', id);
   if(!deck) return;
-  if(!confirm(`Remplacer « ${deck.name} » par le deck actuel ?`)) return;
   deck.cards = cloneCards(state.cards);
   deck.cardCount = state.cards.length;
   deck.updatedAt = Date.now();
@@ -2041,7 +2087,6 @@ async function useImageFromLibrary(id){
 async function deleteImageFromLibrary(id){
   const image = await getLibraryItem('images', id);
   if(!image) return;
-  if(!confirm(`Supprimer l'image « ${image.name} » ?`)) return;
   await deleteLibraryItem('images', id);
   invalidateImageLibraryCache();
   showStatus('Image supprimée');
@@ -2184,7 +2229,6 @@ async function assignIconToSlot(id, category, slot){
 async function deleteIconFromLibrary(id){
   const icon = await getLibraryItem('icons', id);
   if(!icon) return;
-  if(!confirm(`Supprimer l'icône « ${icon.name} » ?`)) return;
   await deleteLibraryItem('icons', id);
   state.cards.forEach(card=>card.steps?.forEach(step=>{
     if(step.costIcons) delete step.costIcons[id];
@@ -2288,7 +2332,7 @@ function trackHeaderHeight(){
 // FOCUS TRAP (modals)
 // ═══════════════════════════════════
 function trapFocus(e){
-  const open=document.querySelector('.modal-overlay.open, .confirm-overlay.open');
+  const open=document.querySelector('.modal-overlay.open');
   if(!open||e.key!=='Tab') return;
   const focusable=open.querySelectorAll('button,input,select,textarea,[tabindex]:not([tabindex="-1"])');
   if(!focusable.length) return;
@@ -2327,6 +2371,8 @@ function changeUiZoom(delta){
 // ═══════════════════════════════════
 function bindEvents(){
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+  document.getElementById('btn-undo').addEventListener('click', undoHistory);
+  document.getElementById('btn-redo').addEventListener('click', redoHistory);
   document.getElementById('btn-sidebar').addEventListener('click', ()=>setSidebarOpen(!state.sidebarOpen));
   const sidebarList = document.getElementById('sidebar-list');
   sidebarList.addEventListener('click', e=>{
@@ -2366,7 +2412,7 @@ function bindEvents(){
   document.getElementById('btn-resources').addEventListener('click', e=>openIconLibrary('resource', e));
   document.getElementById('btn-icons').addEventListener('click', e=>openIconLibrary('bonus', e));
   document.getElementById('btn-import-in-deck').addEventListener('click', ()=>{ closeDeckLibrary(); openImport(); });
-  document.getElementById('btn-export').addEventListener('click', openExport);
+  document.getElementById('btn-export-in-deck').addEventListener('click', ()=>{ closeDeckLibrary(); openExport(); });
   document.getElementById('btn-pdf').addEventListener('click', exportToPDF);
   document.getElementById('zoom-minus').addEventListener('click', ()=>changeUiZoom(-1));
   document.getElementById('zoom-plus').addEventListener('click', ()=>changeUiZoom(1));
@@ -2415,8 +2461,6 @@ function bindEvents(){
     const name = e.target.closest('[data-icon-name]');
     if(name){ renameIconInLibrary(name.dataset.iconName, name.value); return; }
   });
-  document.getElementById('confirm-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
-
   // Cell modal close
   document.getElementById('cell-modal-close').addEventListener('click', closeCellModal);
   document.getElementById('cell-modal-done').addEventListener('click', closeCellModal);
@@ -2425,7 +2469,7 @@ function bindEvents(){
     const closeIfOutside = (id, closeFn)=>{
       const overlay = document.getElementById(id);
       if(!overlay?.classList.contains('open')) return false;
-      const panel = overlay.querySelector('.modal,.confirm-box');
+      const panel = overlay.querySelector('.modal');
       if(panel && panel.contains(e.target)) return false;
       closeFn();
       return true;
@@ -2453,7 +2497,7 @@ function bindEvents(){
       const card = getCard(cardId);
       const a = action.dataset.action;
       if(a==='duplicate'){ duplicateCard(cardId); return; }
-      if(a==='delete'){ confirmDelete(cardId); return; }
+      if(a==='delete'){ deleteCard(cardId); return; }
       if(a==='steps'){ openCellEditor(cardId,'steps',undefined,e); return; }
       if(a==='image'){ openCellEditor(cardId,'image',undefined,e); return; }
       if(a==='image-library'){ openImageLibrary(cardId, e); return; }
@@ -2606,10 +2650,15 @@ function bindEvents(){
       if(image.classList.contains('open')){ closeImageLibrary(); e.preventDefault(); return; }
       const icon = document.getElementById('icon-modal');
       if(icon.classList.contains('open')){ closeIconLibrary(); e.preventDefault(); return; }
-      const cm = document.getElementById('confirm-modal');
-      if(cm.classList.contains('open')){ cm.classList.remove('open'); e.preventDefault(); return; }
     }
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
+    if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'){
+      e.preventDefault();
+      if(e.shiftKey) redoHistory();
+      else undoHistory();
+      return;
+    }
+    if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='y'){ e.preventDefault(); redoHistory(); return; }
     if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){ e.preventDefault(); save(); showStatus('✓ sauvegardé'); }
   });
 }
@@ -2619,6 +2668,7 @@ function bindEvents(){
 // ═══════════════════════════════════
 initTheme();
 load();
+markHistoryReady();
 bindEvents();
 trackHeaderHeight();
 applyUiZoom();
@@ -2628,7 +2678,10 @@ refreshIconCache().then(()=>renderCards()).catch(()=>{});
 ensureImageLibraryCache().catch(()=>{});
 hydrateImportedImages(state.cards).then(()=>{
   renderCards();
+  state.history.restoring = true;
   save();
+  state.history.restoring = false;
+  markHistoryReady();
 }).catch(()=>{});
 </script>
 </body>
