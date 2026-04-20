@@ -26,7 +26,8 @@
   --ease:cubic-bezier(.4,0,.2,1);
   --header-h:92px;
   --grid-card-size:286px;
-  --grid-col-size:340px;
+  --grid-columns:4;
+  --grid-gap-x:58px;
 }
 :root[data-theme="dark"]{
   --paper:#1c1a16;--paper-2:#26231d;--paper-3:#322d25;
@@ -216,24 +217,23 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .chrome-actions #btn-resources{background:#e5f4d3;border-color:#719c35;color:#2d4f12}
 .chrome-actions #btn-icons{background:#f0def8;border-color:#8d5aa8;color:#44215b}
 .chrome-actions #btn-images:hover,.chrome-actions #btn-resources:hover,.chrome-actions #btn-icons:hover{filter:brightness(1.04);transform:translateY(-1px)}
-.sidebar-search{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:18px;padding:4px 12px;background:var(--paper-2);margin:8px 10px 4px;transition:box-shadow var(--t-fast) var(--ease),background var(--t-fast) var(--ease)}
-.sidebar-search:focus-within{background:var(--paper);box-shadow:0 0 0 3px rgba(194,65,12,.2)}
+.sidebar-search{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:18px;padding:4px 12px;background:var(--paper-2);width:100%;transition:box-shadow var(--t-fast) var(--ease),background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
+.sidebar-search:focus-within{background:var(--paper);border-color:var(--accent);box-shadow:0 0 0 3px rgba(194,65,12,.2)}
 .sidebar-search input{border:none;outline:none;background:transparent;flex:1;font-family:'Patrick Hand';font-size:15px;color:var(--ink);min-width:40px}
-.zoom-ctrl{display:inline-flex;align-items:center;gap:4px;border:2px solid var(--line);border-radius:8px;background:var(--paper);padding:2px 4px;box-shadow:var(--shadow-sm);font-family:'Kalam';font-weight:700;color:var(--ink)}
-.zoom-ctrl button{width:26px;height:26px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);font-family:'Kalam';font-weight:700;cursor:pointer;color:var(--ink);display:grid;place-items:center}
-.zoom-ctrl button:hover:not(:disabled){background:var(--paper-2)}
-.zoom-ctrl button:disabled{opacity:.4;cursor:not-allowed}
-.zoom-ctrl span{min-width:44px;text-align:center;font-size:12px}
+.sidebar-search input:focus-visible{outline:none;box-shadow:none}
+.columns-ctrl{display:inline-flex;align-items:center;gap:7px;border:2px solid var(--line);border-radius:8px;background:var(--paper);padding:4px 8px;box-shadow:var(--shadow-sm);font-family:'Kalam';font-weight:700;color:var(--ink)}
+.columns-ctrl label{font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:var(--ink-soft)}
+.columns-ctrl input[type=range]{width:86px;accent-color:var(--accent);cursor:pointer}
+.columns-ctrl span{min-width:54px;text-align:center;font-size:12px}
 
 /* ── MAIN ── */
 main{min-height:50vh}
 body.sidebar-open main{margin-left:260px}
-.card-sidebar{position:fixed;top:var(--header-h,116px);left:0;bottom:0;width:252px;background:var(--paper);border-right:2px solid var(--line);box-shadow:4px 0 0 rgba(0,0,0,.08);z-index:110;transform:translateX(-260px);transition:transform var(--t-med) var(--ease);display:flex;flex-direction:column;min-height:0}
+.card-sidebar{position:fixed;top:var(--header-h,116px);left:0;bottom:0;width:252px;background:var(--paper);border-right:2px solid var(--line);box-shadow:4px 0 0 rgba(0,0,0,.08);z-index:110;transform:translateX(-260px);transition:transform var(--t-med) var(--ease);display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .card-sidebar.open{transform:translateX(0)}
-.sidebar-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1.5px dashed var(--line)}
-.sidebar-head strong{font-family:'Kalam';font-size:17px;color:var(--ink)}
-.sidebar-list{overflow:auto;padding:10px;display:flex;flex-direction:column;gap:10px}
-.sidebar-section{border:1.5px solid var(--line);border-radius:10px;display:flex;flex-direction:column;overflow:hidden;transition:opacity var(--t-med) var(--ease)}
+.sidebar-head{padding:8px 10px 9px;border-bottom:1.5px dashed var(--line)}
+.sidebar-list{overflow-y:auto;overflow-x:hidden;padding:10px;display:flex;flex:1;min-height:0;flex-direction:column;gap:10px}
+.sidebar-section{border:1.5px solid var(--line);border-radius:10px;display:flex;flex-shrink:0;flex-direction:column;overflow:hidden;transition:opacity var(--t-med) var(--ease)}
 .sidebar-section.building{background:#f1d4a3}
 .sidebar-section.exploration{background:#d8e5bd}
 .sidebar-section.treasure{background:#ead083}
@@ -250,12 +250,17 @@ body.sidebar-open main{margin-left:260px}
 .sidebar-section.solo-type{box-shadow:0 0 0 3px var(--accent),3px 3px 0 rgba(0,0,0,.12);transform:translateX(2px)}
 .sidebar-section.solo-type .sidebar-section-toggle .head-label{text-shadow:0 0 1px rgba(0,0,0,.3)}
 .sidebar-section.empty-type .sidebar-section-body{display:none}
-.sidebar-card{border:1.5px solid rgba(42,39,34,.5);border-radius:6px;background:rgba(255,255,255,.5);padding:5px 8px;text-align:left;font-family:'Kalam';font-weight:700;font-size:14px;color:#1b1a17;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
+.sidebar-card{position:relative;border:1.5px solid rgba(42,39,34,.5);border-radius:6px;background:rgba(255,255,255,.5);padding:5px 8px;text-align:left;font-family:'Kalam';font-weight:700;font-size:14px;color:#1b1a17;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
 .sidebar-card:hover,.sidebar-card:focus-visible{background:rgba(255,255,255,.85);transform:translateX(3px);box-shadow:2px 2px 0 rgba(0,0,0,.08)}
 .sidebar-card.matches-search{background:rgba(255,235,150,.92);border-color:var(--accent);box-shadow:2px 2px 0 rgba(194,65,12,.25);font-weight:700}
 .sidebar-card.dim-search{opacity:.35}
+.sidebar-card.session-modified{padding-right:22px;border-color:#a16207;background:rgba(255,235,150,.72)}
+.sidebar-card.session-modified::after{content:'•';position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:18px;color:#a16207;line-height:1}
 .grid-item.flash .kcard{box-shadow:0 0 0 4px var(--accent),4px 4px 0 rgba(0,0,0,.14)}
 .grid-item.highlight .kcard{box-shadow:0 0 0 3px var(--accent-2),4px 4px 0 rgba(0,0,0,.14);transform:translateY(-3px)}
+.cards-grid.has-sidebar-highlight .grid-item:not(.highlight){opacity:.28;filter:blur(1.4px) grayscale(.35)}
+.grid-item.session-modified .gi-name-input{border-color:rgba(194,65,12,.75);background:rgba(255,235,150,.45)}
+.grid-item.session-modified::before{content:'modifié';position:absolute;top:4px;left:calc(50% - (var(--grid-card-size) / 2));z-index:22;background:#fff0a6;border:1.5px solid #9f6b04;border-radius:6px;padding:1px 5px;font-family:'Kalam';font-size:10px;font-weight:700;color:#5d3c00;box-shadow:var(--shadow-sm);pointer-events:none}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:60px 20px;color:var(--ink-ghost);font-family:'Caveat';font-size:18px;text-align:center}
 .empty-state .icon{font-size:48px}
 
@@ -364,9 +369,9 @@ body.sidebar-open main{margin-left:260px}
 .stage-cell.empty{opacity:.55;font-family:'Caveat';font-size:14px;color:var(--ink-ghost);font-style:italic}
 
 /* ── GRID MODE ── */
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,var(--grid-col-size));gap:12px 18px;padding:16px 18px;justify-content:center;align-items:start}
+.cards-grid{display:grid;grid-template-columns:repeat(var(--grid-columns),var(--grid-card-size));gap:12px var(--grid-gap-x);padding:16px 18px;justify-content:center;align-items:start}
 .cards-grid .kcard.md{--sz:var(--grid-card-size)}
-.grid-item{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-width:0;content-visibility:auto;contain-intrinsic-size:var(--grid-col-size) calc(var(--grid-card-size) + 40px)}
+.grid-item{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-width:0;content-visibility:auto;contain-intrinsic-size:var(--grid-card-size) calc(var(--grid-card-size) + 40px);transition:opacity var(--t-med) var(--ease),filter var(--t-med) var(--ease)}
 .grid-item .gi-name-input{width:min(var(--grid-card-size),100%);border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:center;padding:2px 6px;outline:none}
 .grid-item .gi-name-input:hover,.grid-item .gi-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
 .grid-card-actions{position:absolute;top:4px;left:calc(50% + (var(--grid-card-size) / 2) + 8px);display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20}
@@ -394,6 +399,9 @@ body.sidebar-open main{margin-left:260px}
 .library-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1.5px dashed var(--line)}
 .deck-menu-actions{display:flex;gap:6px;align-items:center;margin-bottom:8px}
 .deck-menu-actions .btn{flex:1;justify-content:center}
+.pdf-menu-actions{display:grid;grid-template-columns:1fr;gap:8px}
+.pdf-menu-actions .btn{justify-content:center}
+.pdf-menu-actions .hint{font-family:'Caveat';font-size:15px;color:var(--ink-soft);text-align:center}
 .deck-save-row{display:flex;gap:6px;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1.5px dashed var(--line)}
 .deck-save-row input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);padding:5px 9px;font-family:'Patrick Hand';font-size:14px;color:var(--ink)}
 .deck-save-row .btn{flex-shrink:0;padding:5px 10px;font-size:13px}
@@ -604,10 +612,11 @@ body.sidebar-open main{margin-left:260px}
     </div>
     <div class="chrome-actions">
       <span class="autosave" id="autosave-status" role="status" aria-live="polite"></span>
-      <div class="zoom-ctrl" role="group" aria-label="Zoom de l'interface">
-        <button type="button" id="zoom-minus" aria-label="Réduire le zoom">−</button>
-        <span id="zoom-value">100%</span>
-        <button type="button" id="zoom-plus" aria-label="Augmenter le zoom">+</button>
+      <div class="columns-ctrl" role="group" aria-label="Cartes affichées en largeur">
+        <label for="grid-columns">Largeur</label>
+        <input type="range" id="grid-columns" min="3" max="6" step="1" list="grid-columns-marks" aria-label="Nombre de cartes par ligne"/>
+        <datalist id="grid-columns-marks"><option value="3"></option><option value="4"></option><option value="5"></option><option value="6"></option></datalist>
+        <span id="grid-columns-value">4 cartes</span>
       </div>
       <button class="btn ghost history" id="btn-undo" type="button" aria-label="Annuler" title="Annuler" disabled>↶</button>
       <button class="btn ghost history" id="btn-redo" type="button" aria-label="Rétablir" title="Rétablir" disabled>↷</button>
@@ -625,9 +634,8 @@ body.sidebar-open main{margin-left:260px}
 
 <aside class="card-sidebar" id="card-sidebar" aria-label="Liste des cartes">
   <div class="sidebar-head">
-    <strong>Cartes</strong>
+    <div class="sidebar-search"><span aria-hidden="true">🔍</span><input type="text" id="search-input" placeholder="chercher…" aria-label="Rechercher une carte"/></div>
   </div>
-  <div class="sidebar-search"><span aria-hidden="true">🔍</span><input type="text" id="search-input" placeholder="chercher…" aria-label="Rechercher une carte"/></div>
   <div class="sidebar-list" id="sidebar-list"></div>
 </aside>
 
@@ -670,6 +678,18 @@ body.sidebar-open main{margin-left:260px}
       <button class="btn primary" id="deck-save" type="button">Sauvegarder</button>
     </div>
     <div id="deck-list" class="library-list"></div>
+  </div>
+</div>
+
+<!-- PDF export modal -->
+<div class="modal-overlay" id="pdf-modal" role="dialog" aria-modal="true" aria-labelledby="pdf-modal-title">
+  <div class="modal">
+    <h3 id="pdf-modal-title">Export PDF<button class="modal-close" id="pdf-close" aria-label="Fermer">✕</button></h3>
+    <div class="pdf-menu-actions">
+      <button class="btn pdf" id="pdf-export-all" type="button">Tout exporter</button>
+      <button class="btn ghost" id="pdf-export-modified" type="button">Exporter les modifiées <span id="pdf-modified-count"></span></button>
+      <div class="hint">Les cartes marquées “modifié” sont celles changées depuis l'ouverture de cette session.</div>
+    </div>
   </div>
 </div>
 
@@ -861,7 +881,9 @@ const state = {
   iconCache: {resource:[], bonus:[], byId:{}},
   imageLibraryCache: null,
   sidebarOpen: true,
-  uiZoom: 130,
+  gridColumns: 4,
+  modifiedCardIds: new Set(),
+  sessionCardHashes: {},
   history: {past:[], future:[], last:'', ready:false, restoring:false},
 };
 
@@ -900,6 +922,7 @@ function markHistoryReady(){
   state.history.future = [];
   state.history.last = historySnapshot();
   state.history.ready = true;
+  resetSessionModifiedBaseline();
   updateHistoryButtons();
 }
 function commitHistory(snap=persistenceSnapshot()){
@@ -922,6 +945,7 @@ function restoreHistorySnapshot(snap){
   state.cards = normalizeImportedCards(JSON.parse(snap));
   localStorage.setItem('kr-cards', snap);
   state.history.last = snap;
+  updateSessionModifiedCards();
   renderCards();
   updateHistoryButtons();
   state.history.restoring = false;
@@ -945,6 +969,7 @@ function redoHistory(){
 function save(){
   const payload = persistenceSnapshot();
   commitHistory(payload);
+  updateSessionModifiedCards();
   try{
     localStorage.setItem('kr-cards', payload);
   }catch(e){
@@ -962,7 +987,7 @@ function save(){
 let _saveDebounceT;
 function saveDebounced(delay=400){
   clearTimeout(_saveDebounceT);
-  _saveDebounceT = setTimeout(save, delay);
+  _saveDebounceT = setTimeout(()=>{ if(save()) syncModifiedUi(); }, delay);
 }
 function loadIconAssignments(){
   try{
@@ -989,8 +1014,8 @@ function load(){
   } else {
     state.cards = JSON.parse(JSON.stringify(DEFAULT_CARDS));
   }
-  const zoom = Number(localStorage.getItem('kr-grid-zoom'));
-  if(UI_ZOOMS.includes(zoom)) state.uiZoom = zoom;
+  const columns = Number(localStorage.getItem('kr-grid-columns'));
+  if([3,4,5,6].includes(columns)) state.gridColumns = columns;
   state.sidebarOpen = localStorage.getItem('kr-sidebar-open') !== 'false';
   const solo = localStorage.getItem('kr-solo-type');
   state.soloType = (solo && TYPE_META[solo]) ? solo : null;
@@ -1273,8 +1298,25 @@ function cardImageRenderKey(card){
   return 'ref:' + (card.image || card.imageName || '');
 }
 function cardRenderKey(card){
-  const source = JSON.stringify(compactCardForStorage(card)) + '|' + getStage(card.id) + '|' + cardImageRenderKey(card) + '|' + (state.iconCache.stamp || 0);
+  const source = JSON.stringify(compactCardForStorage(card)) + '|' + getStage(card.id) + '|' + cardImageRenderKey(card) + '|' + (state.iconCache.stamp || 0) + '|' + (state.modifiedCardIds.has(card.id) ? 'm1' : 'm0');
   return hashString(source);
+}
+function cardSessionKey(card){
+  return hashString(JSON.stringify(compactCardForStorage(card)));
+}
+function resetSessionModifiedBaseline(){
+  state.sessionCardHashes = {};
+  state.cards.forEach(card=>{ state.sessionCardHashes[card.id] = cardSessionKey(card); });
+  state.modifiedCardIds = new Set();
+}
+function updateSessionModifiedCards(){
+  const modified = new Set();
+  state.cards.forEach(card=>{
+    const baseline = state.sessionCardHashes[card.id];
+    const current = cardSessionKey(card);
+    if(!baseline || baseline !== current) modified.add(card.id);
+  });
+  state.modifiedCardIds = modified;
 }
 function htmlToElement(html){
   const template = document.createElement('template');
@@ -1378,6 +1420,9 @@ function filteredCards(){
     const q = state.searchQ.toLowerCase();
     cards = cards.filter(c=>c.name.toLowerCase().includes(q));
   }
+  return sortCards(cards);
+}
+function sortCards(cards){
   const coll = new Intl.Collator('fr', {sensitivity:'base', numeric:true});
   const order = ['building','exploration','treasure','action'];
   return cards.slice().sort((a,b)=>{
@@ -1441,11 +1486,19 @@ function renderCardSidebar(){
             if(card.name.toLowerCase().includes(q)) classes.push('matches-search');
             else classes.push('dim-search');
           }
+          if(state.modifiedCardIds.has(card.id)) classes.push('session-modified');
           return `<button class="${classes.join(' ')}" data-sidebar-card="${card.id}" title="${escapeHtml(card.name)}">${escapeHtml(card.name)}</button>`;
         }).join('')}
       </div>
     </section>`;
   }).join('');
+}
+
+function syncModifiedUi(){
+  document.querySelectorAll('.grid-item[data-id]').forEach(item=>{
+    item.classList.toggle('session-modified', state.modifiedCardIds.has(item.dataset.id));
+  });
+  renderCardSidebar();
 }
 
 function setSidebarOpen(open){
@@ -1459,6 +1512,7 @@ function setSidebarOpen(open){
     btn.classList.toggle('open', state.sidebarOpen);
   }
   localStorage.setItem('kr-sidebar-open', state.sidebarOpen ? 'true' : 'false');
+  requestAnimationFrame(applyGridColumns);
 }
 
 function toggleHiddenType(type){
@@ -1566,8 +1620,9 @@ function renderCardGridItem(card, renderKey=cardRenderKey(card)){
   const addLoop = canEditStages && card.steps.length >= 4 && !card.loopCost;
   const addStageTitle = card.steps.length >= 4 ? 'Ajouter la transition IV vers I' : 'Ajouter une étape';
   const copies = Math.max(1, card.copies != null ? card.copies : 1);
+  const modified = state.modifiedCardIds.has(card.id);
   return `
-    <div class="grid-item" data-id="${card.id}" data-render-key="${renderKey}">
+    <div class="grid-item${modified?' session-modified':''}" data-id="${card.id}" data-render-key="${renderKey}">
       ${renderCardHtml(card,'md',true)}
       <input class="gi-name-input" data-card="${card.id}" data-field="name-grid" value="${escapeHtml(card.name)}" aria-label="Nom de la carte"/>
       <div class="grid-card-actions">
@@ -2012,6 +2067,7 @@ async function loadDeckFromLibrary(id){
     const deck = await getLibraryItem('decks', id);
     if(!deck) return;
     state.cards = normalizeImportedCards(cloneCards(deck.cards));
+    resetSessionModifiedBaseline();
     localStorage.setItem('kr-current-deck-name', deck.name);
     save(); renderCards(); closeDeckLibrary();
     showStatus(`Deck chargé: ${deck.name}`);
@@ -2121,9 +2177,9 @@ async function useImageFromLibrary(id){
   card.imageName = image.name;
   card.imageLibraryId = image.id;
   closeImageLibrary();
-  renderCards();
   try{
     save();
+    renderCards();
     showStatus(`Image appliquée à ${card.name}`);
   }catch(e){
     console.warn(e);
@@ -2160,8 +2216,8 @@ function clearImageFromLibraryTarget(){
   if(!card) return;
   clearCardImage(card);
   closeImageLibrary();
-  renderCards();
   save();
+  renderCards();
   showStatus(`Image effacée pour ${card.name}`);
 }
 function closeIconLibrary(){
@@ -2281,15 +2337,35 @@ async function deleteIconFromLibrary(id){
     if(step.bonus?.icons) delete step.bonus.icons[id];
   }));
   await refreshIconCache();
-  renderCards();
   save();
+  renderCards();
   showStatus('Icône supprimée');
   await renderIconLibrary();
 }
 
-function exportToPDF(){
-  const cards = filteredCards();
+function closePdfMenu(){
+  const modal = document.getElementById('pdf-modal');
+  modal.classList.remove('open','anchored');
+  const panel = modal.querySelector('.modal');
+  if(panel){ panel.style.left=''; panel.style.top=''; }
+}
+function openPdfMenu(clickEvent=null){
+  const modal = document.getElementById('pdf-modal');
+  const modifiedCount = state.cards.filter(card=>state.modifiedCardIds.has(card.id)).length;
+  const count = document.getElementById('pdf-modified-count');
+  const modifiedBtn = document.getElementById('pdf-export-modified');
+  if(count) count.textContent = modifiedCount ? `(${modifiedCount})` : '';
+  if(modifiedBtn) modifiedBtn.disabled = modifiedCount === 0;
+  modal.classList.add('open');
+  const reposition = placeAnchoredModal(modal, clickEvent, {anchorEl: document.getElementById('btn-pdf')});
+  if(reposition) requestAnimationFrame(reposition);
+}
+function exportToPDF(scope='all'){
+  const cards = scope === 'modified'
+    ? sortCards(state.cards.filter(card=>state.modifiedCardIds.has(card.id)))
+    : sortCards(state.cards);
   if(!cards.length){ showStatus('Aucune carte à exporter'); return; }
+  closePdfMenu();
   const area = document.getElementById('print-area');
   area.innerHTML = '';
   let total = 0;
@@ -2326,6 +2402,7 @@ function openImport(){
       const cards=normalizeImportedCards(JSON.parse(document.getElementById('io-textarea').value));
       await hydrateImportedImages(cards);
       state.cards=cards;
+      resetSessionModifiedBaseline();
       save(); renderCards();
       modal.classList.remove('open');
       showStatus('Importé !');
@@ -2372,6 +2449,7 @@ function trackHeaderHeight(){
   update();
   if(window.ResizeObserver){ new ResizeObserver(update).observe(chrome); }
   else { window.addEventListener('resize',update); }
+  window.addEventListener('resize', ()=>requestAnimationFrame(applyGridColumns));
 }
 
 // ═══════════════════════════════════
@@ -2390,26 +2468,29 @@ function trapFocus(e){
 // ═══════════════════════════════════
 // VIEW MODE
 // ═══════════════════════════════════
-const UI_ZOOMS = [100,110,120,130,140,150,160,170,180,190,200];
-function applyUiZoom(){
-  const value = UI_ZOOMS.includes(state.uiZoom) ? state.uiZoom : 130;
-  const cardSize = Math.round(220 * value / 100);
-  document.documentElement.style.setProperty('--grid-card-size', `${cardSize}px`);
-  document.documentElement.style.setProperty('--grid-col-size', `${cardSize + 86}px`);
-  const label = document.getElementById('zoom-value');
-  if(label) label.textContent = `${value}%`;
-  const i = UI_ZOOMS.indexOf(value);
-  const minus = document.getElementById('zoom-minus');
-  const plus = document.getElementById('zoom-plus');
-  if(minus) minus.disabled = i <= 0;
-  if(plus) plus.disabled = i >= UI_ZOOMS.length-1;
+const GRID_COLUMNS = [3,4,5,6];
+function applyGridColumns(){
+  const cols = GRID_COLUMNS.includes(state.gridColumns) ? state.gridColumns : 4;
+  const container = document.getElementById('cards-container');
+  document.documentElement.style.setProperty('--grid-columns', String(cols));
+  const input = document.getElementById('grid-columns');
+  const label = document.getElementById('grid-columns-value');
+  if(input) input.value = String(cols);
+  if(label) label.textContent = `${cols} carte${cols>1?'s':''}`;
+  if(!container) return;
+  const styles = getComputedStyle(container);
+  const pad = (parseFloat(styles.paddingLeft)||0) + (parseFloat(styles.paddingRight)||0);
+  const gap = parseFloat(styles.columnGap) || 58;
+  const available = Math.max(320, container.clientWidth || window.innerWidth);
+  const size = Math.max(112, Math.floor((available - pad - gap * (cols - 1)) / cols));
+  document.documentElement.style.setProperty('--grid-card-size', `${size}px`);
 }
-function changeUiZoom(delta){
-  const current = UI_ZOOMS.includes(state.uiZoom) ? UI_ZOOMS.indexOf(state.uiZoom) : 0;
-  const next = Math.max(0, Math.min(UI_ZOOMS.length-1, current + delta));
-  state.uiZoom = UI_ZOOMS[next];
-  localStorage.setItem('kr-grid-zoom', String(state.uiZoom));
-  applyUiZoom();
+function setGridColumns(value){
+  const cols = Math.max(3, Math.min(6, Number(value)||4));
+  state.gridColumns = cols;
+  localStorage.setItem('kr-grid-columns', String(cols));
+  applyGridColumns();
+  renderCards();
 }
 
 // ═══════════════════════════════════
@@ -2433,25 +2514,27 @@ function bindEvents(){
     const item = e.target.closest('[data-sidebar-card]');
     if(!item) return;
     const g = document.querySelector(`.grid-item[data-id="${item.dataset.sidebarCard}"]`);
-    if(g) g.classList.add('highlight');
+    if(g){ g.classList.add('highlight'); document.getElementById('cards-container').classList.add('has-sidebar-highlight'); }
   });
   sidebarList.addEventListener('mouseout', e=>{
     const item = e.target.closest('[data-sidebar-card]');
     if(!item) return;
     const g = document.querySelector(`.grid-item[data-id="${item.dataset.sidebarCard}"]`);
     if(g) g.classList.remove('highlight');
+    document.getElementById('cards-container').classList.remove('has-sidebar-highlight');
   });
   sidebarList.addEventListener('focusin', e=>{
     const item = e.target.closest('[data-sidebar-card]');
     if(!item) return;
     const g = document.querySelector(`.grid-item[data-id="${item.dataset.sidebarCard}"]`);
-    if(g) g.classList.add('highlight');
+    if(g){ g.classList.add('highlight'); document.getElementById('cards-container').classList.add('has-sidebar-highlight'); }
   });
   sidebarList.addEventListener('focusout', e=>{
     const item = e.target.closest('[data-sidebar-card]');
     if(!item) return;
     const g = document.querySelector(`.grid-item[data-id="${item.dataset.sidebarCard}"]`);
     if(g) g.classList.remove('highlight');
+    document.getElementById('cards-container').classList.remove('has-sidebar-highlight');
   });
   document.getElementById('btn-decks').addEventListener('click', e=>openDeckLibrary(e));
   document.getElementById('btn-images').addEventListener('click', ()=>openImageLibrary());
@@ -2459,9 +2542,12 @@ function bindEvents(){
   document.getElementById('btn-icons').addEventListener('click', e=>openIconLibrary('bonus', e));
   document.getElementById('btn-import-in-deck').addEventListener('click', ()=>{ closeDeckLibrary(); openImport(); });
   document.getElementById('btn-export-in-deck').addEventListener('click', ()=>{ closeDeckLibrary(); openExport(); });
-  document.getElementById('btn-pdf').addEventListener('click', exportToPDF);
-  document.getElementById('zoom-minus').addEventListener('click', ()=>changeUiZoom(-1));
-  document.getElementById('zoom-plus').addEventListener('click', ()=>changeUiZoom(1));
+  document.getElementById('btn-pdf').addEventListener('click', openPdfMenu);
+  document.getElementById('grid-columns').addEventListener('input', e=>setGridColumns(e.target.value));
+  document.getElementById('pdf-close').addEventListener('click', closePdfMenu);
+  document.getElementById('pdf-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closePdfMenu(); });
+  document.getElementById('pdf-export-all').addEventListener('click', ()=>exportToPDF('all'));
+  document.getElementById('pdf-export-modified').addEventListener('click', ()=>exportToPDF('modified'));
   document.getElementById('io-close').addEventListener('click', ()=>document.getElementById('io-modal').classList.remove('open'));
   document.getElementById('io-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
   document.getElementById('deck-close').addEventListener('click', closeDeckLibrary);
@@ -2523,6 +2609,7 @@ function bindEvents(){
     if(closeIfOutside('cell-modal', closeCellModal)) return;
     if(closeIfOutside('io-modal', ()=>document.getElementById('io-modal').classList.remove('open'))) return;
     if(closeIfOutside('deck-modal', closeDeckLibrary)) return;
+    if(closeIfOutside('pdf-modal', closePdfMenu)) return;
     if(closeIfOutside('image-modal', closeImageLibrary)) return;
     if(closeIfOutside('icon-modal', closeIconLibrary)) return;
   });
@@ -2692,6 +2779,8 @@ function bindEvents(){
       if(io.classList.contains('open')){ io.classList.remove('open'); e.preventDefault(); return; }
       const deck = document.getElementById('deck-modal');
       if(deck.classList.contains('open')){ closeDeckLibrary(); e.preventDefault(); return; }
+      const pdf = document.getElementById('pdf-modal');
+      if(pdf.classList.contains('open')){ closePdfMenu(); e.preventDefault(); return; }
       const image = document.getElementById('image-modal');
       if(image.classList.contains('open')){ closeImageLibrary(); e.preventDefault(); return; }
       const icon = document.getElementById('icon-modal');
@@ -2717,8 +2806,8 @@ load();
 markHistoryReady();
 bindEvents();
 trackHeaderHeight();
-applyUiZoom();
 setSidebarOpen(state.sidebarOpen);
+applyGridColumns();
 renderCards();
 refreshIconCache().then(()=>renderCards()).catch(()=>{});
 ensureImageLibraryCache().catch(()=>{});
