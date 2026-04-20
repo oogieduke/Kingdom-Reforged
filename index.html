@@ -1191,7 +1191,11 @@ async function verifyCloudUnlock(){
     setCloudStatus('Vérification du mot de passe...', 'warn');
     const res = await fetch(cloudFunctionUrl(), {
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':state.cloud.config.anonKey},
+      headers:{
+        'Content-Type':'application/json',
+        'apikey':state.cloud.config.anonKey,
+        'Authorization':`Bearer ${state.cloud.config.anonKey}`,
+      },
       body: JSON.stringify({action:'verify', password:state.cloud.password}),
     });
     const data = await res.json().catch(()=>({}));
@@ -1252,7 +1256,11 @@ async function cloudSaveNow({silent=false}={}){
     const [assets, payload] = await Promise.all([collectCloudAssets(), cloudProjectPayload()]);
     const res = await fetch(cloudFunctionUrl(), {
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':state.cloud.config.anonKey},
+      headers:{
+        'Content-Type':'application/json',
+        'apikey':state.cloud.config.anonKey,
+        'Authorization':`Bearer ${state.cloud.config.anonKey}`,
+      },
       body: JSON.stringify({
         action:'save-project',
         password:state.cloud.password,
