@@ -205,6 +205,10 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .custom-card-icon.missing-asset{border-radius:6px;font-size:calc(var(--sz,220px) * .07)}
 .bonus-custom.missing-asset{width:1.35em;height:1.35em;font-size:.95em}
 .kcenter.missing-asset{background:#fff3bf;border-style:dashed;color:#7c2d12;font-size:calc(var(--sz,220px) * .18)}
+.missing-glyph{position:relative;display:block;width:.86em;height:.72em;border:.08em solid currentColor;border-radius:.12em;background:rgba(255,255,255,.45);box-sizing:border-box}
+.missing-glyph::before{content:'';position:absolute;left:.12em;right:.12em;bottom:.11em;height:.25em;background:linear-gradient(135deg,transparent 0 43%,currentColor 44% 56%,transparent 57%),linear-gradient(45deg,transparent 0 43%,currentColor 44% 56%,transparent 57%);opacity:.75}
+.missing-glyph::after{content:'?';position:absolute;right:-.42em;bottom:-.42em;width:.78em;height:.78em;border:.07em solid currentColor;border-radius:50%;background:#fff3bf;color:#7c2d12;font-family:'Kalam';font-size:.58em;font-weight:700;line-height:.78em;text-align:center;box-sizing:border-box}
+.missing-preview .missing-glyph{font-size:54px}
 .danger-center,.treasure-center{position:absolute;inset:28%;border:calc(var(--sz,220px) * .014) solid var(--line);border-radius:50%;background:var(--paper);display:grid;place-items:center;text-align:center;font-family:'Kalam';font-weight:700;color:var(--ink);z-index:5;cursor:pointer}
 .danger-center{background:radial-gradient(circle,#f5e8c8,#d6aa58);font-size:calc(var(--sz,220px) * .052)}
 .danger-center b{font-size:calc(var(--sz,220px) * .18);line-height:.9}
@@ -1353,7 +1357,7 @@ function customIconQtyHtml(iconId, qty=1, className='custom-card-icon'){
   if(!n) return '';
   if(!icon){
     const label = state.assetRefs.icons[iconId]?.name || `Icône manquante ${iconId}`;
-    return `<span class="custom-icon-stack missing-stack">${Array(n).fill(`<span class="${className} missing-asset" role="img" aria-label="${escapeHtml(label)}">?</span>`).join('')}</span>`;
+    return `<span class="custom-icon-stack missing-stack">${Array(n).fill(`<span class="${className} missing-asset" role="img" aria-label="${escapeHtml(label)}"><span class="missing-glyph" aria-hidden="true"></span></span>`).join('')}</span>`;
   }
   return `<span class="custom-icon-stack">${Array(n).fill(`<img class="${className}" src="${icon.dataUrl}" alt="${escapeHtml(icon.name)}" loading="lazy" decoding="async"/>`).join('')}</span>`;
 }
@@ -1537,7 +1541,7 @@ function renderCardHtml(card, sizeClass='', interactive=false){
   const center = imageSrc
     ? `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}><img src="${imageSrc}" alt="${escapeHtml(card.name)}" loading="lazy" decoding="async"/></div>`
     : missingImageRef
-      ? `<div class="kcenter missing-asset${interactive?' editable':''}" ${centerAttrs} title="Image manquante: ${escapeHtml(card.imageName)}">?</div>`
+      ? `<div class="kcenter missing-asset${interactive?' editable':''}" ${centerAttrs} title="Image manquante: ${escapeHtml(card.imageName)}" aria-label="Image manquante: ${escapeHtml(card.imageName)}"><span class="missing-glyph" aria-hidden="true"></span></div>`
       : `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}>${escapeHtml(card.name)}</div>`;
 
   return `<div class="kcard ${sizeClass} ${bg}" data-id="${card.id}" style="transform:rotate(${rot}deg)">
@@ -2266,7 +2270,7 @@ function paintImageLibrary(images){
     </div>`);
   const missingTiles = missingRefs.map(ref=>`
     <div class="image-tile missing" data-missing-image="${escapeHtml(ref)}">
-      <div class="missing-preview" role="img" aria-label="Image manquante">?</div>
+      <div class="missing-preview" role="img" aria-label="Image manquante"><span class="missing-glyph" aria-hidden="true"></span></div>
       <input class="image-name-input" data-missing-image-name="${escapeHtml(ref)}" value="${escapeHtml(ref)}" title="${escapeHtml(ref)}" aria-label="Nom de l'image manquante"/>
       <label class="asset-replace-label">Remplacer<input class="asset-replace-input" type="file" accept="image/*" data-replace-missing-image="${escapeHtml(ref)}"/></label>
     </div>`);
@@ -2470,7 +2474,7 @@ async function renderIconLibrary(){
     }
     const missingTiles = missing.map(icon=>`
       <div class="image-tile icon-tile missing" data-missing-icon="${icon.id}">
-        <div class="missing-preview" role="img" aria-label="Icône manquante">?</div>
+        <div class="missing-preview" role="img" aria-label="Icône manquante"><span class="missing-glyph" aria-hidden="true"></span></div>
         <input class="image-name-input" data-missing-icon-name="${icon.id}" value="${escapeHtml(icon.name)}" title="${escapeHtml(icon.name)}" aria-label="Nom de l'icône manquante"/>
         <label class="asset-replace-label">Remplacer<input class="asset-replace-input" type="file" accept="image/*" data-replace-missing-icon="${icon.id}" data-category="${categoryFilter}"/></label>
       </div>`);
