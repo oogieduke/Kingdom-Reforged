@@ -254,13 +254,10 @@ body.sidebar-open main{margin-left:260px}
 .sidebar-card:hover,.sidebar-card:focus-visible{background:rgba(255,255,255,.85);transform:translateX(3px);box-shadow:2px 2px 0 rgba(0,0,0,.08)}
 .sidebar-card.matches-search{background:rgba(255,235,150,.92);border-color:var(--accent);box-shadow:2px 2px 0 rgba(194,65,12,.25);font-weight:700}
 .sidebar-card.dim-search{opacity:.35}
-.sidebar-card.session-modified{padding-right:22px;border-color:#a16207;background:rgba(255,235,150,.72)}
-.sidebar-card.session-modified::after{content:'•';position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:18px;color:#a16207;line-height:1}
+.sidebar-card.session-modified{border-color:#a16207;background:rgba(255,235,150,.72);box-shadow:2px 2px 0 rgba(161,98,7,.18)}
 .grid-item.flash .kcard{box-shadow:0 0 0 4px var(--accent),4px 4px 0 rgba(0,0,0,.14)}
 .grid-item.highlight .kcard{box-shadow:0 0 0 3px var(--accent-2),4px 4px 0 rgba(0,0,0,.14);transform:translateY(-3px)}
-.cards-grid.has-sidebar-highlight .grid-item:not(.highlight){opacity:.28;filter:blur(1.4px) grayscale(.35)}
-.grid-item.session-modified .gi-name-input{border-color:rgba(194,65,12,.75);background:rgba(255,235,150,.45)}
-.grid-item.session-modified::before{content:'modifié';position:absolute;top:4px;left:calc(50% - (var(--grid-card-size) / 2));z-index:22;background:#fff0a6;border:1.5px solid #9f6b04;border-radius:6px;padding:1px 5px;font-family:'Kalam';font-size:10px;font-weight:700;color:#5d3c00;box-shadow:var(--shadow-sm);pointer-events:none}
+.grid-item.session-modified .kcard{outline:3px dashed #facc15;outline-offset:5px}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:60px 20px;color:var(--ink-ghost);font-family:'Caveat';font-size:18px;text-align:center}
 .empty-state .icon{font-size:48px}
 
@@ -371,7 +368,7 @@ body.sidebar-open main{margin-left:260px}
 /* ── GRID MODE ── */
 .cards-grid{display:grid;grid-template-columns:repeat(var(--grid-columns),var(--grid-card-size));gap:12px var(--grid-gap-x);padding:16px 18px;justify-content:center;align-items:start}
 .cards-grid .kcard.md{--sz:var(--grid-card-size)}
-.grid-item{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-width:0;content-visibility:auto;contain-intrinsic-size:var(--grid-card-size) calc(var(--grid-card-size) + 40px);transition:opacity var(--t-med) var(--ease),filter var(--t-med) var(--ease)}
+.grid-item{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-width:0;transition:opacity var(--t-med) var(--ease),filter var(--t-med) var(--ease)}
 .grid-item .gi-name-input{width:min(var(--grid-card-size),100%);border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:center;padding:2px 6px;outline:none}
 .grid-item .gi-name-input:hover,.grid-item .gi-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
 .grid-card-actions{position:absolute;top:4px;left:calc(50% + (var(--grid-card-size) / 2) + 8px);display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20}
@@ -728,6 +725,7 @@ const RES_LABELS = {wood:'B',stone:'P',wheat:'Bl',iron:'F',water:'E'};
 const RES_NAMES  = {wood:'Bois',stone:'Pierre',wheat:'Blé',iron:'Fer',water:'Eau'};
 const BONUS_ICON_LABELS = {pv:'PV',workers:'Ouvriers',actions:'Actions',draw:'Pioche',explorers:'Explorateurs'};
 const ICON_ASSIGN_STORAGE = 'kr-icon-assignments';
+const MODIFIED_STORAGE = 'kr-modified-card-ids';
 const STAGE_NUMS = ['I','II','III','IV'];
 const STAGE_POSITIONS = ['top','right','bottom','left'];
 const RIBBON_POSITIONS = ['tr','br','bl','tl'];
@@ -917,12 +915,26 @@ function updateHistoryButtons(){
   if(undo) undo.disabled = !state.history.past.length;
   if(redo) redo.disabled = !state.history.future.length;
 }
-function markHistoryReady(){
+function loadModifiedCardIds(){
+  try{
+    const ids = JSON.parse(localStorage.getItem(MODIFIED_STORAGE) || '[]');
+    return new Set(Array.isArray(ids) ? ids.filter(id=>typeof id === 'string') : []);
+  }catch{
+    return new Set();
+  }
+}
+function saveModifiedCardIds(){
+  const currentIds = new Set(state.cards.map(card=>card.id));
+  const ids = Array.from(state.modifiedCardIds).filter(id=>currentIds.has(id));
+  state.modifiedCardIds = new Set(ids);
+  try{ localStorage.setItem(MODIFIED_STORAGE, JSON.stringify(ids)); }catch{}
+}
+function markHistoryReady(preserveModified=false){
   state.history.past = [];
   state.history.future = [];
   state.history.last = historySnapshot();
   state.history.ready = true;
-  resetSessionModifiedBaseline();
+  resetSessionModifiedBaseline({preserveModified});
   updateHistoryButtons();
 }
 function commitHistory(snap=persistenceSnapshot()){
@@ -1019,6 +1031,7 @@ function load(){
   state.sidebarOpen = localStorage.getItem('kr-sidebar-open') !== 'false';
   const solo = localStorage.getItem('kr-solo-type');
   state.soloType = (solo && TYPE_META[solo]) ? solo : null;
+  state.modifiedCardIds = loadModifiedCardIds();
 }
 function saveSoloType(){
   if(state.soloType) localStorage.setItem('kr-solo-type', state.soloType);
@@ -1304,19 +1317,21 @@ function cardRenderKey(card){
 function cardSessionKey(card){
   return hashString(JSON.stringify(compactCardForStorage(card)));
 }
-function resetSessionModifiedBaseline(){
+function resetSessionModifiedBaseline({preserveModified=false}={}){
   state.sessionCardHashes = {};
   state.cards.forEach(card=>{ state.sessionCardHashes[card.id] = cardSessionKey(card); });
-  state.modifiedCardIds = new Set();
+  if(!preserveModified) state.modifiedCardIds = new Set();
+  saveModifiedCardIds();
 }
 function updateSessionModifiedCards(){
-  const modified = new Set();
+  const modified = new Set(state.modifiedCardIds);
   state.cards.forEach(card=>{
     const baseline = state.sessionCardHashes[card.id];
     const current = cardSessionKey(card);
     if(!baseline || baseline !== current) modified.add(card.id);
   });
   state.modifiedCardIds = modified;
+  saveModifiedCardIds();
 }
 function htmlToElement(html){
   const template = document.createElement('template');
@@ -2514,27 +2529,25 @@ function bindEvents(){
     const item = e.target.closest('[data-sidebar-card]');
     if(!item) return;
     const g = document.querySelector(`.grid-item[data-id="${item.dataset.sidebarCard}"]`);
-    if(g){ g.classList.add('highlight'); document.getElementById('cards-container').classList.add('has-sidebar-highlight'); }
+    if(g) g.classList.add('highlight');
   });
   sidebarList.addEventListener('mouseout', e=>{
     const item = e.target.closest('[data-sidebar-card]');
     if(!item) return;
     const g = document.querySelector(`.grid-item[data-id="${item.dataset.sidebarCard}"]`);
     if(g) g.classList.remove('highlight');
-    document.getElementById('cards-container').classList.remove('has-sidebar-highlight');
   });
   sidebarList.addEventListener('focusin', e=>{
     const item = e.target.closest('[data-sidebar-card]');
     if(!item) return;
     const g = document.querySelector(`.grid-item[data-id="${item.dataset.sidebarCard}"]`);
-    if(g){ g.classList.add('highlight'); document.getElementById('cards-container').classList.add('has-sidebar-highlight'); }
+    if(g) g.classList.add('highlight');
   });
   sidebarList.addEventListener('focusout', e=>{
     const item = e.target.closest('[data-sidebar-card]');
     if(!item) return;
     const g = document.querySelector(`.grid-item[data-id="${item.dataset.sidebarCard}"]`);
     if(g) g.classList.remove('highlight');
-    document.getElementById('cards-container').classList.remove('has-sidebar-highlight');
   });
   document.getElementById('btn-decks').addEventListener('click', e=>openDeckLibrary(e));
   document.getElementById('btn-images').addEventListener('click', ()=>openImageLibrary());
@@ -2803,7 +2816,7 @@ function bindEvents(){
 // ═══════════════════════════════════
 initTheme();
 load();
-markHistoryReady();
+markHistoryReady(true);
 bindEvents();
 trackHeaderHeight();
 setSidebarOpen(state.sidebarOpen);
@@ -2816,7 +2829,7 @@ hydrateImportedImages(state.cards).then(()=>{
   state.history.restoring = true;
   save();
   state.history.restoring = false;
-  markHistoryReady();
+  markHistoryReady(true);
 }).catch(()=>{});
 </script>
 </body>
