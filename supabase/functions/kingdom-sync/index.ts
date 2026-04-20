@@ -72,9 +72,34 @@ Deno.serve(async (req) => {
     auth: { persistSession: false },
   });
 
+  const projectId = safeSegment(body.projectId || 'main', 'main');
+
+  if (body.action === 'load-project') {
+    const { data: project, error: projectError } = await supabase
+      .from('kr_projects')
+      .select('payload,updated_at')
+      .eq('id', projectId)
+      .maybeSingle();
+
+    if (projectError) return fail(projectError.message, 500);
+
+    const { data: assets, error: assetsError } = await supabase
+      .from('kr_assets')
+      .select('*')
+      .eq('project_id', projectId);
+
+    if (assetsError) return fail(assetsError.message, 500);
+
+    return json({
+      ok: true,
+      payload: project?.payload ?? null,
+      updatedAt: project?.updated_at ?? null,
+      assets: assets ?? [],
+    });
+  }
+
   if (body.action !== 'save-project') return fail('Unknown action', 400);
 
-  const projectId = safeSegment(body.projectId || 'main', 'main');
   const payload = body.payload && typeof body.payload === 'object' ? body.payload : null;
   if (!payload) return fail('Missing payload', 400);
 

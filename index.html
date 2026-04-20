@@ -698,11 +698,8 @@ body.sidebar-open .cards-grid{padding-left:36px}
     <h3 id="cloud-modal-title">Cloud & cadenas<button class="modal-close" id="cloud-close" aria-label="Fermer">×</button></h3>
     <div class="cloud-status warn" id="cloud-status-box"><span class="dot" aria-hidden="true"></span><span id="cloud-status-text">Configure Supabase, puis déverrouille l'édition.</span></div>
     <div class="cloud-form">
-      <label>Project URL
-        <input type="url" id="cloud-url" placeholder="https://xxxx.supabase.co" autocomplete="off"/>
-      </label>
-      <label>Anon public key
-        <input type="password" id="cloud-anon" placeholder="eyJ..." autocomplete="off"/>
+      <label>Supabase
+        <input type="url" id="cloud-url" placeholder="https://xxxx.supabase.co" autocomplete="off" readonly/>
       </label>
       <label>Projet
         <input type="text" id="cloud-project" placeholder="main"/>
@@ -710,7 +707,7 @@ body.sidebar-open .cards-grid{padding-left:36px}
       <label>Mot de passe edition
         <input type="password" id="cloud-password" placeholder="Mot de passe"/>
       </label>
-      <div class="hint">Le mot de passe est vérifié par Supabase. La clé anon est publique; ne mets jamais la clé service_role ici.</div>
+      <div class="hint">Le site connait deja Supabase. Sur un nouveau navigateur, il suffit d'entrer le mot de passe.</div>
     </div>
     <div class="cloud-actions">
       <button class="btn ghost" id="cloud-load" type="button">Charger cloud</button>
@@ -786,7 +783,6 @@ body.sidebar-open .cards-grid{padding-left:36px}
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ═══════════════════════════════════
 // DATA DEFINITIONS
@@ -800,6 +796,10 @@ const MODIFIED_STORAGE = 'kr-modified-card-ids';
 const ASSET_REF_STORAGE = 'kr-asset-refs';
 const CLOUD_CONFIG_STORAGE = 'kr-cloud-config';
 const CLOUD_PASSWORD_SESSION = 'kr-cloud-password';
+const DEFAULT_CLOUD_CONFIG = {
+  url: 'https://hjnmywxcgnvcagxkbmqo.supabase.co',
+  projectId: 'main',
+};
 const STAGE_NUMS = ['I','II','III','IV'];
 const STAGE_POSITIONS = ['top','right','bottom','left'];
 const RIBBON_POSITIONS = ['tr','br','bl','tl'];
@@ -959,7 +959,7 @@ const state = {
   sessionCardHashes: {},
   history: {past:[], future:[], last:'', ready:false, restoring:false},
   cloud: {
-    config: {url:'', anonKey:'', projectId:'main'},
+    config: {...DEFAULT_CLOUD_CONFIG},
     password: '',
     unlocked: false,
     client: null,
@@ -1094,12 +1094,11 @@ function loadCloudConfig(){
   try{
     const raw = JSON.parse(localStorage.getItem(CLOUD_CONFIG_STORAGE) || '{}');
     state.cloud.config = {
-      url: normalizeSupabaseUrl(raw.url),
-      anonKey: String(raw.anonKey || ''),
-      projectId: String(raw.projectId || 'main').trim() || 'main',
+      url: normalizeSupabaseUrl(raw.url || DEFAULT_CLOUD_CONFIG.url),
+      projectId: String(raw.projectId || DEFAULT_CLOUD_CONFIG.projectId).trim() || DEFAULT_CLOUD_CONFIG.projectId,
     };
   }catch{
-    state.cloud.config = {url:'', anonKey:'', projectId:'main'};
+    state.cloud.config = {...DEFAULT_CLOUD_CONFIG};
   }
   try{ state.cloud.password = sessionStorage.getItem(CLOUD_PASSWORD_SESSION) || ''; }catch{}
 }
@@ -1107,11 +1106,10 @@ function saveCloudConfig(){
   localStorage.setItem(CLOUD_CONFIG_STORAGE, JSON.stringify(state.cloud.config));
 }
 function readCloudForm(){
-  const url = normalizeSupabaseUrl(document.getElementById('cloud-url')?.value);
-  const anonKey = String(document.getElementById('cloud-anon')?.value || '').trim();
-  const projectId = String(document.getElementById('cloud-project')?.value || 'main').trim() || 'main';
+  const url = normalizeSupabaseUrl(document.getElementById('cloud-url')?.value || DEFAULT_CLOUD_CONFIG.url);
+  const projectId = String(document.getElementById('cloud-project')?.value || DEFAULT_CLOUD_CONFIG.projectId).trim() || DEFAULT_CLOUD_CONFIG.projectId;
   const password = String(document.getElementById('cloud-password')?.value || '');
-  state.cloud.config = {url, anonKey, projectId};
+  state.cloud.config = {url, projectId};
   state.cloud.password = password;
   saveCloudConfig();
   try{
@@ -1121,11 +1119,10 @@ function readCloudForm(){
   state.cloud.client = null;
 }
 function fillCloudForm(){
-  const {url, anonKey, projectId} = state.cloud.config;
+  const {url, projectId} = state.cloud.config;
   const fields = {
-    'cloud-url': url,
-    'cloud-anon': anonKey,
-    'cloud-project': projectId || 'main',
+    'cloud-url': url || DEFAULT_CLOUD_CONFIG.url,
+    'cloud-project': projectId || DEFAULT_CLOUD_CONFIG.projectId,
     'cloud-password': state.cloud.password || '',
   };
   Object.entries(fields).forEach(([id,value])=>{
@@ -1134,20 +1131,10 @@ function fillCloudForm(){
   });
 }
 function hasCloudConfig(){
-  const {url, anonKey} = state.cloud.config;
-  return Boolean(url && anonKey);
+  return Boolean(state.cloud.config.url);
 }
 function cloudFunctionUrl(){
   return `${state.cloud.config.url}/functions/v1/kingdom-sync`;
-}
-function getCloudClient(){
-  if(state.cloud.client) return state.cloud.client;
-  if(!hasCloudConfig()) throw new Error('Configuration Supabase manquante');
-  if(!window.supabase?.createClient) throw new Error('Client Supabase indisponible');
-  state.cloud.client = window.supabase.createClient(state.cloud.config.url, state.cloud.config.anonKey, {
-    auth: {persistSession:false},
-  });
-  return state.cloud.client;
 }
 function setCloudStatus(message, tone='warn'){
   const box = document.getElementById('cloud-status-box');
@@ -1185,17 +1172,13 @@ function closeCloudModal(){
 }
 async function verifyCloudUnlock(){
   readCloudForm();
-  if(!hasCloudConfig()){ setCloudStatus("Ajoute l'URL Supabase et la clé anon.", 'error'); return false; }
+  if(!hasCloudConfig()){ setCloudStatus("URL Supabase manquante.", 'error'); return false; }
   if(!state.cloud.password){ setCloudStatus('Mot de passe manquant.', 'error'); return false; }
   try{
     setCloudStatus('Vérification du mot de passe...', 'warn');
     const res = await fetch(cloudFunctionUrl(), {
       method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'apikey':state.cloud.config.anonKey,
-        'Authorization':`Bearer ${state.cloud.config.anonKey}`,
-      },
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify({action:'verify', password:state.cloud.password}),
     });
     const data = await res.json().catch(()=>({}));
@@ -1256,11 +1239,7 @@ async function cloudSaveNow({silent=false}={}){
     const [assets, payload] = await Promise.all([collectCloudAssets(), cloudProjectPayload()]);
     const res = await fetch(cloudFunctionUrl(), {
       method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'apikey':state.cloud.config.anonKey,
-        'Authorization':`Bearer ${state.cloud.config.anonKey}`,
-      },
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         action:'save-project',
         password:state.cloud.password,
@@ -1301,14 +1280,8 @@ async function urlToDataUrl(url){
     reader.readAsDataURL(blob);
   });
 }
-async function loadCloudAssets(projectId){
-  const client = getCloudClient();
-  const {data, error} = await client
-    .from('kr_assets')
-    .select('*')
-    .eq('project_id', projectId);
-  if(error) throw error;
-  for(const asset of data || []){
+async function loadCloudAssets(assets=[]){
+  for(const asset of assets || []){
     if(!asset.public_url) continue;
     const dataUrl = await urlToDataUrl(asset.public_url).catch(()=>null);
     if(!dataUrl) continue;
@@ -1359,16 +1332,20 @@ async function cloudLoadProject(){
   setCloudStatus('Chargement du cloud...', 'warn');
   try{
     const projectId = state.cloud.config.projectId || 'main';
-    const client = getCloudClient();
-    const {data, error} = await client
-      .from('kr_projects')
-      .select('payload,updated_at')
-      .eq('id', projectId)
-      .maybeSingle();
-    if(error) throw error;
+    const res = await fetch(cloudFunctionUrl(), {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        action:'load-project',
+        password:state.cloud.password,
+        projectId,
+      }),
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok || !data.ok) throw new Error(data.error || 'Chargement cloud refusé');
     if(!data?.payload){ setCloudStatus('Aucune sauvegarde cloud pour ce projet.', 'warn'); return; }
     rememberImportedAssetManifest(data.payload.assets);
-    await loadCloudAssets(projectId);
+    await loadCloudAssets(data.assets || []);
     await restoreCloudDecks(data.payload.decks);
     state.cards = normalizeImportedCards(cloneCards(data.payload.cards || []));
     await hydrateImportedImages(state.cards);

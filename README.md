@@ -26,9 +26,8 @@ Le site reste statique sur GitHub Pages. Supabase sert seulement de sauvegarde p
 2. Colle `supabase/schema.sql` dans le SQL Editor Supabase et execute-le.
 3. Deploie l'Edge Function `supabase/functions/kingdom-sync` avec `supabase functions deploy kingdom-sync`.
 4. Ajoute le secret avec `supabase secrets set KINGDOM_EDIT_PASSWORD=ton-mot-de-passe`.
-5. Dans l'editeur, clique sur **Cloud** et renseigne:
-   - Project URL: `https://xxxx.supabase.co`
-   - Anon public key
+5. Dans les settings de la fonction `kingdom-sync`, desactive la verification JWT.
+6. Dans l'editeur, clique sur **Cloud** et renseigne seulement:
    - Projet: `main` par defaut
    - Mot de passe d'edition
 
