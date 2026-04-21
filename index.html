@@ -46,13 +46,13 @@ body{background-image:radial-gradient(circle at 20% 10%,var(--grain),transparent
 h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 
 /* ── HEADER ── */
-.chrome{position:sticky;top:0;z-index:150;background:var(--paper);border-bottom:2px dashed var(--line);padding:8px 16px;backdrop-filter:blur(4px);isolation:isolate}
-.chrome-top{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;min-width:0}
-.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.chrome{position:sticky;top:0;z-index:150;background:var(--paper);border-bottom:2px dashed var(--line);padding:8px 16px;backdrop-filter:blur(4px);isolation:isolate;box-sizing:border-box;overflow:hidden}
+.chrome-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0;row-gap:6px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:1}
 .brand-mark{width:34px;height:34px;border:2px solid var(--line);border-radius:8px;display:grid;place-items:center;background:var(--paper-2);transform:rotate(-6deg);font-family:'Kalam';font-weight:700;font-size:17px;box-shadow:3px 3px 0 var(--line);flex-shrink:0;transition:transform var(--t-med) var(--ease)}
 .brand-mark:hover{transform:rotate(0deg) scale(1.05)}
 .brand h1{font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chrome-actions{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:nowrap;min-width:0}
+.chrome-actions{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-width:0;justify-content:flex-end;row-gap:5px}
 .btn-group-uploads{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1.5px dashed var(--line);border-radius:10px;background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(240,230,210,.35));box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
 :root[data-theme="dark"] .btn-group-uploads{background:linear-gradient(135deg,rgba(18,16,13,.55),rgba(32,28,22,.4));box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
 .menu-toggle{width:36px;height:36px;border:2px solid var(--line);background:var(--paper);border-radius:9px;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-shadow:var(--shadow-sm);flex-shrink:0;padding:0;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
@@ -287,14 +287,20 @@ body.sidebar-open main{margin-left:252px}
 .deck-row::after{display:none}
 .sidebar-card-main{flex:1;min-width:0;border:none;background:transparent;color:inherit;font:inherit;text-align:left;padding:5px 8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-card-main:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:6px}
-.deck-actions{display:flex;align-items:center;gap:2px;flex-shrink:0;opacity:0;pointer-events:none;transform:translateX(4px);transition:opacity var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
-.deck-row:hover .deck-actions,.deck-row:focus-within .deck-actions{opacity:1;pointer-events:auto;transform:translateX(0)}
+.deck-actions{display:flex;align-items:center;gap:3px;flex-shrink:0}
 .deck-status-dot{width:8px;height:8px;border-radius:50%;background:#b45309;box-shadow:0 0 0 2px rgba(255,255,255,.7);flex-shrink:0}
-.deck-icon-btn{width:24px;height:24px;border:none;border-radius:6px;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
-.deck-icon-btn:hover,.deck-icon-btn:focus-visible{background:rgba(255,255,255,.6);transform:translateY(-1px);color:var(--ink)}
-.deck-icon-btn.save{color:#166534}
-.deck-icon-btn.delete{color:#991b1b}
-.deck-icon-btn:disabled{opacity:.35;cursor:default;transform:none}
+.deck-icon-btn{width:22px;height:22px;border:1.5px solid var(--line);border-radius:5px;background:var(--paper);display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);box-shadow:1px 1px 0 rgba(0,0,0,.08);font-size:12px;line-height:1;padding:0;transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
+.deck-icon-btn:hover,.deck-icon-btn:focus-visible{background:var(--paper-2);transform:translateY(-1px);color:var(--ink);box-shadow:2px 2px 0 rgba(0,0,0,.12)}
+.deck-icon-btn:active{transform:translate(1px,1px);box-shadow:0 0 0 rgba(0,0,0,.08)}
+.deck-icon-btn.save{color:#166534;border-color:#166534;background:rgba(220,252,231,.5)}
+.deck-icon-btn.save:hover,.deck-icon-btn.save:focus-visible{background:rgba(187,247,208,.8)}
+.deck-icon-btn.delete{color:#991b1b;border-color:#991b1b;background:rgba(254,226,226,.4)}
+.deck-icon-btn.delete:hover,.deck-icon-btn.delete:focus-visible{background:rgba(254,202,202,.8)}
+.deck-icon-btn:disabled{opacity:.35;cursor:default;transform:none;box-shadow:1px 1px 0 rgba(0,0,0,.04)}
+body[data-theme="dark"] .deck-icon-btn{background:var(--paper-2);border-color:var(--line);color:var(--ink-soft)}
+body[data-theme="dark"] .deck-icon-btn:hover,body[data-theme="dark"] .deck-icon-btn:focus-visible{background:var(--paper-3);color:var(--ink)}
+body[data-theme="dark"] .deck-icon-btn.save{background:rgba(22,101,52,.25);border-color:#86efac;color:#86efac}
+body[data-theme="dark"] .deck-icon-btn.delete{background:rgba(153,27,27,.25);border-color:#fca5a5;color:#fca5a5}
 .deck-sync-btn{position:relative;flex-shrink:0;width:26px;height:26px;border:none;background:transparent;border-radius:6px;cursor:pointer;color:#7c5a18;display:grid;place-items:center;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
 .deck-sync-btn:hover,.deck-sync-btn:focus-visible{background:rgba(255,255,255,.6);transform:translateY(-1px);color:#8a4300}
 .deck-sync-btn .sync-upload{position:absolute;opacity:0;transform:scale(.8);transition:opacity var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
@@ -438,14 +444,28 @@ body.sidebar-open .cards-grid{padding-left:36px}
 .grid-item::after{content:'';position:absolute;top:0;left:calc(50% + (var(--grid-card-size) / 2));width:48px;height:var(--grid-card-size);z-index:10;pointer-events:auto}
 .grid-item .gi-name-input{width:min(var(--grid-card-size),100%);border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:center;padding:2px 6px;outline:none}
 .grid-item .gi-name-input:hover,.grid-item .gi-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
-.grid-card-actions{position:absolute;top:4px;left:calc(50% + (var(--grid-card-size) / 2) + 8px);display:flex;flex-direction:column;gap:clamp(2px,calc(var(--grid-card-size) * .018),4px);opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20;--overlay-btn-size:clamp(20px,calc(var(--grid-card-size) * .14),30px)}
-.grid-card-copy-actions{position:absolute;top:calc(var(--grid-card-size) - clamp(82px,calc(var(--grid-card-size) * .48),106px));left:calc(50% + (var(--grid-card-size) / 2) + 8px);display:flex;flex-direction:column;gap:clamp(2px,calc(var(--grid-card-size) * .018),4px);opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20;align-items:center;--overlay-btn-size:clamp(20px,calc(var(--grid-card-size) * .14),30px)}
-.grid-item:hover .grid-card-actions,.grid-item:focus-within .grid-card-actions,.grid-item:hover .grid-card-copy-actions,.grid-item:focus-within .grid-card-copy-actions{opacity:1;pointer-events:auto}
-.grid-card-actions .btn,.grid-card-copy-actions .btn{width:var(--overlay-btn-size);height:var(--overlay-btn-size);padding:0;display:grid;place-items:center;box-shadow:var(--shadow-sm);background:var(--paper);font-size:clamp(11px,calc(var(--overlay-btn-size) * .45),13px)}
-.grid-copy-count{width:var(--overlay-btn-size);min-height:var(--overlay-btn-size);border:1.5px solid var(--line);border-radius:6px;background:var(--paper-2);display:grid;place-items:center;font-family:'Kalam';font-weight:700;font-size:clamp(11px,calc(var(--overlay-btn-size) * .45),13px);color:var(--ink);box-shadow:var(--shadow-sm)}
-.grid-card-actions .stage-action{font-size:clamp(14px,calc(var(--overlay-btn-size) * .65),18px)}
-.grid-card-actions .stage-action.loop-stage{background:#d9f0ff;border-color:#4da7d8;color:#114967}
-.grid-card-actions .stage-action:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.grid-overlay{position:absolute;top:4px;left:calc(50% + (var(--grid-card-size) / 2) + 8px);display:flex;flex-direction:column;gap:clamp(3px,calc(var(--grid-card-size) * .02),5px);z-index:20;align-items:stretch;pointer-events:none;--overlay-btn-size:clamp(22px,calc(var(--grid-card-size) * .14),30px)}
+.grid-overlay-essentials{display:flex;flex-direction:column;gap:inherit;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease)}
+.grid-item:hover .grid-overlay-essentials,.grid-item:focus-within .grid-overlay-essentials,.grid-item.selected-card .grid-overlay-essentials{opacity:1;pointer-events:auto}
+.grid-overlay-extras{display:flex;flex-direction:column;gap:inherit;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease),transform var(--t-fast) var(--ease);transform:translateX(-2px)}
+.grid-item:hover .grid-overlay-extras,.grid-item:focus-within .grid-overlay-extras{opacity:1;pointer-events:auto;transform:translateX(0)}
+.grid-overlay-divider{height:1.5px;background:repeating-linear-gradient(90deg,var(--line) 0 4px,transparent 4px 7px);margin:1px 0}
+.grid-overlay-extras .grid-overlay-stepper{display:flex;flex-direction:column;gap:inherit;align-items:stretch;padding:4px 2px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper-2)}
+.grid-overlay-extras .grid-overlay-stepper-label{font-family:'Kalam';font-size:8px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-soft);text-align:center;line-height:1;margin-bottom:1px}
+.grid-overlay .btn{width:var(--overlay-btn-size);height:var(--overlay-btn-size);padding:0;display:grid;place-items:center;box-shadow:var(--shadow-sm);background:var(--paper);font-size:clamp(11px,calc(var(--overlay-btn-size) * .45),13px)}
+.grid-copy-count{width:var(--overlay-btn-size);min-height:var(--overlay-btn-size);border:1.5px solid var(--line);border-radius:6px;background:var(--paper);display:grid;place-items:center;font-family:'Kalam';font-weight:700;font-size:clamp(11px,calc(var(--overlay-btn-size) * .45),13px);color:var(--ink);box-shadow:var(--shadow-sm)}
+.grid-overlay .stage-action{font-size:clamp(14px,calc(var(--overlay-btn-size) * .65),18px)}
+.grid-overlay .stage-action.loop-stage{background:#d9f0ff;border-color:#4da7d8;color:#114967}
+.grid-overlay .stage-action:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.grid-overlay .btn-select{border:2px solid var(--line);border-radius:6px;background:var(--paper);box-shadow:var(--shadow-sm);position:relative;transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),transform var(--t-fast) var(--ease);padding:0;font-size:0}
+.grid-overlay .btn-select:hover{background:var(--paper-2);transform:translateY(-1px)}
+.grid-overlay .btn-select::before{content:'';position:absolute;inset:0;margin:auto;width:46%;height:46%;border:2px solid var(--ink-ghost);border-radius:3px;background:var(--paper);transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
+.grid-overlay .btn-select[aria-pressed="true"]{border-color:#166534;background:rgba(220,252,231,.85)}
+.grid-overlay .btn-select[aria-pressed="true"]::before{background:#16a34a;border-color:#14532d;box-shadow:inset 0 0 0 2px #dcfce7}
+.grid-overlay .btn-select[aria-pressed="true"]::after{content:'';position:absolute;inset:0;margin:auto;width:28%;height:16%;border:solid #fff;border-width:0 0 2px 2px;transform:translateY(-1px) rotate(-45deg);pointer-events:none}
+body[data-theme="dark"] .grid-overlay .btn-select[aria-pressed="true"]{border-color:#86efac;background:rgba(34,197,94,.2)}
+body[data-theme="dark"] .grid-overlay .btn-select[aria-pressed="true"]::before{background:#22c55e;border-color:#166534}
+.grid-item.compact-actions .grid-overlay-extras{display:none}
 
 /* ── MODALS ── */
 .modal-overlay{position:fixed;inset:0;background:var(--overlay);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
@@ -2121,7 +2141,8 @@ function cardImageRenderKey(card){
   return 'ref:' + (card.image || card.imageName || '');
 }
 function cardRenderKey(card){
-  const source = JSON.stringify(compactCardForStorage(card)) + '|' + getStage(card.id) + '|' + cardImageRenderKey(card) + '|' + (state.iconCache.stamp || 0) + '|' + (state.modifiedCardIds.has(card.id) ? 'm1' : 'm0');
+  const selectedFlag = state.selectedCardIds.has(card.id) ? 's1' : 's0';
+  const source = JSON.stringify(compactCardForStorage(card)) + '|' + getStage(card.id) + '|' + cardImageRenderKey(card) + '|' + (state.iconCache.stamp || 0) + '|' + (state.modifiedCardIds.has(card.id) ? 'm1' : 'm0') + '|' + selectedFlag;
   return hashString(source);
 }
 function cardSessionKey(card){
@@ -2330,7 +2351,10 @@ function renderCardSidebar(){
 
 function syncModifiedUi(){
   document.querySelectorAll('.grid-item[data-id]').forEach(item=>{
-    item.classList.toggle('selected-card', state.selectedCardIds.has(item.dataset.id));
+    const sel = state.selectedCardIds.has(item.dataset.id);
+    item.classList.toggle('selected-card', sel);
+    const btn = item.querySelector('[data-action="select-toggle"]');
+    if(btn) btn.setAttribute('aria-pressed', sel ? 'true' : 'false');
   });
   renderCardSidebar();
   updatePdfSelectionControls();
@@ -2458,23 +2482,40 @@ function renderCardGridItem(card, renderKey=cardRenderKey(card)){
   const danger = inferDanger(card);
   const copies = Math.max(1, card.copies != null ? card.copies : 1);
   const selected = state.selectedCardIds.has(card.id);
+  const extras = [];
+  if(canEditStages){
+    extras.push(`<div class="grid-overlay-stepper" role="group" aria-label="Étapes">
+      <span class="grid-overlay-stepper-label">Étapes</span>
+      <button class="btn ghost stage-action${addLoop?' loop-stage':''}" data-card="${card.id}" data-action="stage-add" ${canAddStageOrLoop?'':'disabled'} aria-label="${addStageTitle}" title="${addStageTitle}">+</button>
+      <button class="btn ghost stage-action" data-card="${card.id}" data-action="stage-remove" ${card.steps.length<=1?'disabled':''} aria-label="Enlever une étape" title="Enlever une étape">−</button>
+    </div>`);
+  }
+  if(canEditDanger){
+    extras.push(`<div class="grid-overlay-stepper" role="group" aria-label="Danger">
+      <span class="grid-overlay-stepper-label">Flammes</span>
+      <button class="btn ghost stage-action" data-card="${card.id}" data-action="danger-plus" ${danger>=3?'disabled':''} aria-label="Ajouter une flamme" title="Ajouter une flamme">+</button>
+      <button class="btn ghost stage-action" data-card="${card.id}" data-action="danger-minus" ${danger<=0?'disabled':''} aria-label="Enlever une flamme" title="Enlever une flamme">−</button>
+    </div>`);
+  }
+  extras.push(`<div class="grid-overlay-stepper" role="group" aria-label="Copies PDF">
+    <span class="grid-overlay-stepper-label">Copies</span>
+    <button class="btn ghost" data-card="${card.id}" data-action="copies-plus" aria-label="Ajouter une copie PDF" title="Ajouter une copie PDF">+</button>
+    <b class="grid-copy-count" data-copies-value="${card.id}">${copies}</b>
+    <button class="btn ghost" data-card="${card.id}" data-action="copies-minus" aria-label="Enlever une copie PDF" title="Enlever une copie PDF"${copies<=1?' disabled':''}>−</button>
+  </div>`);
   return `
     <div class="grid-item${selected?' selected-card':''}" data-id="${card.id}" data-render-key="${renderKey}">
       ${renderCardHtml(card,'md',true)}
       <input class="gi-name-input" data-card="${card.id}" data-field="name-grid" value="${escapeHtml(card.name)}" aria-label="Nom de la carte"/>
-      <div class="grid-card-actions">
-        ${canEditStages ? `<button class="btn ghost stage-action${addLoop?' loop-stage':''}" data-card="${card.id}" data-action="stage-add" ${canAddStageOrLoop?'':'disabled'} aria-label="${addStageTitle}" title="${addStageTitle}">+</button>` : ''}
-        ${canEditStages ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="stage-remove" ${card.steps.length<=1?'disabled':''} aria-label="Enlever une étape" title="Enlever une étape">−</button>` : ''}
-        ${canEditDanger ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="danger-plus" ${danger>=3?'disabled':''} aria-label="Ajouter une flamme" title="Ajouter une flamme">+</button>` : ''}
-        ${canEditDanger ? `<button class="btn ghost stage-action" data-card="${card.id}" data-action="danger-minus" ${danger<=0?'disabled':''} aria-label="Enlever une flamme" title="Enlever une flamme">−</button>` : ''}
-        <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer ${escapeHtml(card.name)}" title="Dupliquer">⎘</button>
-        <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer ${escapeHtml(card.name)}" title="Supprimer">🗑</button>
-      </div>
-      <div class="grid-card-copy-actions" role="group" aria-label="Copies PDF">
-        <button class="btn ghost" data-card="${card.id}" data-action="copies-plus" aria-label="Ajouter une copie PDF" title="Ajouter une copie PDF">+</button>
-        <b class="grid-copy-count" data-copies-value="${card.id}">${copies}</b>
-        <button class="btn ghost" data-card="${card.id}" data-action="copies-minus" aria-label="Enlever une copie PDF" title="Enlever une copie PDF"${copies<=1?' disabled':''}>−</button>
-        <button class="btn ghost" data-card="${card.id}" data-action="select-toggle" aria-pressed="${selected?'true':'false'}" aria-label="${selected?'Deselect':'Sélectionner'} ${escapeHtml(card.name)}" title="${selected?'Deselect':'Sélectionner'}">${selected?'✓':'○'}</button>
+      <div class="grid-overlay">
+        <div class="grid-overlay-essentials">
+          <button class="btn-select" data-card="${card.id}" data-action="select-toggle" aria-pressed="${selected?'true':'false'}" aria-label="${selected?'Désélectionner':'Sélectionner'} ${escapeHtml(card.name)}" title="${selected?'Désélectionner pour l\'export':'Sélectionner pour l\'export'}"></button>
+          <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer ${escapeHtml(card.name)}" title="Dupliquer">⎘</button>
+          <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer ${escapeHtml(card.name)}" title="Supprimer">🗑</button>
+        </div>
+        <div class="grid-overlay-extras">
+          ${extras.join('')}
+        </div>
       </div>
     </div>
   `;
@@ -2820,8 +2861,7 @@ function toggleSelectedCard(id){
   if(state.selectedCardIds.has(id)) state.selectedCardIds.delete(id);
   else state.selectedCardIds.add(id);
   saveSelectedCardIds();
-  renderCards();
-  updatePdfSelectionControls();
+  syncModifiedUi();
 }
 function showStatus(msg){
   const el=document.getElementById('autosave-status');
@@ -3472,6 +3512,9 @@ function applyGridColumns(){
   const available = Math.max(320, container.clientWidth || window.innerWidth);
   const size = Math.max(112, Math.floor((available - pad - gap * (cols - 1)) / cols));
   document.documentElement.style.setProperty('--grid-card-size', `${size}px`);
+  const compact = size < 170;
+  container.classList.toggle('grid-compact-cards', compact);
+  container.querySelectorAll(':scope > .grid-item').forEach(item=>item.classList.toggle('compact-actions', compact));
 }
 function setGridColumns(value){
   const cols = Math.max(3, Math.min(6, Number(value)||4));
