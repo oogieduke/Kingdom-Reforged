@@ -84,6 +84,9 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .btn.cloud{background:#d7f3ee;color:#134e4a;border-color:#0f766e}
 .btn.cloud.on{background:#0f766e;color:#fff;border-color:#0b4f4a}
 .btn.cloud.syncing{filter:saturate(.7);opacity:.75}
+.btn.cloud-refresh{width:34px;padding:0;display:inline-grid;place-items:center;font-size:18px;line-height:1}
+.btn.cloud-refresh.syncing{animation:cloud-spin 1s linear infinite}
+@keyframes cloud-spin{to{transform:rotate(360deg)}}
 .btn.save-cloud{background:#22c55e;color:#082f1a;border-color:#166534}
 .btn.save-cloud.dirty{background:#facc15;color:#422006;border-color:#a16207}
 .btn.save-cloud:hover{filter:brightness(1.04)}
@@ -492,9 +495,12 @@ body.sidebar-open .cards-grid{padding-left:36px}
 .pdf-menu-actions{display:grid;grid-template-columns:1fr;gap:8px}
 .pdf-menu-actions .btn{justify-content:center}
 .pdf-menu-actions .hint{font-family:'Caveat';font-size:15px;color:var(--ink-soft);text-align:center}
-.pdf-size-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;border:2px solid var(--line);border-radius:8px;background:var(--paper)}
-.pdf-size-row span{font-size:14px;color:var(--ink-soft)}
-.pdf-size-row input{width:80px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;font:inherit;text-align:right;background:var(--paper);color:var(--ink)}
+.pdf-size-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px;padding:8px 12px;border:2px dashed var(--line);border-radius:10px;background:var(--paper-2);cursor:text}
+.pdf-size-row .pdf-size-label{font-family:'Kalam',sans-serif;font-size:15px;color:var(--ink)}
+.pdf-size-row .pdf-size-field{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border:2px solid var(--line);border-radius:8px;background:var(--paper);box-shadow:2px 2px 0 var(--line)}
+.pdf-size-row input{width:52px;padding:2px 0;border:none;font:inherit;font-family:'Kalam',sans-serif;font-size:16px;font-weight:700;text-align:right;background:transparent;color:var(--ink);outline:none;-moz-appearance:textfield}
+.pdf-size-row input::-webkit-outer-spin-button,.pdf-size-row input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pdf-size-row .pdf-size-unit{font-family:'Kalam',sans-serif;font-size:14px;color:var(--ink-soft)}
 .deck-save-row{display:flex;gap:6px;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1.5px dashed var(--line)}
 .deck-save-row input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);padding:5px 9px;font-family:'Patrick Hand';font-size:14px;color:var(--ink)}
 .deck-save-row .btn{flex-shrink:0;padding:5px 10px;font-size:13px}
@@ -724,14 +730,15 @@ body.sidebar-open .cards-grid{padding-left:36px}
     </div>
     <div class="chrome-actions">
       <span class="autosave" id="autosave-status" role="status" aria-live="polite"></span>
+      <button class="btn ghost cloud-refresh" id="btn-cloud-refresh" type="button" aria-label="Recharger depuis le cloud" title="Recharger depuis le cloud">↻</button>
       <button class="btn cloud hidden-cloud-control" id="btn-cloud" type="button" aria-label="Configurer la sauvegarde cloud">Cloud</button>
       <button class="btn save-cloud hidden-cloud-control" id="btn-save-cloud" type="button" aria-label="Sauvegarder sur le cloud">Sauvegarder</button>
       <button class="btn ghost history" id="btn-undo" type="button" aria-label="Annuler" title="Annuler" disabled>↶</button>
       <button class="btn ghost history" id="btn-redo" type="button" aria-label="Rétablir" title="Rétablir" disabled>↷</button>
       <div class="columns-ctrl" role="group" aria-label="Cartes affichées en largeur">
         <label for="grid-columns">Largeur</label>
-        <input type="range" id="grid-columns" min="3" max="6" step="1" list="grid-columns-marks" aria-label="Nombre de cartes par ligne"/>
-        <datalist id="grid-columns-marks"><option value="3"></option><option value="4"></option><option value="5"></option><option value="6"></option></datalist>
+        <input type="range" id="grid-columns" min="1" max="10" step="1" list="grid-columns-marks" aria-label="Nombre de cartes par ligne"/>
+        <datalist id="grid-columns-marks"><option value="1"></option><option value="2"></option><option value="3"></option><option value="4"></option><option value="5"></option><option value="6"></option><option value="7"></option><option value="8"></option><option value="9"></option><option value="10"></option></datalist>
         <span id="grid-columns-value">4 cartes</span>
       </div>
       <button class="theme-toggle" id="theme-toggle" aria-label="Basculer thème sombre" title="Thème sombre"><span aria-hidden="true">🌙</span></button>
@@ -871,13 +878,16 @@ body.sidebar-open .cards-grid{padding-left:36px}
   <div class="modal">
     <h3 id="pdf-modal-title">Export PDF<button class="modal-close" id="pdf-close" aria-label="Fermer">✕</button></h3>
     <div class="pdf-menu-actions">
-      <label class="pdf-size-row" for="pdf-card-size">
-        <span>Taille des cartes (mm)</span>
-        <input type="number" id="pdf-card-size" min="20" max="200" step="1" inputmode="numeric"/>
-      </label>
       <button class="btn pdf" id="pdf-export-all" type="button">Tout exporter</button>
       <button class="btn ghost" id="pdf-export-selected" type="button">Exporter la sélection <span id="pdf-selected-count"></span></button>
       <div class="hint">Sélectionne les cartes à exporter directement dans la grille.</div>
+      <label class="pdf-size-row" for="pdf-card-size">
+        <span class="pdf-size-label">Taille des cartes</span>
+        <span class="pdf-size-field">
+          <input type="number" id="pdf-card-size" min="20" max="200" step="1" inputmode="numeric"/>
+          <span class="pdf-size-unit">mm</span>
+        </span>
+      </label>
     </div>
   </div>
 </div>
@@ -1699,7 +1709,7 @@ function load(){
     state.cards = JSON.parse(JSON.stringify(DEFAULT_CARDS));
   }
   const columns = Number(localStorage.getItem('kr-grid-columns'));
-  if([3,4,5,6].includes(columns)) state.gridColumns = columns;
+  if(Number.isFinite(columns) && columns >= 1 && columns <= 10) state.gridColumns = columns;
   state.sidebarOpen = localStorage.getItem('kr-sidebar-open') !== 'false';
   const solo = localStorage.getItem('kr-solo-type');
   state.soloType = (solo && TYPE_META[solo]) ? solo : null;
@@ -3655,7 +3665,7 @@ function trapFocus(e){
 // ═══════════════════════════════════
 // VIEW MODE
 // ═══════════════════════════════════
-const GRID_COLUMNS = [3,4,5,6];
+const GRID_COLUMNS = [1,2,3,4,5,6,7,8,9,10];
 function applyGridColumns(){
   const cols = GRID_COLUMNS.includes(state.gridColumns) ? state.gridColumns : 4;
   const container = document.getElementById('cards-container');
@@ -3676,7 +3686,7 @@ function applyGridColumns(){
   container.querySelectorAll(':scope > .grid-item').forEach(item=>item.classList.toggle('compact-actions', compact));
 }
 function setGridColumns(value){
-  const cols = Math.max(3, Math.min(6, Number(value)||4));
+  const cols = Math.max(1, Math.min(10, Number(value)||4));
   state.gridColumns = cols;
   localStorage.setItem('kr-grid-columns', String(cols));
   applyGridColumns();
@@ -4854,6 +4864,15 @@ async function cloudLoadProject(options={}){
 function bindEvents(){
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
   document.getElementById('btn-cloud').addEventListener('click', openCloudModal);
+  document.getElementById('btn-cloud-refresh')?.addEventListener('click', async ()=>{
+    const btn = document.getElementById('btn-cloud-refresh');
+    if(btn) btn.classList.add('syncing');
+    try{
+      await cloudLoadProject({skipRead:true});
+    } finally {
+      if(btn) btn.classList.remove('syncing');
+    }
+  });
   document.getElementById('cloud-close').addEventListener('click', closeCloudModal);
   document.getElementById('cloud-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeCloudModal(); });
   document.getElementById('cloud-unlock').addEventListener('click', async ()=>{ if(await verifyCloudUnlock()) closeCloudModal(); });
