@@ -55,6 +55,11 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .chrome-actions{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-width:0;justify-content:flex-end;row-gap:5px}
 .btn-group-uploads{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1.5px dashed var(--line);border-radius:10px;background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(240,230,210,.35));box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
 :root[data-theme="dark"] .btn-group-uploads{background:linear-gradient(135deg,rgba(18,16,13,.55),rgba(32,28,22,.4));box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.btn-group-selection{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border:1.5px solid #166534;border-radius:10px;background:rgba(220,252,231,.85);color:#166534;font-family:'Kalam';font-weight:700;font-size:14px}
+.btn-group-selection[hidden]{display:none}
+.btn-group-selection .selection-count{white-space:nowrap}
+.btn-group-selection .btn{padding:3px 8px;font-size:13px}
+:root[data-theme="dark"] .btn-group-selection{background:rgba(34,197,94,.18);border-color:#86efac;color:#bbf7d0}
 .menu-toggle{width:36px;height:36px;border:2px solid var(--line);background:var(--paper);border-radius:9px;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-shadow:var(--shadow-sm);flex-shrink:0;padding:0;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
 .menu-toggle span{display:block;width:18px;height:2.5px;background:var(--ink);border-radius:2px;transition:transform var(--t-med) var(--ease),opacity var(--t-med) var(--ease),width var(--t-med) var(--ease)}
 .menu-toggle:hover{background:var(--paper-2)}
@@ -439,35 +444,20 @@ body[data-theme="dark"] .grid-item.selected-card .kcard{outline-color:#86efac}
 .cards-grid{display:grid;grid-template-columns:repeat(var(--grid-columns),var(--grid-card-size));gap:12px var(--grid-gap-x);padding:16px 48px;justify-content:center;align-items:start}
 body.sidebar-open .cards-grid{padding-left:36px}
 .cards-grid .kcard.md{--sz:var(--grid-card-size)}
-.grid-item{display:flex;flex-direction:column;align-items:flex-start;gap:3px;position:relative;min-width:0;width:var(--grid-card-size);transition:opacity var(--t-med) var(--ease),filter var(--t-med) var(--ease)}
-.grid-item::after{content:'';position:absolute;top:0;left:var(--grid-card-size);width:48px;height:var(--grid-card-size);z-index:10;pointer-events:auto}
-.grid-item-head{position:relative;display:flex;align-items:center;width:100%;padding:0 2px}
-.grid-item .gi-name-input{width:100%;min-width:0;border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:left;padding:2px 6px;outline:none}
+.grid-item{display:flex;flex-direction:column;align-items:flex-start;gap:3px;position:relative;min-width:0;width:var(--grid-card-size);cursor:pointer;transition:opacity var(--t-med) var(--ease),filter var(--t-med) var(--ease)}
+.grid-item:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:10px}
+.grid-item-head{position:relative;display:flex;align-items:center;width:100%;padding:0 2px;cursor:default}
+.grid-item .gi-name-input{width:100%;min-width:0;border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:left;padding:2px 6px;outline:none;cursor:text}
 .grid-item .gi-name-input:hover,.grid-item .gi-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
 .grid-item-meta{position:absolute;right:2px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:6px;flex-shrink:0;padding:0 4px;background:var(--paper);border-radius:6px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:5}
 .grid-item:hover .grid-item-meta{opacity:1;pointer-events:auto}
 .grid-item:has(.gi-name-input:focus) .grid-item-meta{opacity:0 !important;pointer-events:none !important}
 .grid-item-copies{display:inline-flex;align-items:center;gap:3px;padding:2px 4px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper-2)}
-.grid-item-copies .btn{width:22px;height:22px;padding:0;display:grid;place-items:center;box-shadow:none;border:1.5px solid var(--line);background:var(--paper);font-size:12px;border-radius:5px}
+.grid-item-copies .btn{width:22px;height:22px;padding:0;display:grid;place-items:center;box-shadow:none;border:1.5px solid var(--line);background:var(--paper);font-size:12px;border-radius:5px;cursor:pointer}
 .grid-item-copies .btn:hover:not(:disabled){background:var(--paper-2)}
 .grid-item-copies .grid-copy-count{width:auto;min-width:18px;padding:0 2px;min-height:0;border:none;background:transparent;box-shadow:none;font-family:'Kalam';font-weight:700;font-size:13px;color:var(--ink)}
-.btn-select{width:22px;height:22px;border:2px solid var(--line);border-radius:6px;background:var(--paper);box-shadow:1px 1px 0 rgba(0,0,0,.08);position:relative;transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),transform var(--t-fast) var(--ease);padding:0;font-size:0;cursor:pointer;flex-shrink:0}
-.btn-select:hover{background:var(--paper-2);transform:translateY(-1px)}
-.btn-select::before{content:'';position:absolute;inset:0;margin:auto;width:12px;height:12px;border:1.5px solid var(--ink-soft);border-radius:3px;background:var(--paper);transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
-.btn-select[aria-pressed="true"]{border-color:#166534;background:rgba(220,252,231,.85)}
-.btn-select[aria-pressed="true"]::before{background:#16a34a;border-color:#14532d}
-.btn-select[aria-pressed="true"]::after{content:'';position:absolute;inset:0;margin:auto;width:7px;height:4px;border:solid #fff;border-width:0 0 2px 2px;transform:translateY(-1px) rotate(-45deg);pointer-events:none}
-body[data-theme="dark"] .btn-select[aria-pressed="true"]{border-color:#86efac;background:rgba(34,197,94,.2)}
-body[data-theme="dark"] .btn-select[aria-pressed="true"]::before{background:#22c55e;border-color:#166534}
-.grid-overlay{position:absolute;top:0;left:calc(var(--grid-card-size) + 8px);display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;height:var(--grid-card-size);gap:clamp(3px,calc(var(--grid-card-size) * .02),5px);z-index:20;pointer-events:none;--overlay-btn-size:clamp(22px,calc(var(--grid-card-size) * .14),30px)}
-.grid-overlay-top,.grid-overlay-bottom{display:flex;flex-direction:column;gap:inherit;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease)}
-.grid-item:hover .grid-overlay-top,.grid-item:focus-within .grid-overlay-top,.grid-item:hover .grid-overlay-bottom,.grid-item:focus-within .grid-overlay-bottom{opacity:1;pointer-events:auto}
-.grid-overlay-stepper{display:flex;flex-direction:column;gap:inherit;align-items:stretch}
-.grid-overlay-stepper-label{display:none}
-.grid-overlay .btn{width:var(--overlay-btn-size);height:var(--overlay-btn-size);padding:0;display:grid;place-items:center;box-shadow:var(--shadow-sm);background:var(--paper);font-size:clamp(11px,calc(var(--overlay-btn-size) * .45),13px)}
-.grid-overlay .stage-action{font-size:clamp(14px,calc(var(--overlay-btn-size) * .65),18px)}
-.grid-overlay .stage-action.loop-stage{background:#d9f0ff;border-color:#4da7d8;color:#114967}
-.grid-overlay .stage-action:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.ribbon.add-stage-ribbon{font-weight:700;opacity:.85}
+.ribbon.add-stage-ribbon.add-loop-ribbon{background:#d9f0ff;color:#114967}
 .grid-item.compact-actions .grid-overlay-top{display:none}
 
 /* ── MODALS ── */
@@ -736,6 +726,11 @@ body[data-theme="dark"] .btn-select[aria-pressed="true"]::before{background:#22c
         <button class="btn ghost" id="btn-icons" data-requires-edit="true" aria-label="Ouvrir la bibliothèque de bonus">Bonus</button>
       </div>
       <button class="btn decks hidden-cloud-control" id="btn-decks" data-requires-edit="true" aria-label="Ouvrir les decks sauvegardes">Decks</button>
+      <div class="btn-group-selection" role="group" aria-label="Sélection" id="selection-group" hidden>
+        <span class="selection-count" id="selection-count">0 sélectionnée</span>
+        <button class="btn ghost" id="btn-selection-clear" type="button" aria-label="Désélectionner les cartes" title="Désélectionner">✕</button>
+        <button class="btn ghost" id="btn-selection-delete" type="button" aria-label="Supprimer les cartes sélectionnées" title="Supprimer la sélection" style="color:var(--danger)">🗑</button>
+      </div>
       <button class="btn pdf" id="btn-pdf" aria-label="Exporter PDF (A4)">🖨 PDF</button>
     </div>
   </div>
@@ -758,6 +753,7 @@ body[data-theme="dark"] .btn-select[aria-pressed="true"]::before{background:#22c
     <h3 id="cell-modal-title"><span id="cell-modal-title-text">Éditer</span><button class="modal-close" id="cell-modal-close" aria-label="Fermer">✕</button></h3>
     <div id="cell-modal-body"></div>
     <div class="modal-actions">
+      <button class="btn ghost" id="cell-modal-delete-step" type="button" style="color:var(--danger);display:none">Supprimer l'étape</button>
       <button class="btn ghost" id="cell-modal-clear" type="button" style="color:var(--danger);display:none">Reset</button>
       <button class="btn primary" id="cell-modal-done">Fermer</button>
     </div>
@@ -2237,6 +2233,8 @@ function renderCardHtml(card, sizeClass='', interactive=false){
     if(!isAction){
       const isNormalTransition = i < n - 1;
       const isLoopTransition = i === 3 && n === 4 && !!card.loopCost;
+      const isAddStageSlot = interactive && i === n - 1 && n < 4;
+      const isAddLoopSlot = interactive && i === 3 && n === 4 && !card.loopCost;
       if(isNormalTransition || isLoopTransition){
         const nextIdx = isLoopTransition ? 0 : i + 1;
         const nextStep = card.steps[nextIdx];
@@ -2246,6 +2244,10 @@ function renderCardHtml(card, sizeClass='', interactive=false){
         } else if(interactive && nextStep){
           ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${loopCls} editable empty-ribbon" data-stage="${nextIdx}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">＋</div>`;
         }
+      } else if(isAddStageSlot){
+        ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]} editable empty-ribbon add-stage-ribbon" data-card="${card.id}" data-action="stage-add" role="button" tabindex="0" aria-label="Ajouter l'étape ${STAGE_NUMS[n]}" title="Ajouter l'étape ${STAGE_NUMS[n]}">＋</div>`;
+      } else if(isAddLoopSlot){
+        ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]} loop-ribbon editable empty-ribbon add-stage-ribbon add-loop-ribbon" data-card="${card.id}" data-action="stage-add" role="button" tabindex="0" aria-label="Ajouter la transition IV → I" title="Ajouter la transition IV → I">＋</div>`;
       }
     }
     const bHtml = renderBonusHtml(step.bonus);
@@ -2293,6 +2295,7 @@ function sortCards(cards){
 function renderCards(){
   renderCardSidebar();
   updatePdfSelectionControls();
+  updateSelectionGroup();
   const container = document.getElementById('cards-container');
   container.className = 'cards-grid';
   const cards = filteredCards();
@@ -2358,11 +2361,11 @@ function syncModifiedUi(){
   document.querySelectorAll('.grid-item[data-id]').forEach(item=>{
     const sel = state.selectedCardIds.has(item.dataset.id);
     item.classList.toggle('selected-card', sel);
-    const btn = item.querySelector('[data-action="select-toggle"]');
-    if(btn) btn.setAttribute('aria-pressed', sel ? 'true' : 'false');
+    item.setAttribute('aria-pressed', sel ? 'true' : 'false');
   });
   renderCardSidebar();
   updatePdfSelectionControls();
+  updateSelectionGroup();
 }
 
 function setSidebarOpen(open){
@@ -2479,31 +2482,10 @@ function renderCardRow(card){
 }
 
 function renderCardGridItem(card, renderKey=cardRenderKey(card)){
-  const canEditStages = !['exploration','treasure','action'].includes(card.type);
-  const canEditDanger = card.type === 'exploration';
-  const canAddStageOrLoop = canEditStages && (card.steps.length < 4 || !card.loopCost);
-  const addLoop = canEditStages && card.steps.length >= 4 && !card.loopCost;
-  const addStageTitle = card.steps.length >= 4 ? 'Ajouter la transition IV vers I' : 'Ajouter une étape';
-  const danger = inferDanger(card);
   const copies = Math.max(1, card.copies != null ? card.copies : 1);
   const selected = state.selectedCardIds.has(card.id);
-  const extras = [];
-  if(canEditStages){
-    extras.push(`<div class="grid-overlay-stepper" role="group" aria-label="Étapes">
-      <span class="grid-overlay-stepper-label">Étapes</span>
-      <button class="btn ghost stage-action${addLoop?' loop-stage':''}" data-card="${card.id}" data-action="stage-add" ${canAddStageOrLoop?'':'disabled'} aria-label="${addStageTitle}" title="${addStageTitle}">+</button>
-      <button class="btn ghost stage-action" data-card="${card.id}" data-action="stage-remove" ${card.steps.length<=1?'disabled':''} aria-label="Enlever une étape" title="Enlever une étape">−</button>
-    </div>`);
-  }
-  if(canEditDanger){
-    extras.push(`<div class="grid-overlay-stepper" role="group" aria-label="Danger">
-      <span class="grid-overlay-stepper-label">Flammes</span>
-      <button class="btn ghost stage-action" data-card="${card.id}" data-action="danger-plus" ${danger>=3?'disabled':''} aria-label="Ajouter une flamme" title="Ajouter une flamme">+</button>
-      <button class="btn ghost stage-action" data-card="${card.id}" data-action="danger-minus" ${danger<=0?'disabled':''} aria-label="Enlever une flamme" title="Enlever une flamme">−</button>
-    </div>`);
-  }
   return `
-    <div class="grid-item${selected?' selected-card':''}" data-id="${card.id}" data-render-key="${renderKey}">
+    <div class="grid-item${selected?' selected-card':''}" data-id="${card.id}" data-render-key="${renderKey}" role="button" tabindex="0" aria-pressed="${selected?'true':'false'}" aria-label="${selected?'Désélectionner':'Sélectionner'} ${escapeHtml(card.name)}">
       ${renderCardHtml(card,'md',true)}
       <div class="grid-item-head">
         <input class="gi-name-input" data-card="${card.id}" data-field="name-grid" value="${escapeHtml(card.name)}" aria-label="Nom de la carte"/>
@@ -2513,16 +2495,6 @@ function renderCardGridItem(card, renderKey=cardRenderKey(card)){
             <b class="grid-copy-count" data-copies-value="${card.id}">${copies}</b>
             <button class="btn ghost" data-card="${card.id}" data-action="copies-plus" aria-label="Ajouter une copie PDF" title="Ajouter une copie PDF">+</button>
           </div>
-          <button class="btn-select" data-card="${card.id}" data-action="select-toggle" aria-pressed="${selected?'true':'false'}" aria-label="${selected?'Désélectionner':'Sélectionner'} ${escapeHtml(card.name)}" title="${selected?'Désélectionner pour l\'export':'Sélectionner pour l\'export'}"></button>
-        </div>
-      </div>
-      <div class="grid-overlay">
-        <div class="grid-overlay-top">
-          ${extras.join('')}
-        </div>
-        <div class="grid-overlay-bottom">
-          <button class="btn ghost" data-card="${card.id}" data-action="duplicate" aria-label="Dupliquer ${escapeHtml(card.name)}" title="Dupliquer">⎘</button>
-          <button class="btn ghost" data-card="${card.id}" data-action="delete" style="color:var(--danger)" aria-label="Supprimer ${escapeHtml(card.name)}" title="Supprimer">🗑</button>
         </div>
       </div>
     </div>
@@ -2594,6 +2566,17 @@ function openCellEditor(cardId, field, stage, clickEvent){
     clearBtn.style.display = canClear ? 'inline-flex' : 'none';
     clearBtn.textContent = field === 'cost' ? 'Vider le coût' : 'Vider le bonus';
     clearBtn.onclick = canClear ? ()=>clearCurrentEditor(card, field, stage) : null;
+  }
+  const deleteStepBtn = document.getElementById('cell-modal-delete-step');
+  if(deleteStepBtn){
+    const canDeleteStep = field === 'cost'
+      && typeof stage === 'number' && stage > 0
+      && card.steps.length > 1
+      && card.type !== 'action' && card.type !== 'exploration';
+    deleteStepBtn.style.display = canDeleteStep ? 'inline-flex' : 'none';
+    deleteStepBtn.onclick = canDeleteStep ? ()=>{
+      if(confirm(`Supprimer l'étape ${STAGE_NUMS[stage]} ?`)) deleteCurrentEditorStep(card, stage);
+    } : null;
   }
   modal.classList.add('open');
   placeAnchoredModal(modal, clickEvent);
@@ -2870,6 +2853,7 @@ function toggleSelectedCard(id){
   else state.selectedCardIds.add(id);
   saveSelectedCardIds();
   syncModifiedUi();
+  updateSelectionGroup();
 }
 function showStatus(msg){
   const el=document.getElementById('autosave-status');
@@ -3403,7 +3387,32 @@ function clearSelectedCards(){
   syncModifiedUi();
   renderCards();
   updatePdfSelectionControls();
+  updateSelectionGroup();
   showStatus('Selection reinitialisee');
+}
+function deleteSelectedCards(){
+  const ids = Array.from(state.selectedCardIds);
+  if(!ids.length) return;
+  const count = ids.length;
+  if(!confirm(`Supprimer ${count} carte${count>1?'s':''} sélectionnée${count>1?'s':''} ?`)) return;
+  const idSet = new Set(ids);
+  state.cards = state.cards.filter(c=>!idSet.has(c.id));
+  ids.forEach(id=>{ delete state.stageByCard[id]; });
+  state.selectedCardIds = new Set();
+  saveSelectedCardIds();
+  save();
+  renderCards();
+  updateSelectionGroup();
+  showStatus(`${count} carte${count>1?'s':''} supprimée${count>1?'s':''}`);
+}
+function updateSelectionGroup(){
+  const group = document.getElementById('selection-group');
+  const count = document.getElementById('selection-count');
+  if(!group || !count) return;
+  const n = state.selectedCardIds.size;
+  if(n <= 0){ group.hidden = true; return; }
+  group.hidden = false;
+  count.textContent = n === 1 ? '1 sélectionnée' : `${n} sélectionnées`;
 }
 function exportToPDF(scope='all'){
   const cards = scope === 'selected'
@@ -4513,6 +4522,8 @@ function bindEvents(){
   document.getElementById('btn-import-in-deck').addEventListener('click', ()=>{ closeDeckLibrary(); openImport(); });
   document.getElementById('btn-export-in-deck').addEventListener('click', ()=>{ closeDeckLibrary(); openExport(); });
   document.getElementById('btn-pdf').addEventListener('click', openPdfMenu);
+  document.getElementById('btn-selection-clear').addEventListener('click', clearSelectedCards);
+  document.getElementById('btn-selection-delete').addEventListener('click', deleteSelectedCards);
   document.getElementById('grid-columns').addEventListener('input', e=>setGridColumns(e.target.value));
   document.getElementById('pdf-close').addEventListener('click', closePdfMenu);
   document.getElementById('pdf-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closePdfMenu(); });
@@ -4693,11 +4704,6 @@ function bindEvents(){
         }
         return;
       }
-      if(a==='select-toggle'){
-        if(card) toggleSelectedCard(card.id);
-        if(action && typeof action.blur === 'function') action.blur();
-        return;
-      }
       if(a==='image-clear'){
         if(card){ clearCardImage(card); save(); renderCards(); }
         return;
@@ -4705,23 +4711,40 @@ function bindEvents(){
     }
     // Editable cell
     const cell = e.target.closest('[data-field]');
-    if(!cell) return;
-    const field = cell.dataset.field;
-    // Inline fields handled via input/change — ignore clicks
-    if(field==='name-direct'||field==='type-direct') return;
-    const cardId = cell.dataset.card || cell.closest('[data-id]')?.dataset.id;
-    const stage = cell.dataset.stage != null ? +cell.dataset.stage : undefined;
-    if(!cardId) return;
-    // Shield toggle (grid corner + list stage-num)
-    if(field==='shield'||field==='shield-num'){
-      const card = getCard(cardId);
-      if(card && card.steps[stage]){
-        card.steps[stage].shield = !card.steps[stage].shield;
-        save(); renderCards();
+    if(cell){
+      const field = cell.dataset.field;
+      // Inline fields handled via input/change — ignore clicks
+      if(field==='name-direct'||field==='type-direct') return;
+      const cardId = cell.dataset.card || cell.closest('[data-id]')?.dataset.id;
+      const stage = cell.dataset.stage != null ? +cell.dataset.stage : undefined;
+      if(!cardId) return;
+      // Shield toggle (grid corner + list stage-num)
+      if(field==='shield'||field==='shield-num'){
+        const card = getCard(cardId);
+        if(card && card.steps[stage]){
+          card.steps[stage].shield = !card.steps[stage].shield;
+          save(); renderCards();
+        }
+        return;
       }
+      openCellEditor(cardId, field, stage, e);
       return;
     }
-    openCellEditor(cardId, field, stage, e);
+    // Fall-through: click on the grid card background toggles selection
+    const gridItem = e.target.closest('.grid-item[data-id]');
+    if(gridItem){
+      toggleSelectedCard(gridItem.dataset.id);
+    }
+  });
+  // Keyboard: Enter/Space on a focused grid card toggles selection
+  container.addEventListener('keydown', e=>{
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    if(e.target.matches('input,textarea,select,button,[data-field],[data-action]')) return;
+    const gridItem = e.target.closest && e.target.closest('.grid-item[data-id]');
+    if(!gridItem) return;
+    if(e.target !== gridItem) return;
+    e.preventDefault();
+    toggleSelectedCard(gridItem.dataset.id);
   });
   // Inline text input: live-update without re-render
   container.addEventListener('input', e=>{
