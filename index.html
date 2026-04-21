@@ -240,7 +240,7 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .chrome-actions #btn-resources{background:#e5f4d3;border-color:#719c35;color:#2d4f12}
 .chrome-actions #btn-icons{background:#f0def8;border-color:#8d5aa8;color:#44215b}
 .chrome-actions #btn-images:hover,.chrome-actions #btn-resources:hover,.chrome-actions #btn-icons:hover{filter:brightness(1.04);transform:translateY(-1px)}
-.sidebar-search{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:18px;padding:4px 12px;background:var(--paper-2);width:100%;transition:box-shadow var(--t-fast) var(--ease),background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
+.sidebar-search{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:18px;padding:4px 12px;background:var(--paper-2);flex:1;min-width:0;transition:box-shadow var(--t-fast) var(--ease),background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
 .sidebar-search:focus-within{background:var(--paper);border-color:var(--accent);box-shadow:0 0 0 3px rgba(194,65,12,.2)}
 .sidebar-search input{border:none;outline:none;background:transparent;flex:1;font-family:'Patrick Hand';font-size:15px;color:var(--ink);min-width:40px}
 .sidebar-search input:focus-visible{outline:none;box-shadow:none}
@@ -286,7 +286,8 @@ body.sidebar-open main{margin-left:252px}
 .deck-row::after{display:none}
 .sidebar-card-main{flex:1;min-width:0;border:none;background:transparent;color:inherit;font:inherit;text-align:left;padding:5px 8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-card-main:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:6px}
-.deck-actions{display:flex;align-items:center;gap:3px;flex-shrink:0}
+.deck-actions{display:flex;align-items:center;gap:3px;flex-shrink:0;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease)}
+.sidebar-card:hover .deck-actions,.sidebar-card:focus-within .deck-actions{opacity:1;pointer-events:auto}
 .deck-icon-btn{width:22px;height:22px;border:1.5px solid var(--line);border-radius:5px;background:var(--paper);display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);box-shadow:1px 1px 0 rgba(0,0,0,.08);font-size:12px;line-height:1;padding:0;transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
 .deck-icon-btn:hover,.deck-icon-btn:focus-visible{background:var(--paper-2);transform:translateY(-1px);color:var(--ink);box-shadow:2px 2px 0 rgba(0,0,0,.12)}
 .deck-icon-btn:active{transform:translate(1px,1px);box-shadow:0 0 0 rgba(0,0,0,.08)}
@@ -440,9 +441,11 @@ body.sidebar-open .cards-grid{padding-left:36px}
 .cards-grid .kcard.md{--sz:var(--grid-card-size)}
 .grid-item{display:flex;flex-direction:column;align-items:flex-start;gap:3px;position:relative;min-width:0;width:var(--grid-card-size);transition:opacity var(--t-med) var(--ease),filter var(--t-med) var(--ease)}
 .grid-item::after{content:'';position:absolute;top:0;left:var(--grid-card-size);width:48px;height:var(--grid-card-size);z-index:10;pointer-events:auto}
-.grid-item .gi-name-input{width:100%;border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:left;padding:2px 6px;outline:none}
+.grid-item-head{display:flex;align-items:center;gap:6px;width:100%;padding:0 2px}
+.grid-item .gi-name-input{flex:1;min-width:0;border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:left;padding:2px 6px;outline:none}
 .grid-item .gi-name-input:hover,.grid-item .gi-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
-.grid-item-meta{display:flex;align-items:center;gap:6px;padding:0 4px;width:100%}
+.grid-item-meta{display:flex;align-items:center;gap:6px;flex-shrink:0;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease)}
+.grid-item:hover .grid-item-meta,.grid-item:focus-within .grid-item-meta{opacity:1;pointer-events:auto}
 .grid-item-copies{display:inline-flex;align-items:center;gap:3px;padding:2px 4px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper-2)}
 .grid-item-copies .btn{width:22px;height:22px;padding:0;display:grid;place-items:center;box-shadow:none;border:1.5px solid var(--line);background:var(--paper);font-size:12px;border-radius:5px}
 .grid-item-copies .btn:hover:not(:disabled){background:var(--paper-2)}
@@ -458,8 +461,8 @@ body[data-theme="dark"] .btn-select[aria-pressed="true"]::before{background:#22c
 .grid-overlay{position:absolute;top:0;left:calc(var(--grid-card-size) + 8px);display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;height:var(--grid-card-size);gap:clamp(3px,calc(var(--grid-card-size) * .02),5px);z-index:20;pointer-events:none;--overlay-btn-size:clamp(22px,calc(var(--grid-card-size) * .14),30px)}
 .grid-overlay-top,.grid-overlay-bottom{display:flex;flex-direction:column;gap:inherit;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease)}
 .grid-item:hover .grid-overlay-top,.grid-item:focus-within .grid-overlay-top,.grid-item:hover .grid-overlay-bottom,.grid-item:focus-within .grid-overlay-bottom{opacity:1;pointer-events:auto}
-.grid-overlay-stepper{display:flex;flex-direction:column;gap:inherit;align-items:stretch;padding:4px 2px;border:1.5px dashed var(--line);border-radius:8px;background:var(--paper-2)}
-.grid-overlay-stepper-label{font-family:'Kalam';font-size:8px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-soft);text-align:center;line-height:1;margin-bottom:1px}
+.grid-overlay-stepper{display:flex;flex-direction:column;gap:inherit;align-items:stretch}
+.grid-overlay-stepper-label{display:none}
 .grid-overlay .btn{width:var(--overlay-btn-size);height:var(--overlay-btn-size);padding:0;display:grid;place-items:center;box-shadow:var(--shadow-sm);background:var(--paper);font-size:clamp(11px,calc(var(--overlay-btn-size) * .45),13px)}
 .grid-overlay .stage-action{font-size:clamp(14px,calc(var(--overlay-btn-size) * .65),18px)}
 .grid-overlay .stage-action.loop-stage{background:#d9f0ff;border-color:#4da7d8;color:#114967}
@@ -2499,14 +2502,16 @@ function renderCardGridItem(card, renderKey=cardRenderKey(card)){
   return `
     <div class="grid-item${selected?' selected-card':''}" data-id="${card.id}" data-render-key="${renderKey}">
       ${renderCardHtml(card,'md',true)}
-      <input class="gi-name-input" data-card="${card.id}" data-field="name-grid" value="${escapeHtml(card.name)}" aria-label="Nom de la carte"/>
-      <div class="grid-item-meta">
-        <div class="grid-item-copies" role="group" aria-label="Copies PDF">
-          <button class="btn ghost" data-card="${card.id}" data-action="copies-minus" aria-label="Enlever une copie PDF" title="Enlever une copie PDF"${copies<=1?' disabled':''}>−</button>
-          <b class="grid-copy-count" data-copies-value="${card.id}">${copies}</b>
-          <button class="btn ghost" data-card="${card.id}" data-action="copies-plus" aria-label="Ajouter une copie PDF" title="Ajouter une copie PDF">+</button>
+      <div class="grid-item-head">
+        <input class="gi-name-input" data-card="${card.id}" data-field="name-grid" value="${escapeHtml(card.name)}" aria-label="Nom de la carte"/>
+        <div class="grid-item-meta">
+          <div class="grid-item-copies" role="group" aria-label="Copies PDF">
+            <button class="btn ghost" data-card="${card.id}" data-action="copies-minus" aria-label="Enlever une copie PDF" title="Enlever une copie PDF"${copies<=1?' disabled':''}>−</button>
+            <b class="grid-copy-count" data-copies-value="${card.id}">${copies}</b>
+            <button class="btn ghost" data-card="${card.id}" data-action="copies-plus" aria-label="Ajouter une copie PDF" title="Ajouter une copie PDF">+</button>
+          </div>
+          <button class="btn-select" data-card="${card.id}" data-action="select-toggle" aria-pressed="${selected?'true':'false'}" aria-label="${selected?'Désélectionner':'Sélectionner'} ${escapeHtml(card.name)}" title="${selected?'Désélectionner pour l\'export':'Sélectionner pour l\'export'}"></button>
         </div>
-        <button class="btn-select" data-card="${card.id}" data-action="select-toggle" aria-pressed="${selected?'true':'false'}" aria-label="${selected?'Désélectionner':'Sélectionner'} ${escapeHtml(card.name)}" title="${selected?'Désélectionner pour l\'export':'Sélectionner pour l\'export'}"></button>
       </div>
       <div class="grid-overlay">
         <div class="grid-overlay-top">
