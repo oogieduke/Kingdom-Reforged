@@ -110,6 +110,30 @@ Deno.serve(async (req) => {
 
   if (projectError) return fail(projectError.message, 500);
 
+  const deletedAssets = Array.isArray(body.deletedAssets) ? body.deletedAssets : [];
+  for (const entry of deletedAssets) {
+    if (!entry || (entry.kind !== 'image' && entry.kind !== 'icon') || !entry.id) continue;
+    const assetId = safeSegment(entry.id);
+    const { data: existingRows } = await supabase
+      .from('kr_assets')
+      .select('storage_path')
+      .eq('project_id', projectId)
+      .eq('kind', entry.kind)
+      .eq('asset_id', assetId);
+    const paths = Array.isArray(existingRows)
+      ? existingRows.map((row: { storage_path: string }) => row.storage_path).filter(Boolean)
+      : [];
+    if (paths.length) {
+      await supabase.storage.from(BUCKET).remove(paths);
+    }
+    await supabase
+      .from('kr_assets')
+      .delete()
+      .eq('project_id', projectId)
+      .eq('kind', entry.kind)
+      .eq('asset_id', assetId);
+  }
+
   const assets = Array.isArray(body.assets) ? body.assets : [];
   for (const asset of assets) {
     if (!asset?.dataUrl || !asset?.id || !asset?.kind) continue;

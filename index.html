@@ -696,10 +696,11 @@ body.sidebar-open .cards-grid{padding-left:36px}
   body{zoom:1 !important}
   body > *:not(#print-area){display:none !important}
   #print-area,#print-area *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important}
-  #print-area{display:grid !important;grid-template-columns:repeat(3,1fr);gap:.4cm;padding:0}
-  .print-card{page-break-inside:avoid;break-inside:avoid;display:flex;flex-direction:column;align-items:center;gap:2px}
-  .print-card .kcard{--sz:6cm;box-shadow:none !important;transform:none !important}
-  .print-card .print-label{font-family:'Kalam',sans-serif;font-size:9pt;color:#333;text-align:center;margin-top:2px}
+  #print-area{display:grid !important;grid-template-columns:repeat(3,1fr);gap:0;padding:0}
+  .print-card{page-break-inside:avoid;break-inside:avoid;display:flex;flex-direction:column;align-items:stretch;gap:0;position:relative;border-right:1px dashed #888;border-bottom:1px dashed #888}
+  .print-card:nth-child(3n){border-right:none}
+  .print-card .kcard{--sz:6cm;box-shadow:none !important;transform:none !important;margin:0 auto}
+  .print-card .print-label{display:none !important}
 }
 
 /* ── REDUCED MOTION ── */
@@ -824,6 +825,15 @@ body.sidebar-open .cards-grid{padding-left:36px}
   <div class="row">
     <button class="btn danger" id="selection-confirm-yes" type="button">Oui</button>
     <button class="btn ghost" id="selection-confirm-no" type="button">Non</button>
+  </div>
+</div>
+
+<div class="deck-confirm-popover" id="deck-conflict-popover" aria-live="polite">
+  <h4 id="deck-conflict-title">Conflit cloud</h4>
+  <p id="deck-conflict-text">La version cloud de ce deck a changé.</p>
+  <div class="row">
+    <button class="btn primary" id="deck-conflict-copy" type="button">Enregistrer en copie</button>
+    <button class="btn ghost" id="deck-conflict-cancel" type="button">Annuler</button>
   </div>
 </div>
 
@@ -3175,6 +3185,7 @@ async function deleteImageFromLibrary(id){
     }
   });
   invalidateImageLibraryCache();
+  queuePendingAssetDeletion('image', id);
   save();
   renderCards();
   showStatus('Image supprimée');
@@ -3526,7 +3537,7 @@ function exportToPDF(scope='all'){
     for(let i=0;i<copies;i++){
       const wrap = document.createElement('div');
       wrap.className = 'print-card';
-      wrap.innerHTML = renderCardHtml(card,'print',false) + `<div class="print-label">${escapeHtml(card.name)}</div>`;
+      wrap.innerHTML = renderCardHtml(card,'print',false);
       area.appendChild(wrap);
       total++;
     }
@@ -3656,6 +3667,71 @@ state.cloud.authAnchor = null;
 state.cloud.pendingDeleteDeckId = null;
 state.cloud.deleteAnchor = null;
 state.cloud.pendingDeletedDeckIds = new Set();
+state.cloud.pendingDeletedAssets = [];
+state.cloud.deckSnapshots = new Map();
+state.cloud.sessionDeckSnapshots = null;
+
+function rememberDeckSnapshot(deckId, updatedAt){
+  if(!deckId) return;
+  if(!(state.cloud.deckSnapshots instanceof Map)) state.cloud.deckSnapshots = new Map();
+  state.cloud.deckSnapshots.set(deckId, updatedAt || null);
+}
+
+function getDeckSnapshot(deckId){
+  if(!(state.cloud.deckSnapshots instanceof Map)) return undefined;
+  return state.cloud.deckSnapshots.get(deckId);
+}
+
+function rememberDeckSnapshotsFromPayload(payload){
+  if(!payload || !Array.isArray(payload.decks)) return;
+  payload.decks.forEach(deck=>{
+    if(deck?.id) rememberDeckSnapshot(deck.id, deck.updatedAt || null);
+  });
+}
+
+function captureSessionDeckSnapshots(){
+  if(!(state.cloud.deckSnapshots instanceof Map)) return;
+  state.cloud.sessionDeckSnapshots = new Map(state.cloud.deckSnapshots);
+}
+
+function deckHasRemoteConflict(deckId, remoteDeck){
+  if(!remoteDeck) return false;
+  const seen = getDeckSnapshot(deckId);
+  if(seen === undefined) return false;
+  const remoteAt = remoteDeck.updatedAt || null;
+  return remoteAt && seen && remoteAt !== seen;
+}
+
+function uniqueDeckCopyName(base, decks=[]){
+  const existing = new Set((decks || []).map(deck=>String(deck?.name || '').trim().toLowerCase()));
+  const root = String(base || 'Deck').trim() || 'Deck';
+  let candidate = `${root} (copie)`;
+  let i = 2;
+  while(existing.has(candidate.toLowerCase())){ candidate = `${root} (copie ${i})`; i += 1; }
+  return candidate;
+}
+
+function queuePendingAssetDeletion(kind, id){
+  if(!id || (kind !== 'image' && kind !== 'icon')) return;
+  if(!Array.isArray(state.cloud.pendingDeletedAssets)) state.cloud.pendingDeletedAssets = [];
+  const exists = state.cloud.pendingDeletedAssets.some(item=>item && item.kind === kind && item.id === id);
+  if(!exists) state.cloud.pendingDeletedAssets.push({kind, id});
+}
+
+function consumePendingAssetDeletions(){
+  const list = Array.isArray(state.cloud.pendingDeletedAssets) ? state.cloud.pendingDeletedAssets.slice() : [];
+  return list;
+}
+
+function clearPendingAssetDeletions(consumed){
+  if(!Array.isArray(consumed) || !consumed.length){
+    state.cloud.pendingDeletedAssets = [];
+    return;
+  }
+  const matchKey = item=>`${item.kind}:${item.id}`;
+  const consumedKeys = new Set(consumed.map(matchKey));
+  state.cloud.pendingDeletedAssets = (state.cloud.pendingDeletedAssets || []).filter(item=>!consumedKeys.has(matchKey(item)));
+}
 
 function getDeckModifiedCardIds(deck){
   return new Set(Array.isArray(deck?.modifiedCardIds) ? deck.modifiedCardIds.filter(id=>typeof id === 'string') : []);
@@ -4069,6 +4145,26 @@ function openCloudAuthPopover(anchor, deckId){
   }
 }
 
+function closeDeckConflictPopover(){
+  const pop = document.getElementById('deck-conflict-popover');
+  if(pop) pop.classList.remove('open');
+  state.cloud.pendingConflict = null;
+}
+
+function offerDeckSaveAsCopy(localDeck, remoteDeck, anchor){
+  const pop = document.getElementById('deck-conflict-popover');
+  const text = document.getElementById('deck-conflict-text');
+  if(!pop) return;
+  state.cloud.pendingConflict = {deckId: localDeck?.id || null, anchor: anchor || null};
+  if(text){
+    text.textContent = `La version cloud de « ${remoteDeck?.name || localDeck?.name || 'ce deck'} » a changé depuis ton chargement. Sauvegarder écraserait les modifications du cloud.`;
+  }
+  const point = getDeckSyncAnchor(anchor);
+  pop.style.left = `${point.x}px`;
+  pop.style.top = `${point.y}px`;
+  pop.classList.add('open');
+}
+
 async function authenticateCloudPassword(password){
   state.cloud.password = String(password || '').trim();
   if(!state.cloud.password) throw new Error('Mot de passe manquant');
@@ -4126,6 +4222,7 @@ async function syncCloudAssetsNow({silent=true}={}){
   if(!state.cloud.unlocked || state.cloud.saving || !hasCloudConfig()) return false;
   state.cloud.saving = true;
   setCloudStatus('Synchronisation des assets...', 'warn');
+  const deletedAssets = consumePendingAssetDeletions();
   try{
     const [assets, remoteData, manifest] = await Promise.all([
       collectCloudAssets(),
@@ -4147,10 +4244,12 @@ async function syncCloudAssetsNow({silent=true}={}){
         name: localStorage.getItem('kr-current-deck-name') || 'Kingdom Reforged',
         payload,
         assets,
+        deletedAssets,
       }),
     });
     const data = await res.json().catch(()=>({}));
     if(!res.ok || !data.ok) throw new Error(data.error || 'Synchronisation des assets refusee');
+    clearPendingAssetDeletions(deletedAssets);
     state.cloud.lastSyncAt = data.updatedAt || new Date().toISOString();
     state.cloud.loaded = true;
     setCloudStatus('Assets synchronises.', 'ready');
@@ -4158,6 +4257,7 @@ async function syncCloudAssetsNow({silent=true}={}){
     else showStatus('Assets synchronises');
     return true;
   }catch(e){
+    deletedAssets.forEach(entry=>queuePendingAssetDeletion(entry.kind, entry.id));
     setCloudStatus(e.message || 'Synchronisation des assets impossible', 'error');
     if(!silent) showStatus('Erreur cloud');
     return false;
@@ -4226,6 +4326,7 @@ async function deleteImageFromLibrary(id){
     }
   });
   invalidateImageLibraryCache();
+  queuePendingAssetDeletion('image', id);
   save();
   renderCards();
   if(state.cloud.unlocked) await syncCloudAssetsNow({silent:true});
@@ -4332,6 +4433,7 @@ async function deleteIconFromLibrary(id){
   await deleteLibraryItem('icons', id);
   rememberIconRef(id,{name:icon.name,category:icon.category || 'bonus'});
   await refreshIconCache();
+  queuePendingAssetDeletion('icon', id);
   save();
   renderCards();
   if(state.cloud.unlocked) await syncCloudAssetsNow({silent:true});
@@ -4430,13 +4532,15 @@ function startCloudWatch(){ return; }
 function stopCloudWatch(){ return; }
 async function checkCloudForUpdates(){ return; }
 
-async function cloudSaveDeck(deckId){
+async function cloudSaveDeck(deckId, options={}){
+  const {forceCopy=false, copyAnchor=null} = options;
   if(!state.cloud.unlocked || state.cloud.saving || !deckId) return false;
   if(!hasCloudConfig()) return false;
   const localDeck = await getLibraryItem('decks', deckId);
   if(!localDeck) return false;
   state.cloud.saving = true;
   setCloudStatus('Sauvegarde du deck...', 'warn');
+  const deletedAssets = consumePendingAssetDeletions();
   try{
     const [assets, remoteData] = await Promise.all([
       collectCloudAssets(),
@@ -4444,23 +4548,41 @@ async function cloudSaveDeck(deckId){
     ]);
     const remotePayload = remoteData?.payload || {version:2, cards:[], assets:{images:{},icons:{}}, decks:[]};
     const remoteDecks = Array.isArray(remotePayload.decks) ? remotePayload.decks.slice() : [];
+    const remoteDeck = remoteDecks.find(deck=>deck.id === deckId) || null;
+    if(!forceCopy && remoteDeck && deckHasRemoteConflict(deckId, remoteDeck)){
+      state.cloud.saving = false;
+      updateCloudSaveButton();
+      deletedAssets.forEach(entry=>queuePendingAssetDeletion(entry.kind, entry.id));
+      setCloudStatus('Conflit: la version cloud a change.', 'warn');
+      offerDeckSaveAsCopy(localDeck, remoteDeck, copyAnchor);
+      return false;
+    }
+    const targetDeckId = forceCopy ? libraryId('deck-') : deckId;
+    const targetName = forceCopy ? uniqueDeckCopyName(localDeck.name, remoteDecks) : localDeck.name;
     const compactDeck = {
       ...localDeck,
+      id: targetDeckId,
+      name: targetName,
       cards: cloneCards(localDeck.cards || []).map(compactCardForStorage),
       modifiedCardIds: Array.isArray(localDeck.modifiedCardIds) ? [...localDeck.modifiedCardIds] : [],
       selectedCardIds: Array.isArray(localDeck.selectedCardIds) ? [...localDeck.selectedCardIds] : [],
       cardCount: localDeck.cardCount || (localDeck.cards || []).length,
       updatedAt: Date.now(),
     };
-    const idx = remoteDecks.findIndex(deck=>deck.id === deckId);
-    if(idx >= 0) remoteDecks[idx] = compactDeck;
-    else remoteDecks.push(compactDeck);
+    if(forceCopy){
+      compactDeck.createdAt = Date.now();
+      remoteDecks.push(compactDeck);
+    } else {
+      const idx = remoteDecks.findIndex(deck=>deck.id === deckId);
+      if(idx >= 0) remoteDecks[idx] = compactDeck;
+      else remoteDecks.push(compactDeck);
+    }
     const localManifest = collectAssetRefsFromCards(localDeck.cards || []);
     const payload = {
       ...remotePayload,
       decks: remoteDecks,
       assets: mergeAssetManifests(remotePayload.assets || {}, localManifest),
-      cards: deckId === state.currentDeckId ? exportableCards() : (remotePayload.cards || []),
+      cards: (!forceCopy && deckId === state.currentDeckId) ? exportableCards() : (remotePayload.cards || []),
     };
     const res = await fetch(cloudFunctionUrl(), {
       method:'POST',
@@ -4472,20 +4594,39 @@ async function cloudSaveDeck(deckId){
         name: localStorage.getItem('kr-current-deck-name') || 'Kingdom Reforged',
         payload,
         assets,
+        deletedAssets,
       }),
     });
     const data = await res.json().catch(()=>({}));
     if(!res.ok || !data.ok) throw new Error(data.error || 'Sauvegarde cloud refusee');
+    clearPendingAssetDeletions(deletedAssets);
     state.cloud.lastSyncAt = data.updatedAt || new Date().toISOString();
     state.cloud.loaded = true;
-    state.modifiedDeckIds.delete(deckId);
-    saveModifiedDeckIds();
+    if(forceCopy){
+      const copyLocal = {
+        ...localDeck,
+        id: targetDeckId,
+        name: targetName,
+        cards: cloneCards(localDeck.cards || []),
+        updatedAt: compactDeck.updatedAt,
+        createdAt: compactDeck.createdAt || Date.now(),
+      };
+      await putLibraryItem('decks', copyLocal);
+      await refreshDeckCache();
+      rememberDeckSnapshot(targetDeckId, compactDeck.updatedAt);
+    } else {
+      state.modifiedDeckIds.delete(deckId);
+      saveModifiedDeckIds();
+      rememberDeckSnapshot(deckId, compactDeck.updatedAt);
+    }
+    rememberDeckSnapshotsFromPayload(payload);
     renderCardSidebar();
     updateCloudSaveButton();
-    setCloudStatus('Deck synchronise.', 'ready');
-    showStatus(`Deck synchronise: ${localDeck.name}`);
+    setCloudStatus(forceCopy ? 'Copie cloud creee.' : 'Deck synchronise.', 'ready');
+    showStatus(forceCopy ? `Copie enregistree: ${targetName}` : `Deck synchronise: ${localDeck.name}`);
     return true;
   }catch(e){
+    deletedAssets.forEach(entry=>queuePendingAssetDeletion(entry.kind, entry.id));
     setCloudStatus(e.message || 'Sauvegarde cloud impossible', 'error');
     showStatus('Erreur cloud');
     return false;
@@ -4504,6 +4645,7 @@ async function cloudDeleteDeck(deckId){
     decks: (remotePayload.decks || []).filter(deck=>deck.id !== deckId),
   };
   const assets = await collectCloudAssets();
+  const deletedAssets = consumePendingAssetDeletions();
   const res = await fetch(cloudFunctionUrl(), {
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -4514,12 +4656,18 @@ async function cloudDeleteDeck(deckId){
       name: localStorage.getItem('kr-current-deck-name') || 'Kingdom Reforged',
       payload,
       assets,
+      deletedAssets,
     }),
   });
   const data = await res.json().catch(()=>({}));
-  if(!res.ok || !data.ok) throw new Error(data.error || 'Suppression cloud impossible');
+  if(!res.ok || !data.ok){
+    deletedAssets.forEach(entry=>queuePendingAssetDeletion(entry.kind, entry.id));
+    throw new Error(data.error || 'Suppression cloud impossible');
+  }
+  clearPendingAssetDeletions(deletedAssets);
   state.cloud.lastSyncAt = data.updatedAt || new Date().toISOString();
   state.cloud.pendingDeletedDeckIds.delete(deckId);
+  state.cloud.deckSnapshots?.delete?.(deckId);
   return true;
 }
 
@@ -4530,6 +4678,7 @@ async function cloudSaveNow({silent=false}={}){
   await refreshDeckCache();
   state.cloud.saving = true;
   setCloudStatus('Sauvegarde cloud...', 'warn');
+  const deletedAssets = consumePendingAssetDeletions();
   try{
     const [assets, payload] = await Promise.all([collectCloudAssets(), cloudProjectPayload()]);
     const res = await fetch(cloudFunctionUrl(), {
@@ -4542,18 +4691,22 @@ async function cloudSaveNow({silent=false}={}){
         name: localStorage.getItem('kr-current-deck-name') || 'Kingdom Reforged',
         payload,
         assets,
+        deletedAssets,
       }),
     });
     const data = await res.json().catch(()=>({}));
     if(!res.ok || !data.ok) throw new Error(data.error || 'Sauvegarde cloud refusee');
+    clearPendingAssetDeletions(deletedAssets);
     state.cloud.lastSyncAt = data.updatedAt || new Date().toISOString();
     state.cloud.loaded = true;
     clearModifiedDecks();
+    rememberDeckSnapshotsFromPayload(payload);
     setCloudStatus(`Cloud synchronise (${assets.length} assets).`, 'ready');
     if(silent) showAutosaveStatus('cloud', 1600);
     else showStatus('Cloud synchronise');
     return true;
   }catch(e){
+    deletedAssets.forEach(entry=>queuePendingAssetDeletion(entry.kind, entry.id));
     setCloudStatus(e.message || 'Sauvegarde cloud impossible', 'error');
     if(!silent) showStatus('Erreur cloud');
     return false;
@@ -4564,13 +4717,57 @@ async function cloudSaveNow({silent=false}={}){
   }
 }
 
+async function preserveConflictingLocalCopies(remoteDecks){
+  if(!Array.isArray(remoteDecks) || !remoteDecks.length) return [];
+  const sessionSnapshots = state.cloud.sessionDeckSnapshots instanceof Map ? state.cloud.sessionDeckSnapshots : null;
+  const preserved = [];
+  const localDecks = await getAllLibraryItems('decks').catch(()=>[]);
+  const localById = new Map(localDecks.map(deck=>[deck.id, deck]));
+  const nameSet = new Set(localDecks.map(deck=>String(deck?.name || '').trim().toLowerCase()));
+  remoteDecks.forEach(deck=>nameSet.add(String(deck?.name || '').trim().toLowerCase()));
+  for(const remoteDeck of remoteDecks){
+    if(!remoteDeck?.id) continue;
+    const localDeck = localById.get(remoteDeck.id);
+    if(!localDeck) continue;
+    const isModified = state.modifiedDeckIds.has(remoteDeck.id);
+    const seenAt = sessionSnapshots ? sessionSnapshots.get(remoteDeck.id) : undefined;
+    const remoteChanged = seenAt !== undefined && remoteDeck.updatedAt && remoteDeck.updatedAt !== seenAt;
+    if(!isModified || !remoteChanged) continue;
+    const copyName = uniqueDeckCopyName(`${localDeck.name || 'Deck'} (local)`, [...localDecks, ...remoteDecks]);
+    const copyId = libraryId('deck-');
+    nameSet.add(copyName.toLowerCase());
+    const copyDeck = {
+      ...localDeck,
+      id: copyId,
+      name: copyName,
+      cards: cloneCards(localDeck.cards || []),
+      updatedAt: Date.now(),
+      createdAt: Date.now(),
+    };
+    await putLibraryItem('decks', copyDeck);
+    state.modifiedDeckIds.add(copyId);
+    state.modifiedDeckIds.delete(remoteDeck.id);
+    preserved.push({original: remoteDeck.id, copy: copyId, name: copyName});
+  }
+  if(preserved.length) saveModifiedDeckIds();
+  return preserved;
+}
+
 async function applyCloudProject(data, options={}){
   const {remote=false} = options;
   if(!data?.payload) return false;
   rememberImportedAssetManifest(data.payload.assets);
   await loadCloudAssets(data.assets || []);
+  const preservedCopies = await preserveConflictingLocalCopies(data.payload.decks || []);
   await restoreCloudDecks(data.payload.decks);
   await refreshDeckCache();
+  rememberDeckSnapshotsFromPayload(data.payload);
+  if(!state.cloud.sessionDeckSnapshots) captureSessionDeckSnapshots();
+  if(preservedCopies.length){
+    const names = preservedCopies.map(p=>p.name).join(', ');
+    showStatus(`Copie locale conservée: ${names}`);
+    setCloudStatus(`Conflit: copies locales créées (${preservedCopies.length}).`, 'warn');
+  }
   const savedDeckId = localStorage.getItem(CURRENT_DECK_STORAGE) || state.currentDeckId;
   const activeDeck = state.decks.find(deck=>deck.id === savedDeckId) || state.decks[0] || null;
   if(activeDeck){
@@ -5157,6 +5354,18 @@ document.addEventListener('mousedown', e=>{
   if(pop.contains(e.target)) return;
   if(e.target.closest('[data-deck-delete]')) return;
   closeDeckConfirmPopover();
+});
+document.getElementById('deck-conflict-copy')?.addEventListener('click', async ()=>{
+  const info = state.cloud.pendingConflict;
+  closeDeckConflictPopover();
+  if(info?.deckId) await cloudSaveDeck(info.deckId, {forceCopy:true, copyAnchor:info.anchor});
+});
+document.getElementById('deck-conflict-cancel')?.addEventListener('click', closeDeckConflictPopover);
+document.addEventListener('mousedown', e=>{
+  const pop = document.getElementById('deck-conflict-popover');
+  if(!pop?.classList.contains('open')) return;
+  if(pop.contains(e.target)) return;
+  closeDeckConflictPopover();
 });
 document.addEventListener('keydown', e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
