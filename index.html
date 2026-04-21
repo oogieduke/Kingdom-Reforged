@@ -2594,30 +2594,26 @@ function openCellEditor(cardId, field, stage, clickEvent){
   }
   const deleteStepBtn = document.getElementById('cell-modal-delete-step');
   if(deleteStepBtn){
-    const isBuildingCost = field === 'cost' && card.type !== 'action' && card.type !== 'exploration';
-    const canDeleteStep = isBuildingCost
+    const isBuilding = card.type !== 'action' && card.type !== 'exploration';
+    // Delete a non-loop stage → button sits in the BONUS editor of that stage
+    const canDeleteStep = isBuilding
+      && field === 'bonus'
       && typeof stage === 'number' && stage > 0
       && card.steps.length > 1;
-    const canRemoveLoop = isBuildingCost
+    // Remove the IV → I loop transition → button sits in the COST editor of stage 0
+    const canRemoveLoop = isBuilding
+      && field === 'cost'
       && stage === 0
       && card.steps.length === 4
       && !!card.loopCost;
     if(canDeleteStep){
       deleteStepBtn.style.display = 'inline-flex';
-      deleteStepBtn.textContent = "Supprimer l'étape";
-      deleteStepBtn.onclick = ()=>openSelectionConfirm(deleteStepBtn, {
-        title: "Supprimer l'étape",
-        message: `Tu veux vraiment supprimer l'étape ${STAGE_NUMS[stage]} ?`,
-        onConfirm: ()=>deleteCurrentEditorStep(card, stage),
-      });
+      deleteStepBtn.textContent = 'Supprimer';
+      deleteStepBtn.onclick = ()=>deleteCurrentEditorStep(card, stage);
     } else if(canRemoveLoop){
       deleteStepBtn.style.display = 'inline-flex';
-      deleteStepBtn.textContent = "Retirer la transition IV → I";
-      deleteStepBtn.onclick = ()=>openSelectionConfirm(deleteStepBtn, {
-        title: "Retirer la transition",
-        message: "Retirer la transition IV → I ?",
-        onConfirm: ()=>removeLoopFromCurrentEditor(card),
-      });
+      deleteStepBtn.textContent = 'Supprimer';
+      deleteStepBtn.onclick = ()=>removeLoopFromCurrentEditor(card);
     } else {
       deleteStepBtn.style.display = 'none';
       deleteStepBtn.onclick = null;
