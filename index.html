@@ -3775,14 +3775,22 @@ async function switchSidebarDeck(id){
   showStatus(`Deck charge: ${deck.name}`);
 }
 
+function clearSidebarHighlights(){
+  // Sidebar re-render destroys the hovered button before mouseout fires,
+  // so the grid's .highlight / .flash can get stuck. Clear them manually.
+  document.querySelectorAll('#cards-container .grid-item.highlight').forEach(el=>el.classList.remove('highlight'));
+  document.querySelectorAll('#cards-container .grid-item.flash').forEach(el=>el.classList.remove('flash'));
+}
 function beginRenameDeck(id){
   if(!id) return;
   state.renameTarget = {kind:'deck', id};
+  clearSidebarHighlights();
   renderCardSidebar();
 }
 function beginRenameCard(id){
   if(!id) return;
   state.renameTarget = {kind:'card', id};
+  clearSidebarHighlights();
   renderCardSidebar();
 }
 function cancelRename(){
@@ -4937,6 +4945,14 @@ function bindEvents(){
       saveDebounced();
       const gridK = document.querySelector(`.grid-item[data-id="${cardId}"] .kcenter`);
       if(gridK && !isEmbeddedImage(card.image)) gridK.textContent = card.name;
+    }
+  });
+  // Select-all on focus for grid name input so users can retype quickly
+  container.addEventListener('focusin', e=>{
+    const t = e.target;
+    if(t.matches && t.matches('.gi-name-input[data-field="name-grid"]')){
+      // requestAnimationFrame avoids the click that caused focus clobbering the selection
+      requestAnimationFrame(()=>{ try{ t.select(); }catch{} });
     }
   });
   container.addEventListener('change', e=>{
