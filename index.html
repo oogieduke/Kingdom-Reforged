@@ -291,6 +291,8 @@ body.sidebar-open main{margin-left:252px}
 .deck-row::after{display:none}
 .sidebar-card-main{flex:1;min-width:0;border:none;background:transparent;color:inherit;font:inherit;text-align:left;padding:5px 8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-card-main:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:6px}
+.sidebar-rename-input{display:block;width:100%;min-width:0;border:1.5px dashed var(--accent);border-radius:6px;background:var(--paper);color:var(--ink);font-family:'Kalam';font-weight:700;font-size:14px;padding:4px 7px;outline:none}
+.sidebar-rename-input:focus{background:var(--focus-bg);border-style:solid}
 .deck-actions{display:flex;align-items:center;gap:3px;flex-shrink:0;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease)}
 .sidebar-card:hover .deck-actions,.sidebar-card:focus-within .deck-actions{opacity:1;pointer-events:auto}
 .deck-icon-btn{width:22px;height:22px;border:1.5px solid var(--line);border-radius:5px;background:var(--paper);display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);box-shadow:1px 1px 0 rgba(0,0,0,.08);font-size:12px;line-height:1;padding:0;transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
@@ -456,8 +458,18 @@ body.sidebar-open .cards-grid{padding-left:36px}
 .grid-item-copies .btn{width:22px;height:22px;padding:0;display:grid;place-items:center;box-shadow:none;border:1.5px solid var(--line);background:var(--paper);font-size:12px;border-radius:5px;cursor:pointer}
 .grid-item-copies .btn:hover:not(:disabled){background:var(--paper-2)}
 .grid-item-copies .grid-copy-count{width:auto;min-width:18px;padding:0 2px;min-height:0;border:none;background:transparent;box-shadow:none;font-family:'Kalam';font-weight:700;font-size:13px;color:var(--ink)}
-.ribbon.add-stage-ribbon{font-weight:700;opacity:.85}
-.ribbon.add-stage-ribbon.add-loop-ribbon{background:#d9f0ff;color:#114967}
+.add-stage-btn{position:absolute;z-index:3;display:grid;place-items:center;width:calc(var(--sz,220px) * .118);height:calc(var(--sz,220px) * .118);padding:0;border:1.5px dashed var(--line);border-radius:50%;background:var(--paper-2);color:var(--ink-soft);font-family:'Kalam';font-weight:700;font-size:calc(var(--sz,220px) * .07);line-height:1;cursor:pointer;box-shadow:1px 1px 0 rgba(0,0,0,.08);transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
+.add-stage-btn:hover{background:var(--focus-bg);color:var(--ink);border-color:var(--accent)}
+.add-stage-btn.top{top:calc(var(--sz,220px) * .023);left:50%;transform:translateX(-50%)}
+.add-stage-btn.right{right:calc(var(--sz,220px) * .023);top:50%;transform:translateY(-50%)}
+.add-stage-btn.bottom{bottom:calc(var(--sz,220px) * .023);left:50%;transform:translateX(-50%)}
+.add-stage-btn.left{left:calc(var(--sz,220px) * .023);top:50%;transform:translateY(-50%)}
+.add-stage-btn.tl{top:calc(var(--sz,220px) * .023);left:calc(var(--sz,220px) * .023)}
+.add-stage-btn.loop{background:#d9f0ff;border-color:#4da7d8;color:#114967;border-style:dashed}
+.add-stage-btn.loop:hover{background:#cceeff;color:#0b3952;border-color:#2b86b8}
+:root[data-theme="dark"] .add-stage-btn{background:#3a3225;border-color:#6b5233;color:#e6dcc6}
+:root[data-theme="dark"] .add-stage-btn:hover{background:#4b3f2b;border-color:#c8a04a;color:#fff}
+:root[data-theme="dark"] .add-stage-btn.loop{background:rgba(198,235,255,.35);border-color:#4da7d8;color:#114967}
 .grid-item.compact-actions .grid-overlay-top{display:none}
 
 /* ── MODALS ── */
@@ -729,6 +741,7 @@ body.sidebar-open .cards-grid{padding-left:36px}
       <div class="btn-group-selection" role="group" aria-label="Sélection" id="selection-group" hidden>
         <span class="selection-count" id="selection-count">0 sélectionnée</span>
         <button class="btn ghost" id="btn-selection-clear" type="button" aria-label="Désélectionner les cartes" title="Désélectionner">✕</button>
+        <button class="btn ghost" id="btn-selection-duplicate" type="button" aria-label="Dupliquer les cartes sélectionnées" title="Dupliquer la sélection">⎘</button>
         <button class="btn ghost" id="btn-selection-delete" type="button" aria-label="Supprimer les cartes sélectionnées" title="Supprimer la sélection" style="color:var(--danger)">🗑</button>
       </div>
       <button class="btn pdf" id="btn-pdf" aria-label="Exporter PDF (A4)">🖨 PDF</button>
@@ -805,6 +818,15 @@ body.sidebar-open .cards-grid{padding-left:36px}
   </div>
 </div>
 
+<div class="deck-confirm-popover" id="selection-confirm-popover" aria-live="polite">
+  <h4 id="selection-confirm-title">Confirmer</h4>
+  <p id="selection-confirm-text">Confirmer l'action ?</p>
+  <div class="row">
+    <button class="btn danger" id="selection-confirm-yes" type="button">Oui</button>
+    <button class="btn ghost" id="selection-confirm-no" type="button">Non</button>
+  </div>
+</div>
+
 <!-- Import/Export modal -->
 <div class="modal-overlay" id="io-modal" role="dialog" aria-modal="true" aria-labelledby="io-modal-title">
   <div class="modal">
@@ -839,8 +861,7 @@ body.sidebar-open .cards-grid{padding-left:36px}
     <div class="pdf-menu-actions">
       <button class="btn pdf" id="pdf-export-all" type="button">Tout exporter</button>
       <button class="btn ghost" id="pdf-export-selected" type="button">Exporter la sélection <span id="pdf-selected-count"></span></button>
-      <button class="btn ghost" id="pdf-clear-selected" type="button">Reset</button>
-      <div class="hint">Coche les cartes à exporter directement dans la grille.</div>
+      <div class="hint">Sélectionne les cartes à exporter directement dans la grille.</div>
     </div>
   </div>
 </div>
@@ -1053,6 +1074,8 @@ const state = {
   currentDeckId: null,
   deckSectionOpen: true,
   sessionCardHashes: {},
+  pendingSelectionConfirm: null,
+  renameTarget: null,
   history: {past:[], future:[], last:'', ready:false, restoring:false},
   cloud: {
     config: {...DEFAULT_CLOUD_CONFIG},
@@ -2219,9 +2242,14 @@ function renderCardHtml(card, sizeClass='', interactive=false){
   const bg = typeColor(card.type);
   const rot = isAction ? 0 : -stage * 90;
 
-  let corners='', ribbons='', bonuses='';
+  let corners='', ribbons='', bonuses='', addBtns='';
   for(let i=0;i<4;i++){
-    if(i>=n) continue;
+    if(i>=n){
+      if(interactive && !isAction && i === n){
+        addBtns += `<button type="button" class="add-stage-btn ${STAGE_POSITIONS[i]}" data-card="${card.id}" data-action="stage-add" aria-label="Ajouter l'étape ${STAGE_NUMS[i]}" title="Ajouter l'étape ${STAGE_NUMS[i]}">＋</button>`;
+      }
+      continue;
+    }
     const step = card.steps[i];
     const shieldCls = (!isAction && step.shield) ? ' shielded' : '';
     const editCls = interactive ? ' editable' : '';
@@ -2233,8 +2261,6 @@ function renderCardHtml(card, sizeClass='', interactive=false){
     if(!isAction){
       const isNormalTransition = i < n - 1;
       const isLoopTransition = i === 3 && n === 4 && !!card.loopCost;
-      const isAddStageSlot = interactive && i === n - 1 && n < 4;
-      const isAddLoopSlot = interactive && i === 3 && n === 4 && !card.loopCost;
       if(isNormalTransition || isLoopTransition){
         const nextIdx = isLoopTransition ? 0 : i + 1;
         const nextStep = card.steps[nextIdx];
@@ -2244,10 +2270,6 @@ function renderCardHtml(card, sizeClass='', interactive=false){
         } else if(interactive && nextStep){
           ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]}${loopCls} editable empty-ribbon" data-stage="${nextIdx}" data-field="cost" role="button" tabindex="0" aria-label="Coût étape ${STAGE_NUMS[nextIdx]}">＋</div>`;
         }
-      } else if(isAddStageSlot){
-        ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]} editable empty-ribbon add-stage-ribbon" data-card="${card.id}" data-action="stage-add" role="button" tabindex="0" aria-label="Ajouter l'étape ${STAGE_NUMS[n]}" title="Ajouter l'étape ${STAGE_NUMS[n]}">＋</div>`;
-      } else if(isAddLoopSlot){
-        ribbons += `<div class="ribbon ${RIBBON_POSITIONS[i]} loop-ribbon editable empty-ribbon add-stage-ribbon add-loop-ribbon" data-card="${card.id}" data-action="stage-add" role="button" tabindex="0" aria-label="Ajouter la transition IV → I" title="Ajouter la transition IV → I">＋</div>`;
       }
     }
     const bHtml = renderBonusHtml(step.bonus);
@@ -2255,6 +2277,9 @@ function renderCardHtml(card, sizeClass='', interactive=false){
       bonuses += `<div class="bonus ${STAGE_POSITIONS[i]}${editCls}" data-stage="${i}" data-field="bonus"${interactive?' role="button" tabindex="0"':''} aria-label="Bonus étape ${STAGE_NUMS[i]}">${bHtml}</div>`;
     else if(interactive)
       bonuses += `<div class="bonus ${STAGE_POSITIONS[i]} editable" data-stage="${i}" data-field="bonus" role="button" tabindex="0" aria-label="Bonus étape ${STAGE_NUMS[i]}" style="opacity:.45">＋</div>`;
+  }
+  if(interactive && !isAction && n === 4 && !card.loopCost){
+    addBtns += `<button type="button" class="add-stage-btn tl loop" data-card="${card.id}" data-action="stage-add" aria-label="Ajouter la transition IV → I" title="Ajouter la transition IV → I">＋</button>`;
   }
   const centerAttrs = interactive
     ? `data-action="image-library" data-card="${card.id}" role="button" tabindex="0" aria-label="Choisir une image pour ${escapeHtml(card.name)}"`
@@ -2268,7 +2293,7 @@ function renderCardHtml(card, sizeClass='', interactive=false){
       : `<div class="kcenter${interactive?' editable':''}" ${centerAttrs}>${escapeHtml(card.name)}</div>`;
 
   return `<div class="kcard ${sizeClass} ${bg}" data-id="${card.id}" style="transform:rotate(${rot}deg)">
-    ${corners}${ribbons}${bonuses}${center}
+    ${corners}${ribbons}${bonuses}${addBtns}${center}
   </div>`;
 }
 
@@ -2569,14 +2594,34 @@ function openCellEditor(cardId, field, stage, clickEvent){
   }
   const deleteStepBtn = document.getElementById('cell-modal-delete-step');
   if(deleteStepBtn){
-    const canDeleteStep = field === 'cost'
+    const isBuildingCost = field === 'cost' && card.type !== 'action' && card.type !== 'exploration';
+    const canDeleteStep = isBuildingCost
       && typeof stage === 'number' && stage > 0
-      && card.steps.length > 1
-      && card.type !== 'action' && card.type !== 'exploration';
-    deleteStepBtn.style.display = canDeleteStep ? 'inline-flex' : 'none';
-    deleteStepBtn.onclick = canDeleteStep ? ()=>{
-      if(confirm(`Supprimer l'étape ${STAGE_NUMS[stage]} ?`)) deleteCurrentEditorStep(card, stage);
-    } : null;
+      && card.steps.length > 1;
+    const canRemoveLoop = isBuildingCost
+      && stage === 0
+      && card.steps.length === 4
+      && !!card.loopCost;
+    if(canDeleteStep){
+      deleteStepBtn.style.display = 'inline-flex';
+      deleteStepBtn.textContent = "Supprimer l'étape";
+      deleteStepBtn.onclick = ()=>openSelectionConfirm(deleteStepBtn, {
+        title: "Supprimer l'étape",
+        message: `Tu veux vraiment supprimer l'étape ${STAGE_NUMS[stage]} ?`,
+        onConfirm: ()=>deleteCurrentEditorStep(card, stage),
+      });
+    } else if(canRemoveLoop){
+      deleteStepBtn.style.display = 'inline-flex';
+      deleteStepBtn.textContent = "Retirer la transition IV → I";
+      deleteStepBtn.onclick = ()=>openSelectionConfirm(deleteStepBtn, {
+        title: "Retirer la transition",
+        message: "Retirer la transition IV → I ?",
+        onConfirm: ()=>removeLoopFromCurrentEditor(card),
+      });
+    } else {
+      deleteStepBtn.style.display = 'none';
+      deleteStepBtn.onclick = null;
+    }
   }
   modal.classList.add('open');
   placeAnchoredModal(modal, clickEvent);
@@ -2618,6 +2663,13 @@ function deleteCurrentEditorStep(card, stage){
     save(); renderCards();
     showStatus('Étape supprimée');
   }
+}
+function removeLoopFromCurrentEditor(card){
+  if(!card || !card.loopCost) return;
+  card.loopCost = false;
+  closeCellModal();
+  save(); renderCards();
+  showStatus('Transition retirée');
 }
 function clearCurrentEditor(card, field, stage){
   if(!card) return;
@@ -3368,10 +3420,8 @@ function updatePdfSelectionControls(){
   const selectedCount = state.cards.filter(card=>state.selectedCardIds.has(card.id)).length;
   const count = document.getElementById('pdf-selected-count');
   const selectedBtn = document.getElementById('pdf-export-selected');
-  const clearBtn = document.getElementById('pdf-clear-selected');
   if(count) count.textContent = selectedCount ? `(${selectedCount})` : '';
   if(selectedBtn) selectedBtn.disabled = selectedCount === 0;
-  if(clearBtn) clearBtn.disabled = selectedCount === 0;
   return selectedCount;
 }
 function openPdfMenu(clickEvent=null){
@@ -3390,11 +3440,19 @@ function clearSelectedCards(){
   updateSelectionGroup();
   showStatus('Selection reinitialisee');
 }
-function deleteSelectedCards(){
+function deleteSelectedCards(anchor){
   const ids = Array.from(state.selectedCardIds);
   if(!ids.length) return;
   const count = ids.length;
-  if(!confirm(`Supprimer ${count} carte${count>1?'s':''} sélectionnée${count>1?'s':''} ?`)) return;
+  openSelectionConfirm(anchor || document.getElementById('btn-selection-delete'), {
+    title: count > 1 ? 'Supprimer les cartes' : 'Supprimer la carte',
+    message: `Tu veux vraiment supprimer ${count} carte${count>1?'s':''} sélectionnée${count>1?'s':''} ?`,
+    onConfirm: ()=>performDeleteSelectedCards(ids),
+  });
+}
+function performDeleteSelectedCards(ids){
+  if(!ids || !ids.length) return;
+  const count = ids.length;
   const idSet = new Set(ids);
   state.cards = state.cards.filter(c=>!idSet.has(c.id));
   ids.forEach(id=>{ delete state.stageByCard[id]; });
@@ -3404,6 +3462,50 @@ function deleteSelectedCards(){
   renderCards();
   updateSelectionGroup();
   showStatus(`${count} carte${count>1?'s':''} supprimée${count>1?'s':''}`);
+}
+function duplicateSelectedCards(){
+  const ids = Array.from(state.selectedCardIds);
+  if(!ids.length) return;
+  const newSelection = new Set();
+  // duplicate in original array order, inserting copies right after each source
+  const order = state.cards.map(c=>c.id);
+  const idsInOrder = order.filter(id=>ids.includes(id));
+  // iterate in reverse so splice indices stay valid
+  for(let i = idsInOrder.length - 1; i >= 0; i--){
+    const srcId = idsInOrder[i];
+    const idx = state.cards.findIndex(c=>c.id===srcId);
+    if(idx < 0) continue;
+    const src = state.cards[idx];
+    const copy = JSON.parse(JSON.stringify(src));
+    copy.id = newId();
+    copy.name = src.name + ' copy';
+    state.cards.splice(idx+1, 0, copy);
+    newSelection.add(copy.id);
+  }
+  state.selectedCardIds = newSelection;
+  saveSelectedCardIds();
+  save();
+  renderCards();
+  updateSelectionGroup();
+  showStatus(`${newSelection.size} carte${newSelection.size>1?'s':''} dupliquée${newSelection.size>1?'s':''}`);
+}
+function closeSelectionConfirm(){
+  const pop = document.getElementById('selection-confirm-popover');
+  if(pop) pop.classList.remove('open');
+  state.pendingSelectionConfirm = null;
+}
+function openSelectionConfirm(anchor, {title='Confirmer', message='', onConfirm}={}){
+  const pop = document.getElementById('selection-confirm-popover');
+  const titleEl = document.getElementById('selection-confirm-title');
+  const text = document.getElementById('selection-confirm-text');
+  if(!pop) return;
+  state.pendingSelectionConfirm = typeof onConfirm === 'function' ? onConfirm : null;
+  if(titleEl) titleEl.textContent = title;
+  if(text) text.textContent = message;
+  const point = getDeckSyncAnchor(anchor);
+  pop.style.left = `${point.x}px`;
+  pop.style.top = `${point.y}px`;
+  pop.classList.add('open');
 }
 function updateSelectionGroup(){
   const group = document.getElementById('selection-group');
@@ -3607,7 +3709,11 @@ function renderCardSidebar(){
           <button class="deck-icon-btn delete" type="button" data-deck-delete="${deck.id}" aria-label="Supprimer ${escapeHtml(deck.name)}" title="Supprimer ${escapeHtml(deck.name)}">&times;</button>
         ` : '';
         const actions = `<div class="deck-actions"><button class="deck-icon-btn" type="button" data-deck-duplicate="${deck.id}" aria-label="Dupliquer ${escapeHtml(deck.name)}" title="Dupliquer ${escapeHtml(deck.name)}">&#x29C9;</button>${authActions}</div>`;
-        return `<div class="${classes.join(' ')}" title="${escapeHtml(deck.name)}"><button class="sidebar-card-main" type="button" data-sidebar-deck="${deck.id}">${escapeHtml(deck.name)}</button>${actions}</div>`;
+        const isRenaming = state.renameTarget?.kind === 'deck' && state.renameTarget.id === deck.id;
+        const main = isRenaming
+          ? `<input class="sidebar-card-main sidebar-rename-input" type="text" data-rename-deck="${deck.id}" value="${escapeHtml(deck.name)}" aria-label="Renommer le deck"/>`
+          : `<button class="sidebar-card-main" type="button" data-sidebar-deck="${deck.id}">${escapeHtml(deck.name)}</button>`;
+        return `<div class="${classes.join(' ')}" title="${escapeHtml(deck.name)}">${main}${actions}</div>`;
       }).join('') : '<div class="library-empty">Aucun deck.</div>'}
     </div>
   </section>`;
@@ -3638,12 +3744,18 @@ function renderCardSidebar(){
             else classes.push('dim-search');
           }
           if(state.selectedCardIds.has(card.id)) classes.push('selected-card');
+          const isRenaming = state.renameTarget?.kind === 'card' && state.renameTarget.id === card.id;
+          if(isRenaming){
+            return `<input class="${classes.join(' ')} sidebar-rename-input" type="text" data-rename-card="${card.id}" value="${escapeHtml(card.name)}" aria-label="Renommer la carte"/>`;
+          }
           return `<button class="${classes.join(' ')}" data-sidebar-card="${card.id}" title="${escapeHtml(card.name)}">${escapeHtml(card.name)}</button>`;
         }).join('')}
       </div>
     </section>`;
   }).join('');
   list.innerHTML = deckSection + cardSections;
+  const renameInput = list.querySelector('.sidebar-rename-input');
+  if(renameInput){ renameInput.focus(); renameInput.select?.(); }
 }
 
 async function switchSidebarDeck(id){
@@ -3665,6 +3777,52 @@ async function switchSidebarDeck(id){
   markHistoryReady(true);
   renderCards();
   showStatus(`Deck charge: ${deck.name}`);
+}
+
+function beginRenameDeck(id){
+  if(!id) return;
+  state.renameTarget = {kind:'deck', id};
+  renderCardSidebar();
+}
+function beginRenameCard(id){
+  if(!id) return;
+  state.renameTarget = {kind:'card', id};
+  renderCardSidebar();
+}
+function cancelRename(){
+  if(!state.renameTarget) return;
+  state.renameTarget = null;
+  renderCardSidebar();
+}
+async function commitRenameDeck(id, newName){
+  // Guard against duplicate commits when the input is removed by re-render
+  if(!state.renameTarget || state.renameTarget.kind !== 'deck' || state.renameTarget.id !== id) return;
+  state.renameTarget = null;
+  const trimmed = String(newName || '').trim();
+  const deck = state.decks.find(item=>item.id === id);
+  if(!deck){ renderCardSidebar(); return; }
+  if(!trimmed || trimmed === deck.name){ renderCardSidebar(); return; }
+  deck.name = trimmed;
+  deck.updatedAt = Date.now();
+  try{ await putLibraryItem('decks', deck); }catch(err){ console.warn(err); }
+  state.modifiedDeckIds.add(deck.id);
+  saveModifiedDeckIds?.();
+  if(id === state.currentDeckId) localStorage.setItem('kr-current-deck-name', deck.name);
+  await refreshDeckCache?.();
+  renderCardSidebar();
+  updateCloudSaveButton?.();
+  showStatus(`Deck renommé: ${deck.name}`);
+}
+function commitRenameCard(id, newName){
+  if(!state.renameTarget || state.renameTarget.kind !== 'card' || state.renameTarget.id !== id) return;
+  state.renameTarget = null;
+  const card = getCard(id);
+  const trimmed = String(newName || '').trim();
+  if(!card || !trimmed || trimmed === card.name){ renderCardSidebar(); return; }
+  card.name = trimmed;
+  save();
+  renderCards();
+  showStatus(`Carte renommée: ${card.name}`);
 }
 
 async function createSidebarDeck(){
@@ -4484,12 +4642,25 @@ function bindEvents(){
   document.getElementById('btn-sidebar').addEventListener('click', ()=>setSidebarOpen(!state.sidebarOpen));
   const sidebarList = document.getElementById('sidebar-list');
   sidebarList.addEventListener('click', e=>{
+    if(e.target.closest('.sidebar-rename-input')) return;
     const add = e.target.closest('[data-add-type]');
     if(add){ addNewCard(add.dataset.addType); return; }
     const toggle = e.target.closest('[data-toggle-type]');
     if(toggle){ toggleHiddenType(toggle.dataset.toggleType); return; }
     const item = e.target.closest('[data-sidebar-card]');
-    if(item) focusCardFromSidebar(item.dataset.sidebarCard);
+    if(item){
+      const cardId = item.dataset.sidebarCard;
+      // Second click on the already-active sidebar card → rename
+      if(state.lastSidebarCardId === cardId){
+        beginRenameCard(cardId);
+        state.lastSidebarCardId = null;
+      } else {
+        focusCardFromSidebar(cardId);
+        state.lastSidebarCardId = cardId;
+        clearTimeout(state.lastSidebarCardTimer);
+        state.lastSidebarCardTimer = setTimeout(()=>{ state.lastSidebarCardId = null; }, 4000);
+      }
+    }
   });
   sidebarList.addEventListener('mouseover', e=>{
     const item = e.target.closest('[data-sidebar-card]');
@@ -4523,13 +4694,13 @@ function bindEvents(){
   document.getElementById('btn-export-in-deck').addEventListener('click', ()=>{ closeDeckLibrary(); openExport(); });
   document.getElementById('btn-pdf').addEventListener('click', openPdfMenu);
   document.getElementById('btn-selection-clear').addEventListener('click', clearSelectedCards);
-  document.getElementById('btn-selection-delete').addEventListener('click', deleteSelectedCards);
+  document.getElementById('btn-selection-duplicate').addEventListener('click', duplicateSelectedCards);
+  document.getElementById('btn-selection-delete').addEventListener('click', e=>deleteSelectedCards(e.currentTarget));
   document.getElementById('grid-columns').addEventListener('input', e=>setGridColumns(e.target.value));
   document.getElementById('pdf-close').addEventListener('click', closePdfMenu);
   document.getElementById('pdf-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closePdfMenu(); });
   document.getElementById('pdf-export-all').addEventListener('click', ()=>exportToPDF('all'));
   document.getElementById('pdf-export-selected').addEventListener('click', ()=>exportToPDF('selected'));
-  document.getElementById('pdf-clear-selected').addEventListener('click', clearSelectedCards);
   document.getElementById('io-close').addEventListener('click', ()=>document.getElementById('io-modal').classList.remove('open'));
   document.getElementById('io-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
   document.getElementById('deck-close').addEventListener('click', closeDeckLibrary);
@@ -4854,6 +5025,7 @@ hydrateImportedImages(state.cards).then(()=>{
 
 document.getElementById('btn-save-cloud')?.addEventListener('click', ()=>cloudSaveNow());
 document.getElementById('sidebar-list')?.addEventListener('click', e=>{
+  if(e.target.closest('.sidebar-rename-input')) return;
   const syncDeck = e.target.closest('[data-deck-sync]');
   if(syncDeck){
     e.preventDefault();
@@ -4881,7 +5053,34 @@ document.getElementById('sidebar-list')?.addEventListener('click', e=>{
   const toggleDecks = e.target.closest('[data-toggle-decks]');
   if(toggleDecks){ toggleDeckSection(); return; }
   const deckItem = e.target.closest('[data-sidebar-deck]');
-  if(deckItem){ switchSidebarDeck(deckItem.dataset.sidebarDeck); }
+  if(deckItem){
+    const deckId = deckItem.dataset.sidebarDeck;
+    // Second click on the already-active deck → rename
+    if(deckId === state.currentDeckId){
+      beginRenameDeck(deckId);
+    } else {
+      switchSidebarDeck(deckId);
+    }
+  }
+});
+// Rename-input lifecycle (keydown + blur commit) for sidebar
+document.getElementById('sidebar-list')?.addEventListener('keydown', e=>{
+  const renameDeck = e.target.closest('[data-rename-deck]');
+  if(renameDeck){
+    if(e.key === 'Enter'){ e.preventDefault(); commitRenameDeck(renameDeck.dataset.renameDeck, renameDeck.value); return; }
+    if(e.key === 'Escape'){ e.preventDefault(); cancelRename(); return; }
+  }
+  const renameCard = e.target.closest('[data-rename-card]');
+  if(renameCard){
+    if(e.key === 'Enter'){ e.preventDefault(); commitRenameCard(renameCard.dataset.renameCard, renameCard.value); return; }
+    if(e.key === 'Escape'){ e.preventDefault(); cancelRename(); return; }
+  }
+});
+document.getElementById('sidebar-list')?.addEventListener('focusout', e=>{
+  const renameDeck = e.target.closest('[data-rename-deck]');
+  if(renameDeck){ commitRenameDeck(renameDeck.dataset.renameDeck, renameDeck.value); return; }
+  const renameCard = e.target.closest('[data-rename-card]');
+  if(renameCard){ commitRenameCard(renameCard.dataset.renameCard, renameCard.value); return; }
 });
 document.getElementById('sidebar-cloud-btn')?.addEventListener('click', async e=>{
   if(!state.cloud.unlocked){
@@ -4911,6 +5110,18 @@ document.getElementById('deck-confirm-yes')?.addEventListener('click', async ()=
   if(deckId) await deleteDeckFromLibrary(deckId);
 });
 document.getElementById('deck-confirm-no')?.addEventListener('click', closeDeckConfirmPopover);
+document.getElementById('selection-confirm-yes')?.addEventListener('click', ()=>{
+  const fn = state.pendingSelectionConfirm;
+  closeSelectionConfirm();
+  if(typeof fn === 'function'){ try{ fn(); }catch(err){ console.warn(err); } }
+});
+document.getElementById('selection-confirm-no')?.addEventListener('click', closeSelectionConfirm);
+document.addEventListener('mousedown', e=>{
+  const pop = document.getElementById('selection-confirm-popover');
+  if(!pop?.classList.contains('open')) return;
+  if(pop.contains(e.target)) return;
+  closeSelectionConfirm();
+});
 document.getElementById('cloud-auth-input')?.addEventListener('keydown', e=>{
   if(e.key === 'Enter'){
     e.preventDefault();
@@ -4940,6 +5151,7 @@ document.addEventListener('keydown', e=>{
   if(e.key === 'Escape'){
     closeDeckConfirmPopover();
     closeCloudAuthPopover();
+    closeSelectionConfirm();
   }
   if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){
     e.preventDefault();
