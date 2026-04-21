@@ -324,6 +324,13 @@ body[data-theme="dark"] .deck-icon-btn.delete{background:rgba(153,27,27,.25);bor
 .cloud-auth-popover .row,.deck-confirm-popover .row{display:flex;gap:6px;align-items:center;margin-top:8px}
 .cloud-auth-popover .status{min-height:18px;font-size:12px;color:var(--ink-soft);margin-top:6px}
 .cloud-auth-popover .status.error{color:var(--danger)}
+.sidebar-backup-group{display:inline-flex;gap:4px;flex-shrink:0}
+.sidebar-icon-btn{position:relative;flex-shrink:0;width:30px;height:34px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper-2);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow-soft);font-size:15px;line-height:1;transition:transform var(--t-fast) var(--ease),background var(--t-fast) var(--ease),color var(--t-fast) var(--ease);padding:0;color:var(--ink)}
+.sidebar-icon-btn:hover,.sidebar-icon-btn:focus-visible{background:var(--paper);transform:translateY(-1px)}
+.sidebar-icon-btn.backup{color:#0f766e}
+.sidebar-icon-btn.restore{color:#b45309}
+.sidebar-icon-btn.busy{opacity:.7;pointer-events:none;animation:sidebar-pulse .8s ease-in-out infinite alternate}
+@keyframes sidebar-pulse{to{transform:translateY(-1px) scale(.96)}}
 .sidebar-cloud-btn{position:relative;flex-shrink:0;width:34px;height:34px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper-2);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow-soft);color:#7f1d1d;transition:transform var(--t-fast) var(--ease),background var(--t-fast) var(--ease),color var(--t-fast) var(--ease);padding:0;overflow:hidden}
 .sidebar-cloud-btn.connected{color:#166534}
 .sidebar-cloud-btn:hover,.sidebar-cloud-btn:focus-visible{background:var(--paper);transform:translateY(-1px)}
@@ -759,6 +766,11 @@ body.sidebar-open .cards-grid{padding-left:36px}
 <aside class="card-sidebar" id="card-sidebar" aria-label="Liste des cartes">
   <div class="sidebar-head">
     <div class="sidebar-search"><span aria-hidden="true">&#128269;</span><input type="text" id="search-input" placeholder="chercher..." aria-label="Rechercher une carte"/></div>
+    <div class="sidebar-backup-group" role="group" aria-label="Sauvegarde locale">
+      <button class="sidebar-icon-btn backup" id="sidebar-backup-btn" type="button" aria-label="Télécharger une sauvegarde" title="Télécharger une sauvegarde"><span aria-hidden="true">&#x2B07;</span></button>
+      <button class="sidebar-icon-btn restore" id="sidebar-restore-btn" type="button" aria-label="Restaurer une sauvegarde" title="Restaurer une sauvegarde"><span aria-hidden="true">&#x2B06;</span></button>
+      <input type="file" id="sidebar-restore-input" accept="application/json,.json" hidden/>
+    </div>
     <button class="sidebar-cloud-btn" id="sidebar-cloud-btn" type="button" aria-label="Rafraichir le cloud" title="Rafraichir le cloud"><span class="cloud-symbol" aria-hidden="true">&#9729;</span><span class="refresh-symbol" aria-hidden="true">&#8635;</span></button>
   </div>
   <div class="sidebar-list" id="sidebar-list"></div>
@@ -4097,6 +4109,120 @@ async function deleteDeckFromLibrary(id){
   });
 }
 
+async function buildBackupPayload(){
+  const [decks, images, icons] = await Promise.all([
+    getAllLibraryItems('decks').catch(()=>[]),
+    getAllLibraryItems('images').catch(()=>[]),
+    getAllLibraryItems('icons').catch(()=>[]),
+  ]);
+  return {
+    version: 2,
+    kind: 'kingdom-reforged-backup',
+    exportedAt: new Date().toISOString(),
+    payload: {
+      ...exportPayload(),
+      decks: decks.map(deck=>({
+        ...deck,
+        cards: Array.isArray(deck.cards) ? cloneCards(deck.cards).map(compactCardForStorage) : [],
+      })),
+    },
+    images,
+    icons,
+    assignments: state.iconAssignments || {},
+  };
+}
+
+async function downloadBackup(){
+  const btn = document.getElementById('sidebar-backup-btn');
+  if(btn) btn.classList.add('busy');
+  try{
+    const data = await buildBackupPayload();
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const stamp = new Date().toISOString().replace(/[:.]/g,'-').slice(0,16);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `kingdom-reforged-backup-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    const deckCount = Array.isArray(data.payload?.decks) ? data.payload.decks.length : 0;
+    showStatus(`Sauvegarde téléchargée (${deckCount} deck${deckCount>1?'s':''})`);
+  }catch(e){
+    console.warn(e);
+    showStatus('Sauvegarde impossible');
+  }finally{
+    if(btn) btn.classList.remove('busy');
+  }
+}
+
+async function restoreBackupFromFile(file){
+  if(!file) return;
+  const btn = document.getElementById('sidebar-restore-btn');
+  if(btn) btn.classList.add('busy');
+  try{
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if(!data || typeof data !== 'object') throw new Error('Format invalide');
+    const payload = data.payload || data;
+    if(Array.isArray(data.images)){
+      for(const image of data.images){
+        if(!image?.id || !image?.dataUrl) continue;
+        await putLibraryItem('images', image);
+        rememberImageRef(image.name || image.id, {id: image.id});
+      }
+    }
+    if(Array.isArray(data.icons)){
+      for(const icon of data.icons){
+        if(!icon?.id || !icon?.dataUrl) continue;
+        await putLibraryItem('icons', icon);
+        rememberIconRef(icon.id, {name: icon.name, category: icon.category || 'bonus'});
+      }
+    }
+    if(data.assignments && typeof data.assignments === 'object'){
+      state.iconAssignments = {
+        resource: {...(data.assignments.resource || {})},
+        bonus: {...(data.assignments.bonus || {})},
+      };
+      saveIconAssignments();
+    }
+    let deckCount = 0;
+    if(payload && Array.isArray(payload.decks)){
+      for(const deck of payload.decks){
+        if(!deck?.id || !deck?.name || !Array.isArray(deck.cards)) continue;
+        await putLibraryItem('decks', {
+          ...deck,
+          cards: normalizeImportedCards(cloneCards(deck.cards)),
+          cardCount: deck.cardCount || deck.cards.length,
+          createdAt: deck.createdAt || Date.now(),
+          updatedAt: deck.updatedAt || Date.now(),
+        });
+        deckCount += 1;
+      }
+    }
+    invalidateImageLibraryCache();
+    await refreshIconCache();
+    await refreshDeckCache();
+    if(payload?.cards && Array.isArray(payload.cards)){
+      state.cards = normalizeImportedCards(cloneCards(payload.cards));
+    }
+    await hydrateImportedImages(state.cards);
+    state.history.restoring = true;
+    save();
+    state.history.restoring = false;
+    markHistoryReady(true);
+    renderCards();
+    showStatus(`Sauvegarde restaurée (${deckCount} deck${deckCount>1?'s':''})`);
+  }catch(e){
+    console.warn(e);
+    showStatus(e.message || 'Restauration impossible');
+  }finally{
+    if(btn) btn.classList.remove('busy');
+  }
+}
+
 async function replaceDeckInLibrary(id){
   const deck = await getLibraryItem('decks', id);
   if(!deck) return;
@@ -5345,6 +5471,15 @@ document.getElementById('sidebar-cloud-btn')?.addEventListener('click', async e=
     return;
   }
   await cloudLoadProject({skipRead:true});
+});
+document.getElementById('sidebar-backup-btn')?.addEventListener('click', downloadBackup);
+document.getElementById('sidebar-restore-btn')?.addEventListener('click', ()=>{
+  document.getElementById('sidebar-restore-input')?.click();
+});
+document.getElementById('sidebar-restore-input')?.addEventListener('change', async e=>{
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(file) await restoreBackupFromFile(file);
 });
 document.getElementById('cloud-auth-submit')?.addEventListener('click', async ()=>{
   const status = document.getElementById('cloud-auth-status');
