@@ -84,9 +84,6 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .btn.cloud{background:#d7f3ee;color:#134e4a;border-color:#0f766e}
 .btn.cloud.on{background:#0f766e;color:#fff;border-color:#0b4f4a}
 .btn.cloud.syncing{filter:saturate(.7);opacity:.75}
-.btn.cloud-refresh{width:34px;padding:0;display:inline-grid;place-items:center;font-size:18px;line-height:1}
-.btn.cloud-refresh.syncing{animation:cloud-spin 1s linear infinite}
-@keyframes cloud-spin{to{transform:rotate(360deg)}}
 .btn.save-cloud{background:#22c55e;color:#082f1a;border-color:#166534}
 .btn.save-cloud.dirty{background:#facc15;color:#422006;border-color:#a16207}
 .btn.save-cloud:hover{filter:brightness(1.04)}
@@ -495,11 +492,12 @@ body.sidebar-open .cards-grid{padding-left:36px}
 .pdf-menu-actions{display:grid;grid-template-columns:1fr;gap:8px}
 .pdf-menu-actions .btn{justify-content:center}
 .pdf-menu-actions .hint{font-family:'Caveat';font-size:15px;color:var(--ink-soft);text-align:center}
-.pdf-size-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px;padding:8px 12px;border:2px dashed var(--line);border-radius:10px;background:var(--paper-2);cursor:text}
+.pdf-size-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px;padding:8px 12px;border:2px dashed var(--line);border-radius:10px;background:var(--paper-2)}
 .pdf-size-row .pdf-size-label{font-family:'Kalam',sans-serif;font-size:15px;color:var(--ink)}
-.pdf-size-row .pdf-size-field{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border:2px solid var(--line);border-radius:8px;background:var(--paper);box-shadow:2px 2px 0 var(--line)}
-.pdf-size-row input{width:52px;padding:2px 0;border:none;font:inherit;font-family:'Kalam',sans-serif;font-size:16px;font-weight:700;text-align:right;background:transparent;color:var(--ink);outline:none;-moz-appearance:textfield}
-.pdf-size-row input::-webkit-outer-spin-button,.pdf-size-row input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pdf-size-row .pdf-size-field{display:inline-flex;align-items:center;gap:6px;padding:3px 6px;border:2px solid var(--line);border-radius:8px;background:var(--paper);box-shadow:2px 2px 0 var(--line)}
+.pdf-size-row .btn-mini{width:22px;height:22px;padding:0;display:grid;place-items:center;border:1.5px solid var(--line);border-radius:5px;background:var(--paper);font-size:14px;line-height:1;cursor:pointer;color:var(--ink)}
+.pdf-size-row .btn-mini:hover{background:var(--paper-2)}
+.pdf-size-row #pdf-card-size-value{min-width:28px;text-align:center;font-family:'Kalam',sans-serif;font-size:16px;font-weight:700;color:var(--ink)}
 .pdf-size-row .pdf-size-unit{font-family:'Kalam',sans-serif;font-size:14px;color:var(--ink-soft)}
 .deck-save-row{display:flex;gap:6px;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1.5px dashed var(--line)}
 .deck-save-row input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);padding:5px 9px;font-family:'Patrick Hand';font-size:14px;color:var(--ink)}
@@ -730,7 +728,6 @@ body.sidebar-open .cards-grid{padding-left:36px}
     </div>
     <div class="chrome-actions">
       <span class="autosave" id="autosave-status" role="status" aria-live="polite"></span>
-      <button class="btn ghost cloud-refresh" id="btn-cloud-refresh" type="button" aria-label="Recharger depuis le cloud" title="Recharger depuis le cloud">↻</button>
       <button class="btn cloud hidden-cloud-control" id="btn-cloud" type="button" aria-label="Configurer la sauvegarde cloud">Cloud</button>
       <button class="btn save-cloud hidden-cloud-control" id="btn-save-cloud" type="button" aria-label="Sauvegarder sur le cloud">Sauvegarder</button>
       <button class="btn ghost history" id="btn-undo" type="button" aria-label="Annuler" title="Annuler" disabled>↶</button>
@@ -881,13 +878,15 @@ body.sidebar-open .cards-grid{padding-left:36px}
       <button class="btn pdf" id="pdf-export-all" type="button">Tout exporter</button>
       <button class="btn ghost" id="pdf-export-selected" type="button">Exporter la sélection <span id="pdf-selected-count"></span></button>
       <div class="hint">Sélectionne les cartes à exporter directement dans la grille.</div>
-      <label class="pdf-size-row" for="pdf-card-size">
+      <div class="pdf-size-row">
         <span class="pdf-size-label">Taille des cartes</span>
         <span class="pdf-size-field">
-          <input type="number" id="pdf-card-size" min="20" max="200" step="1" inputmode="numeric"/>
+          <button type="button" class="btn-mini" id="pdf-card-size-minus" aria-label="Diminuer la taille">−</button>
+          <b id="pdf-card-size-value">68</b>
           <span class="pdf-size-unit">mm</span>
+          <button type="button" class="btn-mini" id="pdf-card-size-plus" aria-label="Augmenter la taille">+</button>
         </span>
-      </label>
+      </div>
     </div>
   </div>
 </div>
@@ -3450,11 +3449,24 @@ function updatePdfSelectionControls(){
 function openPdfMenu(clickEvent=null){
   const modal = document.getElementById('pdf-modal');
   updatePdfSelectionControls();
-  const sizeInput = document.getElementById('pdf-card-size');
-  if(sizeInput) sizeInput.value = String(getPdfCardSizeMm());
+  renderPdfCardSize();
   modal.classList.add('open');
   const reposition = placeAnchoredModal(modal, clickEvent, {anchorEl: document.getElementById('btn-pdf')});
   if(reposition) requestAnimationFrame(reposition);
+}
+function renderPdfCardSize(){
+  const label = document.getElementById('pdf-card-size-value');
+  const minus = document.getElementById('pdf-card-size-minus');
+  const plus = document.getElementById('pdf-card-size-plus');
+  const mm = getPdfCardSizeMm();
+  if(label) label.textContent = String(mm);
+  if(minus) minus.disabled = mm <= 20;
+  if(plus) plus.disabled = mm >= 200;
+}
+function adjustPdfCardSize(delta){
+  const next = getPdfCardSizeMm() + delta;
+  setPdfCardSizeMm(next);
+  renderPdfCardSize();
 }
 function clearSelectedCards(){
   state.selectedCardIds = new Set();
@@ -3542,7 +3554,7 @@ function updateSelectionGroup(){
   count.textContent = n === 1 ? '1 sélectionnée' : `${n} sélectionnées`;
 }
 const PDF_CARD_SIZE_STORAGE = 'kr-pdf-card-size-mm';
-const PDF_CARD_SIZE_DEFAULT = 60;
+const PDF_CARD_SIZE_DEFAULT = 68;
 function getPdfCardSizeMm(){
   const raw = Number(localStorage.getItem(PDF_CARD_SIZE_STORAGE));
   if(Number.isFinite(raw) && raw >= 20 && raw <= 200) return raw;
@@ -4864,15 +4876,6 @@ async function cloudLoadProject(options={}){
 function bindEvents(){
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
   document.getElementById('btn-cloud').addEventListener('click', openCloudModal);
-  document.getElementById('btn-cloud-refresh')?.addEventListener('click', async ()=>{
-    const btn = document.getElementById('btn-cloud-refresh');
-    if(btn) btn.classList.add('syncing');
-    try{
-      await cloudLoadProject({skipRead:true});
-    } finally {
-      if(btn) btn.classList.remove('syncing');
-    }
-  });
   document.getElementById('cloud-close').addEventListener('click', closeCloudModal);
   document.getElementById('cloud-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeCloudModal(); });
   document.getElementById('cloud-unlock').addEventListener('click', async ()=>{ if(await verifyCloudUnlock()) closeCloudModal(); });
@@ -4945,10 +4948,8 @@ function bindEvents(){
   document.getElementById('pdf-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closePdfMenu(); });
   document.getElementById('pdf-export-all').addEventListener('click', ()=>exportToPDF('all'));
   document.getElementById('pdf-export-selected').addEventListener('click', ()=>exportToPDF('selected'));
-  document.getElementById('pdf-card-size')?.addEventListener('change', e=>{
-    const mm = setPdfCardSizeMm(e.target.value);
-    e.target.value = String(mm);
-  });
+  document.getElementById('pdf-card-size-minus')?.addEventListener('click', ()=>adjustPdfCardSize(-1));
+  document.getElementById('pdf-card-size-plus')?.addEventListener('click', ()=>adjustPdfCardSize(1));
   document.getElementById('io-close').addEventListener('click', ()=>document.getElementById('io-modal').classList.remove('open'));
   document.getElementById('io-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
   document.getElementById('deck-close').addEventListener('click', closeDeckLibrary);
