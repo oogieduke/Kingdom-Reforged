@@ -279,7 +279,7 @@ body.sidebar-open main{margin-left:252px}
 .sidebar-card:hover,.sidebar-card:focus-visible{background:rgba(255,255,255,.85);transform:translateX(3px);box-shadow:2px 2px 0 rgba(0,0,0,.08)}
 .sidebar-card.matches-search{background:rgba(255,235,150,.92);border-color:var(--accent);box-shadow:2px 2px 0 rgba(194,65,12,.25);font-weight:700}
 .sidebar-card.dim-search{opacity:.35}
-.sidebar-card.session-modified{border-color:#a16207;background:rgba(255,235,150,.72);box-shadow:2px 2px 0 rgba(161,98,7,.18)}
+.sidebar-card.selected-card{border-color:#15803d;background:rgba(220,252,231,.78);box-shadow:2px 2px 0 rgba(21,128,61,.18)}
 .sidebar-card.active-deck{background:rgba(255,255,255,.92);border-color:#0f766e;box-shadow:2px 2px 0 rgba(15,118,110,.25)}
 .sidebar-card.deck-modified::after{content:'';position:absolute;right:7px;top:50%;width:8px;height:8px;border-radius:50%;background:#b45309;transform:translateY(-50%);box-shadow:0 0 0 2px rgba(255,255,255,.7)}
 .sidebar-card.deck-modified{padding-right:20px;border-color:#b45309;background:rgba(255,235,150,.78)}
@@ -321,8 +321,8 @@ body.sidebar-open main{margin-left:252px}
 .sidebar-cloud-btn:hover .refresh-symbol,.sidebar-cloud-btn:focus-visible .refresh-symbol{opacity:1;transform:scale(1)}
 .grid-item.flash .kcard{box-shadow:0 0 0 4px var(--accent),4px 4px 0 rgba(0,0,0,.14)}
 .grid-item.highlight .kcard{box-shadow:0 0 0 3px var(--accent-2),4px 4px 0 rgba(0,0,0,.14);transform:translateY(-3px)}
-.grid-item.session-modified .kcard{outline:3px dashed #b45309;outline-offset:5px}
-body[data-theme="dark"] .grid-item.session-modified .kcard{outline-color:#facc15}
+.grid-item.selected-card .kcard{outline:3px dashed #15803d;outline-offset:5px}
+body[data-theme="dark"] .grid-item.selected-card .kcard{outline-color:#86efac}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:60px 20px;color:var(--ink-ghost);font-family:'Caveat';font-size:18px;text-align:center}
 .empty-state .icon{font-size:48px}
 
@@ -438,12 +438,12 @@ body.sidebar-open .cards-grid{padding-left:36px}
 .grid-item::after{content:'';position:absolute;top:0;left:calc(50% + (var(--grid-card-size) / 2));width:48px;height:var(--grid-card-size);z-index:10;pointer-events:auto}
 .grid-item .gi-name-input{width:min(var(--grid-card-size),100%);border:1.5px dashed transparent;border-radius:6px;background:transparent;color:var(--ink);font-family:'Kalam';font-weight:700;font-size:15px;text-align:center;padding:2px 6px;outline:none}
 .grid-item .gi-name-input:hover,.grid-item .gi-name-input:focus{border-color:var(--line);background:var(--focus-bg)}
-.grid-card-actions{position:absolute;top:4px;left:calc(50% + (var(--grid-card-size) / 2) + 8px);display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20}
-.grid-card-copy-actions{position:absolute;top:calc(var(--grid-card-size) - 106px);left:calc(50% + (var(--grid-card-size) / 2) + 8px);display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20;align-items:center}
+.grid-card-actions{position:absolute;top:4px;left:calc(50% + (var(--grid-card-size) / 2) + 8px);display:flex;flex-direction:column;gap:clamp(2px,calc(var(--grid-card-size) * .018),4px);opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20;--overlay-btn-size:clamp(20px,calc(var(--grid-card-size) * .14),30px)}
+.grid-card-copy-actions{position:absolute;top:calc(var(--grid-card-size) - clamp(82px,calc(var(--grid-card-size) * .48),106px));left:calc(50% + (var(--grid-card-size) / 2) + 8px);display:flex;flex-direction:column;gap:clamp(2px,calc(var(--grid-card-size) * .018),4px);opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease);z-index:20;align-items:center;--overlay-btn-size:clamp(20px,calc(var(--grid-card-size) * .14),30px)}
 .grid-item:hover .grid-card-actions,.grid-item:focus-within .grid-card-actions,.grid-item:hover .grid-card-copy-actions,.grid-item:focus-within .grid-card-copy-actions{opacity:1;pointer-events:auto}
-.grid-card-actions .btn,.grid-card-copy-actions .btn{width:30px;height:30px;padding:0;display:grid;place-items:center;box-shadow:var(--shadow-sm);background:var(--paper);font-size:13px}
-.grid-copy-count{width:30px;min-height:24px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper-2);display:grid;place-items:center;font-family:'Kalam';font-weight:700;font-size:13px;color:var(--ink);box-shadow:var(--shadow-sm)}
-.grid-card-actions .stage-action{font-size:18px}
+.grid-card-actions .btn,.grid-card-copy-actions .btn{width:var(--overlay-btn-size);height:var(--overlay-btn-size);padding:0;display:grid;place-items:center;box-shadow:var(--shadow-sm);background:var(--paper);font-size:clamp(11px,calc(var(--overlay-btn-size) * .45),13px)}
+.grid-copy-count{width:var(--overlay-btn-size);min-height:var(--overlay-btn-size);border:1.5px solid var(--line);border-radius:6px;background:var(--paper-2);display:grid;place-items:center;font-family:'Kalam';font-weight:700;font-size:clamp(11px,calc(var(--overlay-btn-size) * .45),13px);color:var(--ink);box-shadow:var(--shadow-sm)}
+.grid-card-actions .stage-action{font-size:clamp(14px,calc(var(--overlay-btn-size) * .65),18px)}
 .grid-card-actions .stage-action.loop-stage{background:#d9f0ff;border-color:#4da7d8;color:#114967}
 .grid-card-actions .stage-action:disabled{opacity:.35;cursor:not-allowed;transform:none}
 
@@ -817,9 +817,9 @@ body.sidebar-open .cards-grid{padding-left:36px}
     <h3 id="pdf-modal-title">Export PDF<button class="modal-close" id="pdf-close" aria-label="Fermer">✕</button></h3>
     <div class="pdf-menu-actions">
       <button class="btn pdf" id="pdf-export-all" type="button">Tout exporter</button>
-      <button class="btn ghost" id="pdf-export-modified" type="button">Exporter les modifiées <span id="pdf-modified-count"></span></button>
-      <button class="btn ghost" id="pdf-clear-modified" type="button">Reset</button>
-      <div class="hint">Les cartes marquées “modifié” sont celles changées depuis le dernier reset.</div>
+      <button class="btn ghost" id="pdf-export-selected" type="button">Exporter la sélection <span id="pdf-selected-count"></span></button>
+      <button class="btn ghost" id="pdf-clear-selected" type="button">Reset</button>
+      <div class="hint">Coche les cartes à exporter directement dans la grille.</div>
     </div>
   </div>
 </div>
@@ -1026,6 +1026,7 @@ const state = {
   sidebarOpen: true,
   gridColumns: 4,
   modifiedCardIds: new Set(),
+  selectedCardIds: new Set(),
   modifiedDeckIds: new Set(),
   decks: [],
   currentDeckId: null,
@@ -1092,6 +1093,21 @@ function saveModifiedCardIds(){
     const deck = state.decks.find(item=>item.id === state.currentDeckId);
     if(deck) deck.modifiedCardIds = [...ids];
     persistActiveDeckModifiedCards().catch(()=>{});
+  }
+}
+function getDeckSelectedCardIds(deck){
+  return new Set(Array.isArray(deck?.selectedCardIds) ? deck.selectedCardIds.filter(id=>typeof id === 'string') : []);
+}
+function saveSelectedCardIds(){
+  const currentIds = new Set(state.cards.map(card=>card.id));
+  const ids = Array.from(state.selectedCardIds).filter(id=>currentIds.has(id));
+  state.selectedCardIds = new Set(ids);
+  if(state.currentDeckId){
+    const deck = state.decks.find(item=>item.id === state.currentDeckId);
+    if(deck){
+      deck.selectedCardIds = [...ids];
+      putLibraryItem('decks', {...deck}).catch(()=>{});
+    }
   }
 }
 function loadModifiedDeckIds(){
@@ -1188,6 +1204,7 @@ function save(){
     if(deck){
       deck.cards = cloneCards(state.cards);
       deck.modifiedCardIds = Array.from(state.modifiedCardIds);
+      deck.selectedCardIds = Array.from(state.selectedCardIds);
       deck.cardCount = state.cards.length;
       deck.updatedAt = Date.now();
       putLibraryItem('decks', {...deck}).catch(()=>{});
@@ -1819,6 +1836,7 @@ async function storeCurrentDeckLocal({markDirty=true}={}){
     ...existing,
     cards: cloneCards(state.cards),
     modifiedCardIds: Array.from(state.modifiedCardIds),
+    selectedCardIds: Array.from(state.selectedCardIds),
     cardCount: state.cards.length,
     updatedAt: now,
   };
@@ -1841,6 +1859,7 @@ function makeEmptyDeck(name){
     name,
     cards: [],
     modifiedCardIds: [],
+    selectedCardIds: [],
     cardCount: 0,
     createdAt: now,
     updatedAt: now,
@@ -2247,6 +2266,7 @@ function sortCards(cards){
 
 function renderCards(){
   renderCardSidebar();
+  updatePdfSelectionControls();
   const container = document.getElementById('cards-container');
   container.className = 'cards-grid';
   const cards = filteredCards();
@@ -2300,7 +2320,7 @@ function renderCardSidebar(){
             if(card.name.toLowerCase().includes(q)) classes.push('matches-search');
             else classes.push('dim-search');
           }
-          if(state.modifiedCardIds.has(card.id)) classes.push('session-modified');
+          if(state.selectedCardIds.has(card.id)) classes.push('selected-card');
           return `<button class="${classes.join(' ')}" data-sidebar-card="${card.id}" title="${escapeHtml(card.name)}">${escapeHtml(card.name)}</button>`;
         }).join('')}
       </div>
@@ -2310,9 +2330,10 @@ function renderCardSidebar(){
 
 function syncModifiedUi(){
   document.querySelectorAll('.grid-item[data-id]').forEach(item=>{
-    item.classList.toggle('session-modified', state.modifiedCardIds.has(item.dataset.id));
+    item.classList.toggle('selected-card', state.selectedCardIds.has(item.dataset.id));
   });
   renderCardSidebar();
+  updatePdfSelectionControls();
 }
 
 function setSidebarOpen(open){
@@ -2436,9 +2457,9 @@ function renderCardGridItem(card, renderKey=cardRenderKey(card)){
   const addStageTitle = card.steps.length >= 4 ? 'Ajouter la transition IV vers I' : 'Ajouter une étape';
   const danger = inferDanger(card);
   const copies = Math.max(1, card.copies != null ? card.copies : 1);
-  const modified = state.modifiedCardIds.has(card.id);
+  const selected = state.selectedCardIds.has(card.id);
   return `
-    <div class="grid-item${modified?' session-modified':''}" data-id="${card.id}" data-render-key="${renderKey}">
+    <div class="grid-item${selected?' selected-card':''}" data-id="${card.id}" data-render-key="${renderKey}">
       ${renderCardHtml(card,'md',true)}
       <input class="gi-name-input" data-card="${card.id}" data-field="name-grid" value="${escapeHtml(card.name)}" aria-label="Nom de la carte"/>
       <div class="grid-card-actions">
@@ -2453,6 +2474,7 @@ function renderCardGridItem(card, renderKey=cardRenderKey(card)){
         <button class="btn ghost" data-card="${card.id}" data-action="copies-plus" aria-label="Ajouter une copie PDF" title="Ajouter une copie PDF">+</button>
         <b class="grid-copy-count" data-copies-value="${card.id}">${copies}</b>
         <button class="btn ghost" data-card="${card.id}" data-action="copies-minus" aria-label="Enlever une copie PDF" title="Enlever une copie PDF"${copies<=1?' disabled':''}>−</button>
+        <button class="btn ghost" data-card="${card.id}" data-action="select-toggle" aria-pressed="${selected?'true':'false'}" aria-label="${selected?'Deselect':'Sélectionner'} ${escapeHtml(card.name)}" title="${selected?'Deselect':'Sélectionner'}">${selected?'✓':'○'}</button>
       </div>
     </div>
   `;
@@ -2776,6 +2798,7 @@ function duplicateCard(id){
   copy.id = newId();
   copy.name = card.name + ' copy';
   state.cards.splice(idx+1, 0, copy);
+  state.selectedCardIds.delete(copy.id);
   save(); renderCards();
   requestAnimationFrame(()=>{
     const input = document.querySelector(`.grid-item[data-id="${copy.id}"] .gi-name-input`);
@@ -2787,8 +2810,18 @@ function deleteCard(id){
   const card = getCard(id); if(!card) return;
   state.cards = state.cards.filter(c=>c.id!==id);
   delete state.stageByCard[id];
+  state.selectedCardIds.delete(id);
+  saveSelectedCardIds();
   save(); renderCards();
   showStatus('Carte supprimée');
+}
+function toggleSelectedCard(id){
+  if(!id) return;
+  if(state.selectedCardIds.has(id)) state.selectedCardIds.delete(id);
+  else state.selectedCardIds.add(id);
+  saveSelectedCardIds();
+  renderCards();
+  updatePdfSelectionControls();
 }
 function showStatus(msg){
   const el=document.getElementById('autosave-status');
@@ -3289,32 +3322,33 @@ function closePdfMenu(){
   const panel = modal.querySelector('.modal');
   if(panel){ panel.style.left=''; panel.style.top=''; }
 }
-function updatePdfModifiedControls(){
-  const modifiedCount = state.cards.filter(card=>state.modifiedCardIds.has(card.id)).length;
-  const count = document.getElementById('pdf-modified-count');
-  const modifiedBtn = document.getElementById('pdf-export-modified');
-  const clearBtn = document.getElementById('pdf-clear-modified');
-  if(count) count.textContent = modifiedCount ? `(${modifiedCount})` : '';
-  if(modifiedBtn) modifiedBtn.disabled = modifiedCount === 0;
-  if(clearBtn) clearBtn.disabled = modifiedCount === 0;
-  return modifiedCount;
+function updatePdfSelectionControls(){
+  const selectedCount = state.cards.filter(card=>state.selectedCardIds.has(card.id)).length;
+  const count = document.getElementById('pdf-selected-count');
+  const selectedBtn = document.getElementById('pdf-export-selected');
+  const clearBtn = document.getElementById('pdf-clear-selected');
+  if(count) count.textContent = selectedCount ? `(${selectedCount})` : '';
+  if(selectedBtn) selectedBtn.disabled = selectedCount === 0;
+  if(clearBtn) clearBtn.disabled = selectedCount === 0;
+  return selectedCount;
 }
 function openPdfMenu(clickEvent=null){
   const modal = document.getElementById('pdf-modal');
-  updatePdfModifiedControls();
+  updatePdfSelectionControls();
   modal.classList.add('open');
   const reposition = placeAnchoredModal(modal, clickEvent, {anchorEl: document.getElementById('btn-pdf')});
   if(reposition) requestAnimationFrame(reposition);
 }
-function clearModifiedCards(){
-  resetSessionModifiedBaseline();
+function clearSelectedCards(){
+  state.selectedCardIds = new Set();
+  saveSelectedCardIds();
   renderCards();
-  updatePdfModifiedControls();
-  showStatus('Cartes modifiées vidées');
+  updatePdfSelectionControls();
+  showStatus('Selection reinitialisee');
 }
 function exportToPDF(scope='all'){
-  const cards = scope === 'modified'
-    ? sortCards(state.cards.filter(card=>state.modifiedCardIds.has(card.id)))
+  const cards = scope === 'selected'
+    ? sortCards(state.cards.filter(card=>state.selectedCardIds.has(card.id)))
     : sortCards(state.cards);
   if(!cards.length){ showStatus('Aucune carte à exporter'); return; }
   closePdfMenu();
@@ -3452,6 +3486,7 @@ state.cloud.pendingSyncDeckId = null;
 state.cloud.authAnchor = null;
 state.cloud.pendingDeleteDeckId = null;
 state.cloud.deleteAnchor = null;
+state.cloud.pendingDeletedDeckIds = new Set();
 
 function getDeckModifiedCardIds(deck){
   return new Set(Array.isArray(deck?.modifiedCardIds) ? deck.modifiedCardIds.filter(id=>typeof id === 'string') : []);
@@ -3502,7 +3537,7 @@ function renderCardSidebar(){
         ` : '';
         const status = dirty ? '<span class="deck-status-dot" aria-hidden="true"></span>' : '';
         const actions = `<div class="deck-actions"><button class="deck-icon-btn" type="button" data-deck-duplicate="${deck.id}" aria-label="Dupliquer ${escapeHtml(deck.name)}" title="Dupliquer ${escapeHtml(deck.name)}">&#x29C9;</button>${authActions}</div>`;
-        return `<div class="${classes.join(' ')}" title="${escapeHtml(deck.name)}"><button class="sidebar-card-main" type="button" data-sidebar-deck="${deck.id}">${escapeHtml(deck.name)}</button>${status}${actions}</div>`;
+        return `<div class="${classes.join(' ')}" title="${escapeHtml(deck.name)}">${status}<button class="sidebar-card-main" type="button" data-sidebar-deck="${deck.id}">${escapeHtml(deck.name)}</button>${actions}</div>`;
       }).join('') : '<div class="library-empty">Aucun deck.</div>'}
     </div>
   </section>`;
@@ -3532,7 +3567,7 @@ function renderCardSidebar(){
             if(card.name.toLowerCase().includes(q)) classes.push('matches-search');
             else classes.push('dim-search');
           }
-          if(state.modifiedCardIds.has(card.id)) classes.push('session-modified');
+          if(state.selectedCardIds.has(card.id)) classes.push('selected-card');
           return `<button class="${classes.join(' ')}" data-sidebar-card="${card.id}" title="${escapeHtml(card.name)}">${escapeHtml(card.name)}</button>`;
         }).join('')}
       </div>
@@ -3549,6 +3584,7 @@ async function switchSidebarDeck(id){
   state.currentDeckId = deck.id;
   state.cards = normalizeImportedCards(cloneCards(deck.cards || []));
   state.modifiedCardIds = getDeckModifiedCardIds(deck);
+  state.selectedCardIds = getDeckSelectedCardIds(deck);
   await hydrateImportedImages(state.cards);
   state.stageByCard = {};
   localStorage.setItem(CURRENT_DECK_STORAGE, deck.id);
@@ -3574,6 +3610,7 @@ async function createSidebarDeck(){
   state.cards = [];
   state.stageByCard = {};
   state.modifiedCardIds = new Set();
+  state.selectedCardIds = new Set();
   state.modifiedDeckIds.add(deck.id);
   saveModifiedDeckIds();
   localStorage.setItem(CURRENT_DECK_STORAGE, deck.id);
@@ -3597,6 +3634,7 @@ async function duplicateSidebarDeck(id){
     name,
     cards: cloneCards(source.cards || []),
     modifiedCardIds: Array.isArray(source.modifiedCardIds) ? [...source.modifiedCardIds] : [],
+    selectedCardIds: [],
     cardCount: (source.cards || []).length,
     createdAt: Date.now(),
     updatedAt: Date.now(),
@@ -3635,6 +3673,7 @@ async function ensureDeckSidebarState(){
     localStorage.setItem('kr-current-deck-name', activeDeck.name);
     state.cards = normalizeImportedCards(cloneCards(activeDeck.cards || []));
     state.modifiedCardIds = getDeckModifiedCardIds(activeDeck);
+    state.selectedCardIds = getDeckSelectedCardIds(activeDeck);
     await hydrateImportedImages(state.cards);
     state.stageByCard = {};
     state.history.restoring = true;
@@ -3659,6 +3698,7 @@ async function saveDeckToLibrary(){
     id: existing?.id || current?.id || libraryId('deck-'),
     name,
     cards: cloneCards(state.cards),
+    selectedCardIds: Array.from(state.selectedCardIds),
     cardCount: state.cards.length,
     createdAt: existing?.createdAt || current?.createdAt || now,
     updatedAt: now,
@@ -3684,14 +3724,7 @@ async function deleteDeckFromLibrary(id){
   if(!state.cloud.unlocked) return;
   const deck = await getLibraryItem('decks', id);
   if(!deck) return;
-  if(state.cloud.unlocked){
-    try{
-      await cloudDeleteDeck(id);
-    }catch(e){
-      showStatus(e.message || 'Suppression cloud impossible');
-      return;
-    }
-  }
+  state.cloud.pendingDeletedDeckIds.add(id);
   await deleteLibraryItem('decks', id);
   state.modifiedDeckIds.delete(id);
   saveModifiedDeckIds();
@@ -3703,6 +3736,13 @@ async function deleteDeckFromLibrary(id){
     renderCards();
   }
   showStatus('Deck supprime');
+  cloudDeleteDeck(id).then(ok=>{
+    state.cloud.pendingDeletedDeckIds.delete(id);
+    if(ok === false) showStatus('Suppression cloud en attente');
+  }).catch(e=>{
+    state.cloud.pendingDeletedDeckIds.delete(id);
+    showStatus(e.message || 'Suppression cloud impossible');
+  });
 }
 
 async function replaceDeckInLibrary(id){
@@ -4119,12 +4159,14 @@ async function restoreCloudDecks(decks){
   const remoteIds = new Set();
   for(const deck of decks){
     if(!deck?.id || !deck?.name || !Array.isArray(deck.cards)) continue;
+    if(state.cloud.pendingDeletedDeckIds.has(deck.id)) continue;
     remoteIds.add(deck.id);
     if(state.modifiedDeckIds.has(deck.id)) continue;
     await putLibraryItem('decks',{
       ...deck,
       cards: normalizeImportedCards(cloneCards(deck.cards)),
       modifiedCardIds: Array.isArray(deck.modifiedCardIds) ? deck.modifiedCardIds.filter(id=>typeof id === 'string') : [],
+      selectedCardIds: Array.isArray(deck.selectedCardIds) ? deck.selectedCardIds.filter(id=>typeof id === 'string') : [],
       cardCount: deck.cardCount || deck.cards.length,
       createdAt: deck.createdAt || Date.now(),
       updatedAt: deck.updatedAt || Date.now(),
@@ -4132,7 +4174,7 @@ async function restoreCloudDecks(decks){
   }
   const localDecks = await getAllLibraryItems('decks').catch(()=>[]);
   for(const deck of localDecks){
-    if(!remoteIds.has(deck.id) && !state.modifiedDeckIds.has(deck.id)) await deleteLibraryItem('decks', deck.id);
+    if(!remoteIds.has(deck.id) && !state.modifiedDeckIds.has(deck.id) && !state.cloud.pendingDeletedDeckIds.has(deck.id)) await deleteLibraryItem('decks', deck.id);
   }
 }
 
@@ -4174,6 +4216,7 @@ async function cloudSaveDeck(deckId){
       ...localDeck,
       cards: cloneCards(localDeck.cards || []).map(compactCardForStorage),
       modifiedCardIds: Array.isArray(localDeck.modifiedCardIds) ? [...localDeck.modifiedCardIds] : [],
+      selectedCardIds: Array.isArray(localDeck.selectedCardIds) ? [...localDeck.selectedCardIds] : [],
       cardCount: localDeck.cardCount || (localDeck.cards || []).length,
       updatedAt: Date.now(),
     };
@@ -4244,6 +4287,7 @@ async function cloudDeleteDeck(deckId){
   const data = await res.json().catch(()=>({}));
   if(!res.ok || !data.ok) throw new Error(data.error || 'Suppression cloud impossible');
   state.cloud.lastSyncAt = data.updatedAt || new Date().toISOString();
+  state.cloud.pendingDeletedDeckIds.delete(deckId);
   return true;
 }
 
@@ -4303,9 +4347,11 @@ async function applyCloudProject(data, options={}){
     localStorage.setItem('kr-current-deck-name', activeDeck.name);
     state.cards = normalizeImportedCards(cloneCards(activeDeck.cards || []));
     state.modifiedCardIds = getDeckModifiedCardIds(activeDeck);
+    state.selectedCardIds = getDeckSelectedCardIds(activeDeck);
   } else {
     state.cards = normalizeImportedCards(cloneCards(data.payload.cards || []));
     state.modifiedCardIds = new Set();
+    state.selectedCardIds = new Set();
   }
   await hydrateImportedImages(state.cards);
   state.stageByCard = {};
@@ -4410,8 +4456,8 @@ function bindEvents(){
   document.getElementById('pdf-close').addEventListener('click', closePdfMenu);
   document.getElementById('pdf-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closePdfMenu(); });
   document.getElementById('pdf-export-all').addEventListener('click', ()=>exportToPDF('all'));
-  document.getElementById('pdf-export-modified').addEventListener('click', ()=>exportToPDF('modified'));
-  document.getElementById('pdf-clear-modified').addEventListener('click', clearModifiedCards);
+  document.getElementById('pdf-export-selected').addEventListener('click', ()=>exportToPDF('selected'));
+  document.getElementById('pdf-clear-selected').addEventListener('click', clearSelectedCards);
   document.getElementById('io-close').addEventListener('click', ()=>document.getElementById('io-modal').classList.remove('open'));
   document.getElementById('io-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
   document.getElementById('deck-close').addEventListener('click', closeDeckLibrary);
@@ -4584,6 +4630,10 @@ function bindEvents(){
           const cur = card.copies != null ? card.copies : 1;
           card.copies = Math.min(99, cur + 1); updateCopiesDisplay(card); saveDebounced();
         }
+        return;
+      }
+      if(a==='select-toggle'){
+        if(card) toggleSelectedCard(card.id);
         return;
       }
       if(a==='image-clear'){
