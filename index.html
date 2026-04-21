@@ -82,6 +82,7 @@ h1,h2,h3,h4{font-family:'Kalam',cursive;font-weight:700}
 .btn.save-cloud{background:#22c55e;color:#082f1a;border-color:#166534}
 .btn.save-cloud.dirty{background:#facc15;color:#422006;border-color:#a16207}
 .btn.save-cloud:hover{filter:brightness(1.04)}
+.btn.hidden-cloud-control{display:none !important}
 .btn.locked::before{content:'\1F512';font-size:.9em}
 .btn.history{padding:5px 9px;min-width:34px;justify-content:center}
 .btn:disabled{opacity:.45;cursor:not-allowed}
@@ -282,6 +283,27 @@ body.sidebar-open main{margin-left:252px}
 .sidebar-card.active-deck{background:rgba(255,255,255,.92);border-color:#0f766e;box-shadow:2px 2px 0 rgba(15,118,110,.25)}
 .sidebar-card.deck-modified::after{content:'';position:absolute;right:7px;top:50%;width:8px;height:8px;border-radius:50%;background:#b45309;transform:translateY(-50%);box-shadow:0 0 0 2px rgba(255,255,255,.7)}
 .sidebar-card.deck-modified{padding-right:20px;border-color:#b45309;background:rgba(255,235,150,.78)}
+.deck-row{display:flex;align-items:center;gap:4px;padding:0 4px 0 0;overflow:visible}
+.deck-row::after{display:none}
+.sidebar-card-main{flex:1;min-width:0;border:none;background:transparent;color:inherit;font:inherit;text-align:left;padding:5px 8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-card-main:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:6px}
+.deck-sync-btn{position:relative;flex-shrink:0;width:26px;height:26px;border:none;background:transparent;border-radius:6px;cursor:pointer;color:#7c5a18;display:grid;place-items:center;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
+.deck-sync-btn:hover,.deck-sync-btn:focus-visible{background:rgba(255,255,255,.6);transform:translateY(-1px);color:#8a4300}
+.deck-sync-btn .sync-upload{position:absolute;opacity:0;transform:scale(.8);transition:opacity var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
+.deck-sync-btn:hover .sync-upload,.deck-sync-btn:focus-visible .sync-upload{opacity:1;transform:scale(1)}
+.deck-sync-btn:hover .sync-cloud-off,.deck-sync-btn:focus-visible .sync-cloud-off{opacity:0;transform:scale(.8)}
+.sync-cloud-off{position:relative;display:block;width:16px;height:12px;transition:opacity var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
+.sync-cloud-off::before{content:'☁';position:absolute;inset:0;font-size:16px;line-height:12px}
+.sync-cloud-off::after{content:'';position:absolute;left:1px;right:1px;top:5px;height:2px;background:currentColor;transform:rotate(-33deg);transform-origin:center;border-radius:999px}
+.cloud-auth-popover{position:fixed;z-index:260;min-width:220px;max-width:260px;padding:10px;border:2px solid var(--line);border-radius:10px;background:var(--paper);box-shadow:4px 4px 0 var(--line),0 10px 24px rgba(0,0,0,.18);display:none}
+.cloud-auth-popover.open{display:block}
+.cloud-auth-popover h4{font-size:15px;margin-bottom:6px}
+.cloud-auth-popover p{font-size:13px;color:var(--ink-soft);margin-bottom:8px}
+.cloud-auth-popover input{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--paper-2);font-family:'Patrick Hand';font-size:15px;color:var(--ink);outline:none}
+.cloud-auth-popover input:focus{background:var(--focus-bg);border-color:var(--accent)}
+.cloud-auth-popover .row{display:flex;gap:6px;align-items:center;margin-top:8px}
+.cloud-auth-popover .status{min-height:18px;font-size:12px;color:var(--ink-soft);margin-top:6px}
+.cloud-auth-popover .status.error{color:var(--danger)}
 .grid-item.flash .kcard{box-shadow:0 0 0 4px var(--accent),4px 4px 0 rgba(0,0,0,.14)}
 .grid-item.highlight .kcard{box-shadow:0 0 0 3px var(--accent-2),4px 4px 0 rgba(0,0,0,.14);transform:translateY(-3px)}
 .grid-item.session-modified .kcard{outline:3px dashed #b45309;outline-offset:5px}
@@ -657,8 +679,8 @@ body.sidebar-open .cards-grid{padding-left:36px}
     </div>
     <div class="chrome-actions">
       <span class="autosave" id="autosave-status" role="status" aria-live="polite"></span>
-      <button class="btn cloud" id="btn-cloud" type="button" aria-label="Configurer la sauvegarde cloud">Cloud</button>
-      <button class="btn save-cloud" id="btn-save-cloud" type="button" aria-label="Sauvegarder sur le cloud">Sauvegarder</button>
+      <button class="btn cloud hidden-cloud-control" id="btn-cloud" type="button" aria-label="Configurer la sauvegarde cloud">Cloud</button>
+      <button class="btn save-cloud hidden-cloud-control" id="btn-save-cloud" type="button" aria-label="Sauvegarder sur le cloud">Sauvegarder</button>
       <button class="btn ghost history" id="btn-undo" type="button" aria-label="Annuler" title="Annuler" disabled>↶</button>
       <button class="btn ghost history" id="btn-redo" type="button" aria-label="Rétablir" title="Rétablir" disabled>↷</button>
       <div class="columns-ctrl" role="group" aria-label="Cartes affichées en largeur">
@@ -724,6 +746,17 @@ body.sidebar-open .cards-grid{padding-left:36px}
       <button class="btn primary" id="cloud-unlock" type="button">Déverrouiller</button>
     </div>
   </div>
+</div>
+
+<div class="cloud-auth-popover" id="cloud-auth-popover" aria-live="polite">
+  <h4>Synchroniser le deck</h4>
+  <p>Entre le mot de passe pour envoyer les modifs sur le cloud.</p>
+  <input type="password" id="cloud-auth-input" placeholder="Mot de passe" autocomplete="current-password"/>
+  <div class="row">
+    <button class="btn primary" id="cloud-auth-submit" type="button">Valider</button>
+    <button class="btn ghost" id="cloud-auth-cancel" type="button">Fermer</button>
+  </div>
+  <div class="status" id="cloud-auth-status"></div>
 </div>
 
 <!-- Import/Export modal -->
@@ -1120,6 +1153,15 @@ function save(){
     return false;
   }
   markCurrentDeckModified();
+  if(state.currentDeckId){
+    const deck = state.decks.find(item=>item.id === state.currentDeckId);
+    if(deck){
+      deck.cards = cloneCards(state.cards);
+      deck.cardCount = state.cards.length;
+      deck.updatedAt = Date.now();
+      putLibraryItem('decks', {...deck}).catch(()=>{});
+    }
+  }
   showAutosaveStatus(state.cloud.unlocked ? 'modifié' : '✓ sauvegardé');
   return true;
 }
@@ -3352,6 +3394,9 @@ function setGridColumns(value){
 }
 
 // Manual cloud save + sidebar deck workflow overrides
+state.cloud.pendingSyncDeckId = null;
+state.cloud.authAnchor = null;
+
 function renderCardSidebar(){
   const list = document.getElementById('sidebar-list');
   if(!list) return;
@@ -3370,10 +3415,13 @@ function renderCardSidebar(){
     </div>
     <div class="sidebar-section-body">
       ${state.decks.length ? state.decks.map(deck=>{
-        const classes = ['sidebar-card'];
+        const classes = ['sidebar-card','deck-row'];
         if(deck.id === state.currentDeckId) classes.push('active-deck');
         if(state.modifiedDeckIds.has(deck.id)) classes.push('deck-modified');
-        return `<button class="${classes.join(' ')}" data-sidebar-deck="${deck.id}" title="${escapeHtml(deck.name)}">${escapeHtml(deck.name)}</button>`;
+        const syncButton = state.modifiedDeckIds.has(deck.id)
+          ? `<button class="deck-sync-btn" type="button" data-deck-sync="${deck.id}" aria-label="Synchroniser ${escapeHtml(deck.name)}" title="Synchroniser ${escapeHtml(deck.name)}"><span class="sync-cloud-off" aria-hidden="true"></span><span class="sync-upload" aria-hidden="true">↑</span></button>`
+          : '';
+        return `<div class="${classes.join(' ')}" title="${escapeHtml(deck.name)}"><button class="sidebar-card-main" type="button" data-sidebar-deck="${deck.id}">${escapeHtml(deck.name)}</button>${syncButton}</div>`;
       }).join('') : '<div class="library-empty">Aucun deck.</div>'}
     </div>
   </section>`;
@@ -3557,13 +3605,113 @@ async function replaceDeckInLibrary(id){
 
 function updateEditLockUi(){
   document.querySelectorAll('[data-requires-edit]').forEach(btn=>{
-    btn.classList.toggle('locked', !state.cloud.unlocked);
-    btn.setAttribute('aria-pressed', state.cloud.unlocked ? 'true' : 'false');
+    btn.classList.remove('locked');
+    btn.setAttribute('aria-pressed', 'true');
   });
   setCloudStatus(
-    state.cloud.unlocked ? (state.cloud.loaded ? 'Projet cloud charge. Sauvegarde manuelle prete.' : 'Mot de passe valide, chargement du cloud...') : (hasCloudConfig() ? 'Cloud configure, edition verrouillee.' : "Configure Supabase, puis deverrouille l'edition."),
+    state.cloud.unlocked ? 'Cloud pret.' : 'Cloud en attente de mot de passe.',
     state.cloud.unlocked ? 'ready' : 'warn'
   );
+}
+
+function ensureEditUnlocked(){
+  return true;
+}
+
+function getDeckSyncAnchor(anchor){
+  if(anchor?.getBoundingClientRect){
+    const rect = anchor.getBoundingClientRect();
+    return {x: Math.min(window.innerWidth - 280, rect.right + 8), y: Math.min(window.innerHeight - 150, rect.top - 2)};
+  }
+  if(anchor && Number.isFinite(anchor.x) && Number.isFinite(anchor.y)){
+    return {x: Math.min(window.innerWidth - 280, anchor.x), y: Math.min(window.innerHeight - 150, anchor.y)};
+  }
+  return {x: Math.min(window.innerWidth - 280, window.innerWidth / 2), y: Math.min(window.innerHeight - 150, 100)};
+}
+
+function closeCloudAuthPopover(){
+  const pop = document.getElementById('cloud-auth-popover');
+  if(pop) pop.classList.remove('open');
+  const status = document.getElementById('cloud-auth-status');
+  if(status){ status.textContent = ''; status.classList.remove('error'); }
+  state.cloud.pendingSyncDeckId = null;
+  state.cloud.authAnchor = null;
+}
+
+function openCloudAuthPopover(anchor, deckId){
+  const pop = document.getElementById('cloud-auth-popover');
+  const input = document.getElementById('cloud-auth-input');
+  const point = getDeckSyncAnchor(anchor);
+  state.cloud.pendingSyncDeckId = deckId || null;
+  state.cloud.authAnchor = point;
+  pop.style.left = `${point.x}px`;
+  pop.style.top = `${point.y}px`;
+  pop.classList.add('open');
+  if(input){
+    input.value = state.cloud.password || '';
+    setTimeout(()=>input.focus(), 0);
+    input.select?.();
+  }
+}
+
+async function authenticateCloudPassword(password){
+  state.cloud.password = String(password || '').trim();
+  if(!state.cloud.password) throw new Error('Mot de passe manquant');
+  try{
+    sessionStorage.setItem(CLOUD_PASSWORD_SESSION, state.cloud.password);
+  }catch{}
+  const res = await fetch(cloudFunctionUrl(), {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({action:'verify', password:state.cloud.password}),
+  });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok || !data.ok) throw new Error(data.error || 'Mot de passe refuse');
+  state.cloud.unlocked = true;
+  state.cloud.loaded = true;
+  updateEditLockUi();
+  return true;
+}
+
+async function verifyCloudUnlock(){
+  const password = state.cloud.password || document.getElementById('cloud-auth-input')?.value || document.getElementById('cloud-password')?.value || '';
+  if(!password) return false;
+  try{
+    await authenticateCloudPassword(password);
+    return await cloudLoadProject({skipRead:true});
+  }catch(e){
+    return false;
+  }
+}
+
+async function requestDeckCloudSync(deckId, anchor){
+  await storeCurrentDeckLocal({markDirty:false});
+  await refreshDeckCache();
+  if(!state.cloud.unlocked){
+    openCloudAuthPopover(anchor, deckId);
+    return;
+  }
+  await cloudSaveNow();
+}
+
+async function restoreCloudDecks(decks){
+  if(!Array.isArray(decks)) return;
+  const remoteIds = new Set();
+  for(const deck of decks){
+    if(!deck?.id || !deck?.name || !Array.isArray(deck.cards)) continue;
+    remoteIds.add(deck.id);
+    await putLibraryItem('decks',{
+      ...deck,
+      cards: normalizeImportedCards(cloneCards(deck.cards)),
+      cardCount: deck.cardCount || deck.cards.length,
+      createdAt: deck.createdAt || Date.now(),
+      updatedAt: deck.updatedAt || Date.now(),
+    });
+  }
+  const localDecks = await getAllLibraryItems('decks').catch(()=>[]);
+  for(const deck of localDecks){
+    if(!remoteIds.has(deck.id)) await deleteLibraryItem('decks', deck.id);
+  }
 }
 
 async function cloudProjectPayload(){
@@ -4056,12 +4204,50 @@ hydrateImportedImages(state.cards).then(()=>{
 
 document.getElementById('btn-save-cloud')?.addEventListener('click', ()=>cloudSaveNow());
 document.getElementById('sidebar-list')?.addEventListener('click', e=>{
+  const syncDeck = e.target.closest('[data-deck-sync]');
+  if(syncDeck){
+    e.preventDefault();
+    e.stopPropagation();
+    requestDeckCloudSync(syncDeck.dataset.deckSync, syncDeck);
+    return;
+  }
   const addDeck = e.target.closest('[data-add-deck]');
   if(addDeck){ createSidebarDeck(); return; }
   const toggleDecks = e.target.closest('[data-toggle-decks]');
   if(toggleDecks){ toggleDeckSection(); return; }
   const deckItem = e.target.closest('[data-sidebar-deck]');
   if(deckItem){ switchSidebarDeck(deckItem.dataset.sidebarDeck); }
+});
+document.getElementById('cloud-auth-submit')?.addEventListener('click', async ()=>{
+  const status = document.getElementById('cloud-auth-status');
+  const input = document.getElementById('cloud-auth-input');
+  const deckId = state.cloud.pendingSyncDeckId;
+  try{
+    if(status){ status.textContent = 'Verification...'; status.classList.remove('error'); }
+    await authenticateCloudPassword(input?.value || '');
+    closeCloudAuthPopover();
+    await requestDeckCloudSync(deckId, state.cloud.authAnchor);
+  }catch(e){
+    if(status){ status.textContent = e.message || 'Mot de passe invalide'; status.classList.add('error'); }
+  }
+});
+document.getElementById('cloud-auth-cancel')?.addEventListener('click', closeCloudAuthPopover);
+document.getElementById('cloud-auth-input')?.addEventListener('keydown', e=>{
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    document.getElementById('cloud-auth-submit')?.click();
+  }
+  if(e.key === 'Escape'){
+    e.preventDefault();
+    closeCloudAuthPopover();
+  }
+});
+document.addEventListener('mousedown', e=>{
+  const pop = document.getElementById('cloud-auth-popover');
+  if(!pop?.classList.contains('open')) return;
+  if(pop.contains(e.target)) return;
+  if(e.target.closest('[data-deck-sync]')) return;
+  closeCloudAuthPopover();
 });
 document.addEventListener('keydown', e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
@@ -4073,6 +4259,11 @@ document.addEventListener('keydown', e=>{
   }
 }, true);
 ensureDeckSidebarState().then(()=>renderCards()).catch(console.warn);
+if(state.cloud.password){
+  authenticateCloudPassword(state.cloud.password)
+    .then(()=>cloudLoadProject({skipRead:true}))
+    .catch(()=>{ state.cloud.unlocked = false; updateEditLockUi(); });
+}
 </script>
 </body>
 </html>
