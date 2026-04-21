@@ -61,7 +61,8 @@ Deno.serve(async (req) => {
     return fail('Invalid JSON', 400);
   }
 
-  if (!checkPassword(body.password)) return fail('Mot de passe incorrect', 401);
+  const isPublicAction = body.action === 'load-project';
+  if (!isPublicAction && !checkPassword(body.password)) return fail('Mot de passe incorrect', 401);
   if (body.action === 'verify') return json({ ok: true });
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL');

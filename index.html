@@ -492,6 +492,9 @@ body.sidebar-open .cards-grid{padding-left:36px}
 .pdf-menu-actions{display:grid;grid-template-columns:1fr;gap:8px}
 .pdf-menu-actions .btn{justify-content:center}
 .pdf-menu-actions .hint{font-family:'Caveat';font-size:15px;color:var(--ink-soft);text-align:center}
+.pdf-size-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;border:2px solid var(--line);border-radius:8px;background:var(--paper)}
+.pdf-size-row span{font-size:14px;color:var(--ink-soft)}
+.pdf-size-row input{width:80px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;font:inherit;text-align:right;background:var(--paper);color:var(--ink)}
 .deck-save-row{display:flex;gap:6px;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1.5px dashed var(--line)}
 .deck-save-row input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);padding:5px 9px;font-family:'Patrick Hand';font-size:14px;color:var(--ink)}
 .deck-save-row .btn{flex-shrink:0;padding:5px 10px;font-size:13px}
@@ -696,10 +699,9 @@ body.sidebar-open .cards-grid{padding-left:36px}
   body{zoom:1 !important}
   body > *:not(#print-area){display:none !important}
   #print-area,#print-area *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important}
-  #print-area{display:grid !important;grid-template-columns:repeat(3,1fr);gap:0;padding:0}
-  .print-card{page-break-inside:avoid;break-inside:avoid;display:flex;flex-direction:column;align-items:stretch;gap:0;position:relative;border-right:1px dashed #888;border-bottom:1px dashed #888}
-  .print-card:nth-child(3n){border-right:none}
-  .print-card .kcard{--sz:6cm;box-shadow:none !important;transform:none !important;margin:0 auto}
+  #print-area{display:flex !important;flex-wrap:wrap;gap:0;padding:0;align-content:flex-start}
+  .print-card{page-break-inside:avoid;break-inside:avoid;display:block;padding:0;margin:0;width:var(--print-card-size,6cm);height:var(--print-card-size,6cm);position:relative;border-right:1px dashed #888;border-bottom:1px dashed #888;box-sizing:content-box}
+  .print-card .kcard{--sz:var(--print-card-size,6cm);width:var(--sz) !important;height:var(--sz) !important;box-shadow:none !important;transform:none !important;margin:0;display:block}
   .print-card .print-label{display:none !important}
 }
 
@@ -869,6 +871,10 @@ body.sidebar-open .cards-grid{padding-left:36px}
   <div class="modal">
     <h3 id="pdf-modal-title">Export PDF<button class="modal-close" id="pdf-close" aria-label="Fermer">✕</button></h3>
     <div class="pdf-menu-actions">
+      <label class="pdf-size-row" for="pdf-card-size">
+        <span>Taille des cartes (mm)</span>
+        <input type="number" id="pdf-card-size" min="20" max="200" step="1" inputmode="numeric"/>
+      </label>
       <button class="btn pdf" id="pdf-export-all" type="button">Tout exporter</button>
       <button class="btn ghost" id="pdf-export-selected" type="button">Exporter la sélection <span id="pdf-selected-count"></span></button>
       <div class="hint">Sélectionne les cartes à exporter directement dans la grille.</div>
@@ -3434,6 +3440,8 @@ function updatePdfSelectionControls(){
 function openPdfMenu(clickEvent=null){
   const modal = document.getElementById('pdf-modal');
   updatePdfSelectionControls();
+  const sizeInput = document.getElementById('pdf-card-size');
+  if(sizeInput) sizeInput.value = String(getPdfCardSizeMm());
   modal.classList.add('open');
   const reposition = placeAnchoredModal(modal, clickEvent, {anchorEl: document.getElementById('btn-pdf')});
   if(reposition) requestAnimationFrame(reposition);
@@ -3523,6 +3531,18 @@ function updateSelectionGroup(){
   group.hidden = false;
   count.textContent = n === 1 ? '1 sélectionnée' : `${n} sélectionnées`;
 }
+const PDF_CARD_SIZE_STORAGE = 'kr-pdf-card-size-mm';
+const PDF_CARD_SIZE_DEFAULT = 60;
+function getPdfCardSizeMm(){
+  const raw = Number(localStorage.getItem(PDF_CARD_SIZE_STORAGE));
+  if(Number.isFinite(raw) && raw >= 20 && raw <= 200) return raw;
+  return PDF_CARD_SIZE_DEFAULT;
+}
+function setPdfCardSizeMm(value){
+  const mm = Math.max(20, Math.min(200, Number(value)||PDF_CARD_SIZE_DEFAULT));
+  localStorage.setItem(PDF_CARD_SIZE_STORAGE, String(mm));
+  return mm;
+}
 function exportToPDF(scope='all'){
   const cards = scope === 'selected'
     ? sortCards(state.cards.filter(card=>state.selectedCardIds.has(card.id)))
@@ -3531,6 +3551,8 @@ function exportToPDF(scope='all'){
   closePdfMenu();
   const area = document.getElementById('print-area');
   area.innerHTML = '';
+  const sizeMm = getPdfCardSizeMm();
+  area.style.setProperty('--print-card-size', `${sizeMm}mm`);
   let total = 0;
   cards.forEach(card=>{
     const copies = Math.max(1, card.copies != null ? card.copies : 1);
@@ -4796,26 +4818,28 @@ async function applyCloudProject(data, options={}){
 }
 
 async function cloudLoadProject(options={}){
-  const {skipRead=false, afterUnlock=false} = options;
+  const {skipRead=false, afterUnlock=false, silent=false} = options;
   if(!skipRead) readCloudForm();
-  if(!hasCloudConfig()){ setCloudStatus('Configuration Supabase manquante.', 'error'); return false; }
-  if(!state.cloud.password){ setCloudStatus('Mot de passe manquant.', 'error'); return false; }
+  if(!hasCloudConfig()){
+    if(!silent) setCloudStatus('Configuration Supabase manquante.', 'error');
+    return false;
+  }
   state.cloud.loading = true;
-  setCloudStatus('Chargement du cloud...', 'warn');
+  if(!silent) setCloudStatus('Chargement du cloud...', 'warn');
   try{
     const data = await cloudFetchProject();
     if(!data?.payload){
       state.cloud.loaded = true;
-      setCloudStatus('Aucune sauvegarde cloud pour ce projet. La prochaine sauvegarde creera le projet.', 'warn');
+      if(!silent) setCloudStatus('Aucune sauvegarde cloud pour ce projet. La prochaine sauvegarde creera le projet.', 'warn');
       if(afterUnlock) showStatus('Cloud pret');
       return true;
     }
     await applyCloudProject(data);
-    showStatus('Projet cloud charge');
+    if(!silent) showStatus('Projet cloud charge');
     return true;
   }catch(e){
     state.cloud.loaded = false;
-    setCloudStatus(e.message || 'Chargement cloud impossible', 'error');
+    if(!silent) setCloudStatus(e.message || 'Chargement cloud impossible', 'error');
     return false;
   }finally{
     state.cloud.loading = false;
@@ -4902,6 +4926,10 @@ function bindEvents(){
   document.getElementById('pdf-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closePdfMenu(); });
   document.getElementById('pdf-export-all').addEventListener('click', ()=>exportToPDF('all'));
   document.getElementById('pdf-export-selected').addEventListener('click', ()=>exportToPDF('selected'));
+  document.getElementById('pdf-card-size')?.addEventListener('change', e=>{
+    const mm = setPdfCardSizeMm(e.target.value);
+    e.target.value = String(mm);
+  });
   document.getElementById('io-close').addEventListener('click', ()=>document.getElementById('io-modal').classList.remove('open'));
   document.getElementById('io-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
   document.getElementById('deck-close').addEventListener('click', closeDeckLibrary);
@@ -5385,7 +5413,13 @@ ensureDeckSidebarState().then(()=>renderCards()).catch(console.warn);
 if(state.cloud.password){
   authenticateCloudPassword(state.cloud.password)
     .then(()=>cloudLoadProject({skipRead:true}))
-    .catch(()=>{ state.cloud.unlocked = false; updateEditLockUi(); });
+    .catch(()=>{
+      state.cloud.unlocked = false;
+      updateEditLockUi();
+      cloudLoadProject({skipRead:true, silent:true}).catch(()=>{});
+    });
+} else if(hasCloudConfig()){
+  cloudLoadProject({skipRead:true, silent:true}).catch(()=>{});
 }
 </script>
 </body>
