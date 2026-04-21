@@ -254,7 +254,7 @@ main{min-height:50vh}
 body.sidebar-open main{margin-left:252px}
 .card-sidebar{position:fixed;top:var(--header-h,116px);left:0;bottom:0;width:252px;background:var(--paper);border-right:2px solid var(--line);box-shadow:4px 0 0 rgba(0,0,0,.08);z-index:110;transform:translateX(-260px);transition:transform var(--t-med) var(--ease);display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .card-sidebar.open{transform:translateX(0)}
-.sidebar-head{padding:8px 10px 9px;border-bottom:1.5px dashed var(--line)}
+.sidebar-head{padding:8px 10px 9px;border-bottom:1.5px dashed var(--line);display:flex;align-items:center;gap:6px}
 .sidebar-list{overflow-y:auto;overflow-x:hidden;padding:10px;display:flex;flex:1;min-height:0;flex-direction:column;gap:10px}
 .sidebar-section{border:1.5px solid var(--line);border-radius:10px;display:flex;flex-shrink:0;flex-direction:column;overflow:hidden;transition:opacity var(--t-med) var(--ease)}
 .sidebar-section.building{background:#f1d4a3}
@@ -287,6 +287,12 @@ body.sidebar-open main{margin-left:252px}
 .deck-row::after{display:none}
 .sidebar-card-main{flex:1;min-width:0;border:none;background:transparent;color:inherit;font:inherit;text-align:left;padding:5px 8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-card-main:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:6px}
+.deck-actions{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.deck-icon-btn{width:24px;height:24px;border:none;border-radius:6px;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
+.deck-icon-btn:hover,.deck-icon-btn:focus-visible{background:rgba(255,255,255,.6);transform:translateY(-1px);color:var(--ink)}
+.deck-icon-btn.save{color:#166534}
+.deck-icon-btn.delete{color:#991b1b}
+.deck-icon-btn:disabled{opacity:.35;cursor:default;transform:none}
 .deck-sync-btn{position:relative;flex-shrink:0;width:26px;height:26px;border:none;background:transparent;border-radius:6px;cursor:pointer;color:#7c5a18;display:grid;place-items:center;transition:background var(--t-fast) var(--ease),transform var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
 .deck-sync-btn:hover,.deck-sync-btn:focus-visible{background:rgba(255,255,255,.6);transform:translateY(-1px);color:#8a4300}
 .deck-sync-btn .sync-upload{position:absolute;opacity:0;transform:scale(.8);transition:opacity var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
@@ -304,6 +310,13 @@ body.sidebar-open main{margin-left:252px}
 .cloud-auth-popover .row{display:flex;gap:6px;align-items:center;margin-top:8px}
 .cloud-auth-popover .status{min-height:18px;font-size:12px;color:var(--ink-soft);margin-top:6px}
 .cloud-auth-popover .status.error{color:var(--danger)}
+.sidebar-cloud-btn{position:relative;flex-shrink:0;width:34px;height:34px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper-2);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow-soft);color:#7f1d1d;transition:transform var(--t-fast) var(--ease),background var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
+.sidebar-cloud-btn.connected{color:#166534}
+.sidebar-cloud-btn:hover,.sidebar-cloud-btn:focus-visible{background:var(--paper);transform:translateY(-1px)}
+.sidebar-cloud-btn .cloud-symbol,.sidebar-cloud-btn .refresh-symbol{position:absolute;transition:opacity var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
+.sidebar-cloud-btn .refresh-symbol{opacity:0;transform:scale(.8)}
+.sidebar-cloud-btn:hover .cloud-symbol,.sidebar-cloud-btn:focus-visible .cloud-symbol{opacity:0;transform:scale(.8)}
+.sidebar-cloud-btn:hover .refresh-symbol,.sidebar-cloud-btn:focus-visible .refresh-symbol{opacity:1;transform:scale(1)}
 .grid-item.flash .kcard{box-shadow:0 0 0 4px var(--accent),4px 4px 0 rgba(0,0,0,.14)}
 .grid-item.highlight .kcard{box-shadow:0 0 0 3px var(--accent-2),4px 4px 0 rgba(0,0,0,.14);transform:translateY(-3px)}
 .grid-item.session-modified .kcard{outline:3px dashed #b45309;outline-offset:5px}
@@ -695,7 +708,7 @@ body.sidebar-open .cards-grid{padding-left:36px}
         <button class="btn ghost" id="btn-resources" data-requires-edit="true" aria-label="Ouvrir les icônes de ressources">Ressources</button>
         <button class="btn ghost" id="btn-icons" data-requires-edit="true" aria-label="Ouvrir la bibliothèque de bonus">Bonus</button>
       </div>
-      <button class="btn decks" id="btn-decks" data-requires-edit="true" aria-label="Ouvrir les decks sauvegardés">Decks</button>
+      <button class="btn decks hidden-cloud-control" id="btn-decks" data-requires-edit="true" aria-label="Ouvrir les decks sauvegardes">Decks</button>
       <button class="btn pdf" id="btn-pdf" aria-label="Exporter PDF (A4)">🖨 PDF</button>
     </div>
   </div>
@@ -703,7 +716,8 @@ body.sidebar-open .cards-grid{padding-left:36px}
 
 <aside class="card-sidebar" id="card-sidebar" aria-label="Liste des cartes">
   <div class="sidebar-head">
-    <div class="sidebar-search"><span aria-hidden="true">🔍</span><input type="text" id="search-input" placeholder="chercher…" aria-label="Rechercher une carte"/></div>
+    <div class="sidebar-search"><span aria-hidden="true">&#128269;</span><input type="text" id="search-input" placeholder="chercher..." aria-label="Rechercher une carte"/></div>
+    <button class="sidebar-cloud-btn" id="sidebar-cloud-btn" type="button" aria-label="Rafraichir le cloud" title="Rafraichir le cloud"><span class="cloud-symbol" aria-hidden="true">&#9729;</span><span class="refresh-symbol" aria-hidden="true">&#8635;</span></button>
   </div>
   <div class="sidebar-list" id="sidebar-list"></div>
 </aside>
@@ -1240,6 +1254,12 @@ function setCloudStatus(message, tone='warn'){
     btn.classList.toggle('syncing', state.cloud.saving || state.cloud.loading);
     btn.textContent = state.cloud.unlocked ? (state.cloud.loaded ? 'Cloud OK' : 'Cloud...') : 'Cloud';
   }
+  const sidebarBtn = document.getElementById('sidebar-cloud-btn');
+  if(sidebarBtn){
+    sidebarBtn.classList.toggle('connected', !!state.cloud.unlocked);
+    sidebarBtn.setAttribute('aria-label', state.cloud.unlocked ? 'Rafraichir le cloud' : 'Se connecter puis rafraichir le cloud');
+    sidebarBtn.title = state.cloud.unlocked ? 'Rafraichir le cloud' : 'Se connecter puis rafraichir le cloud';
+  }
   updateCloudSaveButton();
 }
 function updateCloudSaveButton(){
@@ -1745,6 +1765,7 @@ async function restoreCloudDecks(decks){
   for(const deck of decks){
     if(!deck?.id || !deck?.name || !Array.isArray(deck.cards)) continue;
     remoteIds.add(deck.id);
+    if(state.modifiedDeckIds.has(deck.id)) continue;
     await putLibraryItem('decks',{
       ...deck,
       cards: normalizeImportedCards(cloneCards(deck.cards)),
@@ -1755,7 +1776,7 @@ async function restoreCloudDecks(decks){
   }
   const localDecks = await getAllLibraryItems('decks').catch(()=>[]);
   for(const deck of localDecks){
-    if(!remoteIds.has(deck.id)) await deleteLibraryItem('decks', deck.id);
+    if(!remoteIds.has(deck.id) && !state.modifiedDeckIds.has(deck.id)) await deleteLibraryItem('decks', deck.id);
   }
 }
 async function storeCurrentDeckLocal({markDirty=true}={}){
@@ -3416,12 +3437,15 @@ function renderCardSidebar(){
     <div class="sidebar-section-body">
       ${state.decks.length ? state.decks.map(deck=>{
         const classes = ['sidebar-card','deck-row'];
+        const dirty = state.modifiedDeckIds.has(deck.id);
         if(deck.id === state.currentDeckId) classes.push('active-deck');
-        if(state.modifiedDeckIds.has(deck.id)) classes.push('deck-modified');
-        const syncButton = state.modifiedDeckIds.has(deck.id)
-          ? `<button class="deck-sync-btn" type="button" data-deck-sync="${deck.id}" aria-label="Synchroniser ${escapeHtml(deck.name)}" title="Synchroniser ${escapeHtml(deck.name)}"><span class="sync-cloud-off" aria-hidden="true"></span><span class="sync-upload" aria-hidden="true">↑</span></button>`
-          : '';
-        return `<div class="${classes.join(' ')}" title="${escapeHtml(deck.name)}"><button class="sidebar-card-main" type="button" data-sidebar-deck="${deck.id}">${escapeHtml(deck.name)}</button>${syncButton}</div>`;
+        if(dirty) classes.push('deck-modified');
+        const actions = `<div class="deck-actions">
+          <button class="deck-icon-btn save" type="button" data-deck-sync="${deck.id}" aria-label="Sauvegarder ${escapeHtml(deck.name)}" title="Sauvegarder ${escapeHtml(deck.name)}"${dirty ? "" : " disabled"}>&#8682;</button>
+          <button class="deck-icon-btn" type="button" data-deck-duplicate="${deck.id}" aria-label="Dupliquer ${escapeHtml(deck.name)}" title="Dupliquer ${escapeHtml(deck.name)}">&#x29C9;</button>
+          <button class="deck-icon-btn delete" type="button" data-deck-delete="${deck.id}" aria-label="Supprimer ${escapeHtml(deck.name)}" title="Supprimer ${escapeHtml(deck.name)}">&times;</button>
+        </div>`;
+        return `<div class="${classes.join(' ')}" title="${escapeHtml(deck.name)}"><button class="sidebar-card-main" type="button" data-sidebar-deck="${deck.id}">${escapeHtml(deck.name)}</button>${actions}</div>`;
       }).join('') : '<div class="library-empty">Aucun deck.</div>'}
     </div>
   </section>`;
@@ -3502,6 +3526,31 @@ async function createSidebarDeck(){
   showStatus('Nouveau deck cree');
 }
 
+async function duplicateSidebarDeck(id){
+  const source = await getLibraryItem('decks', id);
+  if(!source) return;
+  await refreshDeckCache();
+  const names = new Set(state.decks.map(deck=>String(deck.name || '').toLowerCase()));
+  let name = incrementDeckName(`${source.name} copy`);
+  while(names.has(name.toLowerCase())) name = incrementDeckName(name);
+  const copy = {
+    ...source,
+    id: libraryId('deck-'),
+    name,
+    cards: cloneCards(source.cards || []),
+    cardCount: (source.cards || []).length,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
+  await putLibraryItem('decks', copy);
+  await refreshDeckCache();
+  state.modifiedDeckIds.add(copy.id);
+  saveModifiedDeckIds();
+  renderCardSidebar();
+  updateCloudSaveButton();
+  showStatus(`Deck duplique: ${copy.name}`);
+}
+
 async function ensureDeckSidebarState(){
   await refreshDeckCache();
   if(!state.decks.length){
@@ -3574,6 +3623,14 @@ async function loadDeckFromLibrary(id){
 async function deleteDeckFromLibrary(id){
   const deck = await getLibraryItem('decks', id);
   if(!deck) return;
+  if(state.cloud.unlocked){
+    try{
+      await cloudDeleteDeck(id);
+    }catch(e){
+      showStatus(e.message || 'Suppression cloud impossible');
+      return;
+    }
+  }
   await deleteLibraryItem('decks', id);
   state.modifiedDeckIds.delete(id);
   saveModifiedDeckIds();
@@ -3641,9 +3698,13 @@ function closeCloudAuthPopover(){
 function openCloudAuthPopover(anchor, deckId){
   const pop = document.getElementById('cloud-auth-popover');
   const input = document.getElementById('cloud-auth-input');
+  const title = pop?.querySelector('h4');
+  const text = pop?.querySelector('p');
   const point = getDeckSyncAnchor(anchor);
   state.cloud.pendingSyncDeckId = deckId || null;
   state.cloud.authAnchor = point;
+  if(title) title.textContent = deckId ? 'Synchroniser le deck' : 'Connexion cloud';
+  if(text) text.textContent = deckId ? 'Entre le mot de passe pour envoyer les modifs sur le cloud.' : 'Entre le mot de passe pour connecter le cloud et rafraichir la liste.';
   pop.style.left = `${point.x}px`;
   pop.style.top = `${point.y}px`;
   pop.classList.add('open');
@@ -3684,14 +3745,51 @@ async function verifyCloudUnlock(){
   }
 }
 
+function collectAssetRefsFromCards(cards=[]){
+  const images = {};
+  const icons = {};
+  cards.forEach(card=>{
+    const imageRef = card.imageName || (!isEmbeddedImage(card.image) ? card.image : '');
+    if(imageRef){
+      const meta = state.assetRefs.images[String(imageRef).toLowerCase()];
+      images[imageRef] = {name: meta?.name || imageRef};
+    }
+    (card.steps || []).forEach(step=>{
+      Object.keys(step.costIcons || {}).forEach(id=>{
+        if((step.costIcons || {})[id] > 0){
+          const saved = state.assetRefs.icons[id] || {};
+          const icon = state.iconCache.byId[id] || {};
+          icons[id] = {id, name: icon.name || saved.name || id, category: 'resource'};
+        }
+      });
+      Object.keys(step.bonus?.icons || {}).forEach(id=>{
+        if((step.bonus?.icons || {})[id] > 0){
+          const saved = state.assetRefs.icons[id] || {};
+          const icon = state.iconCache.byId[id] || {};
+          icons[id] = {id, name: icon.name || saved.name || id, category: icon.category || saved.category || 'bonus'};
+        }
+      });
+    });
+  });
+  return {images, icons};
+}
+
+function mergeAssetManifests(base={}, extra={}){
+  return {
+    images: {...(base.images || {}), ...(extra.images || {})},
+    icons: {...(base.icons || {}), ...(extra.icons || {})},
+  };
+}
+
 async function requestDeckCloudSync(deckId, anchor){
-  await storeCurrentDeckLocal({markDirty:false});
-  await refreshDeckCache();
+  if(!deckId) return;
+  if(deckId === state.currentDeckId) await storeCurrentDeckLocal({markDirty:false});
+  else await refreshDeckCache();
   if(!state.cloud.unlocked){
     openCloudAuthPopover(anchor, deckId);
     return;
   }
-  await cloudSaveNow();
+  await cloudSaveDeck(deckId);
 }
 
 async function restoreCloudDecks(decks){
@@ -3733,6 +3831,96 @@ function queueCloudSave(){
 function startCloudWatch(){ return; }
 function stopCloudWatch(){ return; }
 async function checkCloudForUpdates(){ return; }
+
+async function cloudSaveDeck(deckId){
+  if(!state.cloud.unlocked || state.cloud.saving || !deckId) return false;
+  if(!hasCloudConfig()) return false;
+  const localDeck = await getLibraryItem('decks', deckId);
+  if(!localDeck) return false;
+  state.cloud.saving = true;
+  setCloudStatus('Sauvegarde du deck...', 'warn');
+  try{
+    const [assets, remoteData] = await Promise.all([
+      collectCloudAssets(),
+      cloudFetchProject().catch(()=>({payload:null, assets:[], updatedAt:null})),
+    ]);
+    const remotePayload = remoteData?.payload || {version:2, cards:[], assets:{images:{},icons:{}}, decks:[]};
+    const remoteDecks = Array.isArray(remotePayload.decks) ? remotePayload.decks.slice() : [];
+    const compactDeck = {
+      ...localDeck,
+      cards: cloneCards(localDeck.cards || []).map(compactCardForStorage),
+      cardCount: localDeck.cardCount || (localDeck.cards || []).length,
+      updatedAt: Date.now(),
+    };
+    const idx = remoteDecks.findIndex(deck=>deck.id === deckId);
+    if(idx >= 0) remoteDecks[idx] = compactDeck;
+    else remoteDecks.push(compactDeck);
+    const localManifest = collectAssetRefsFromCards(localDeck.cards || []);
+    const payload = {
+      ...remotePayload,
+      decks: remoteDecks,
+      assets: mergeAssetManifests(remotePayload.assets || {}, localManifest),
+      cards: deckId === state.currentDeckId ? exportableCards() : (remotePayload.cards || []),
+    };
+    const res = await fetch(cloudFunctionUrl(), {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        action:'save-project',
+        password:state.cloud.password,
+        projectId:state.cloud.config.projectId || 'main',
+        name: localStorage.getItem('kr-current-deck-name') || 'Kingdom Reforged',
+        payload,
+        assets,
+      }),
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok || !data.ok) throw new Error(data.error || 'Sauvegarde cloud refusee');
+    state.cloud.lastSyncAt = data.updatedAt || new Date().toISOString();
+    state.cloud.loaded = true;
+    state.modifiedDeckIds.delete(deckId);
+    saveModifiedDeckIds();
+    renderCardSidebar();
+    updateCloudSaveButton();
+    setCloudStatus('Deck synchronise.', 'ready');
+    showStatus(`Deck synchronise: ${localDeck.name}`);
+    return true;
+  }catch(e){
+    setCloudStatus(e.message || 'Sauvegarde cloud impossible', 'error');
+    showStatus('Erreur cloud');
+    return false;
+  }finally{
+    state.cloud.saving = false;
+    updateCloudSaveButton();
+  }
+}
+
+async function cloudDeleteDeck(deckId){
+  if(!state.cloud.unlocked || state.cloud.saving || !deckId) return false;
+  const remoteData = await cloudFetchProject().catch(()=>({payload:null, assets:[], updatedAt:null}));
+  const remotePayload = remoteData?.payload || {version:2, cards:[], assets:{images:{},icons:{}}, decks:[]};
+  const payload = {
+    ...remotePayload,
+    decks: (remotePayload.decks || []).filter(deck=>deck.id !== deckId),
+  };
+  const assets = await collectCloudAssets();
+  const res = await fetch(cloudFunctionUrl(), {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      action:'save-project',
+      password:state.cloud.password,
+      projectId:state.cloud.config.projectId || 'main',
+      name: localStorage.getItem('kr-current-deck-name') || 'Kingdom Reforged',
+      payload,
+      assets,
+    }),
+  });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok || !data.ok) throw new Error(data.error || 'Suppression cloud impossible');
+  state.cloud.lastSyncAt = data.updatedAt || new Date().toISOString();
+  return true;
+}
 
 async function cloudSaveNow({silent=false}={}){
   if(!state.cloud.unlocked || state.cloud.saving) return false;
@@ -4211,12 +4399,33 @@ document.getElementById('sidebar-list')?.addEventListener('click', e=>{
     requestDeckCloudSync(syncDeck.dataset.deckSync, syncDeck);
     return;
   }
+  const duplicateDeck = e.target.closest('[data-deck-duplicate]');
+  if(duplicateDeck){
+    e.preventDefault();
+    e.stopPropagation();
+    duplicateSidebarDeck(duplicateDeck.dataset.deckDuplicate);
+    return;
+  }
+  const deleteDeck = e.target.closest('[data-deck-delete]');
+  if(deleteDeck){
+    e.preventDefault();
+    e.stopPropagation();
+    deleteDeckFromLibrary(deleteDeck.dataset.deckDelete);
+    return;
+  }
   const addDeck = e.target.closest('[data-add-deck]');
   if(addDeck){ createSidebarDeck(); return; }
   const toggleDecks = e.target.closest('[data-toggle-decks]');
   if(toggleDecks){ toggleDeckSection(); return; }
   const deckItem = e.target.closest('[data-sidebar-deck]');
   if(deckItem){ switchSidebarDeck(deckItem.dataset.sidebarDeck); }
+});
+document.getElementById('sidebar-cloud-btn')?.addEventListener('click', async e=>{
+  if(!state.cloud.unlocked){
+    openCloudAuthPopover(e.currentTarget, null);
+    return;
+  }
+  await cloudLoadProject({skipRead:true});
 });
 document.getElementById('cloud-auth-submit')?.addEventListener('click', async ()=>{
   const status = document.getElementById('cloud-auth-status');
@@ -4226,7 +4435,8 @@ document.getElementById('cloud-auth-submit')?.addEventListener('click', async ()
     if(status){ status.textContent = 'Verification...'; status.classList.remove('error'); }
     await authenticateCloudPassword(input?.value || '');
     closeCloudAuthPopover();
-    await requestDeckCloudSync(deckId, state.cloud.authAnchor);
+    if(deckId) await requestDeckCloudSync(deckId, state.cloud.authAnchor);
+    else await cloudLoadProject({skipRead:true});
   }catch(e){
     if(status){ status.textContent = e.message || 'Mot de passe invalide'; status.classList.add('error'); }
   }
