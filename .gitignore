@@ -1,5 +1,7 @@
 .claude/
 node_modules/
+package.json
+package-lock.json
 supabase/.temp/
 .DS_Store
 Thumbs.db
